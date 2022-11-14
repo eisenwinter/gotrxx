@@ -1,0 +1,14 @@
+{
+    "go.lintTool":"golangci-lint",
+    "go.lintFlags": [
+    "--fast"
+    ],
+    "gopls": {
+        "buildFlags": ["-tags=integration"]
+    },
+    "nuxt.isNuxtApp": false,
+    "go.buildFlags": [
+        "-tags=integration"
+    ],
+    "go.testTags": "integration",
+}

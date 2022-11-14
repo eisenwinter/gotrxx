@@ -1,0 +1,64 @@
+---
+layout: layout.ejs
+permalink: "/<%- page.fileSlug %>.html"
+endpoint: "signin"
+---
+
+
+<div class="card">
+    {{if .error}}
+    <%- include('/_components/alert-error.ejs');  %>
+    {{end}}
+        <form method="post" action="signin">
+            {{ .csrfField }}
+            <input type="hidden" value="{{.returnUrl}}"  name="return_url" />
+            <fieldset>
+                <legend> {{ .i18n.T "title"}}</legend>
+                <div class="field">
+                    <label for="email">
+                        {{ .i18n.T "fields.email"}}
+                    </label>
+                    <input type="email" required value="{{ .email }}" name="email">
+                </div>
+                <div class="field">
+                    <label for="password">
+                        {{ .i18n.T "fields.password"}}
+                    </label> 
+                    <input type="password" value="{{ .password }}"  name="password">
+                </div>
+                {{ if .otp }}
+                <div class="field">
+                    <label for="otp">
+                        {{ .i18n.T "fields.otp"}}
+                    </label> 
+                    <input type="text" required name="otp">
+                </div>
+                {{ end }}
+                <div class="field flex-row flex-align-center">
+                    <input class="w-auto" type="checkbox" value="true" name="remember_me" />
+                    <label for="remember_me" class="pl-0-3">
+                       {{ .i18n.T "fields.remember_me"}}
+                    </label>                         
+                </div>
+                <div class="field">
+                    <button type="submit">{{ .i18n.T "fields.login"}}</button>
+                </div>    
+            </fieldset>
+        </form>
+    </div>
+    <div class="flex mt">
+        <div class="flex-basis-49 text-align-center">
+            <small>
+                <a href="/account/forgotten-password">
+                    {{ .i18n.T "forgot_password_link"}}
+                </a>
+            </small>
+        </div>
+        <div class="flex-basis-49 text-align-center">
+            <small>
+                <a href="/account/signup">
+                    {{ .i18n.T "new_account_link"}}
+                </a>
+            </small>
+        </div>
+    </div>

@@ -1,0 +1,16 @@
+{
+    "success": {
+        "mfa_disabled":  "You have successfuly disabled 2-FA"
+    },
+    "errors": {
+        "invalid_password": "Invalid password supplied",
+        "unknown": "Unknown error occured"
+    },
+    "fields": {
+        "enable": "Enable",
+        "disable": "Disable",
+        "password": "Password"
+    },
+    "title": "Change your two factor settings",
+    "back_link": "Back"
+}

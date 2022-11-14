@@ -1,0 +1,25 @@
+@use "sass:math"
+=desktop
+  @media screen and (min-width: $mobile-break-point)
+    @content
+
+=padding-factor($fact)
+  padding: math.div($padding-d, $fact)
+
+=padding-factor-x-y($x, $y)
+  padding: math.div($padding-d, $x) math.div($padding-d, $y)
+
+=margin-factor($fact)
+  margin: math.div($margin-d, $fact)
+
+=margin-factor-x-y($x, $y)
+  margin: math.div($margin-d, $x) math.div($margin-d, $y)
+
+
+=block($spacing: $block-spacing)
+  &:not(:last-child)
+    margin-bottom: $spacing
+
+=label
+  &:not(:last-child)
+    margin-bottom: $label-spacing

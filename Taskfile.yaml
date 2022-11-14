@@ -1,0 +1,134 @@
+# https://taskfile.dev
+
+version: '3'
+
+vars:
+  EXE: gotrxx{{exeExt}}
+tasks:
+  default:
+    cmds: 
+      - task -l
+
+  dev:provision:
+    desc: "sets up the workspace and gets dependecies"
+    cmds:
+      - mkdir -p bin
+      - mkdir -p .dev
+      - go mod download
+      - task: test:misc:certificates
+      - task: templates:restore
+  
+  build:
+    desc: "build the compiled binary"
+    cmds:
+      - go build -v -o bin/{{.EXE}}
+
+  assets:sass:
+    desc: "Rebuilds the sass unminified"
+    cmds:
+      - sass templates/static/sass/main.sass templates/static/css/main.css
+  assets:sass:minified:
+    desc: "Rebuilds the sass minified"
+    cmds:
+      - sass templates/static/sass/main.sass templates/static/css/main.css --style compressed
+
+  lint:golangci:
+    desc: "Runs golang ci linter"
+    cmds:
+      - golangci-lint --verbose run
+    silent: true
+
+  lint:goreportcard:
+    desc: "Runs goreportcard"
+    cmds:
+      - goreportcard-cli -v
+    silent: true
+
+  lint:gofmt:
+    desc: "Runs gofmt with -s -w"
+    cmds:
+      - gofmt -s -w ./..
+    silent: true
+
+  lint:wrapcheck:
+    desc: "Run wrapcheck"
+    cmds:
+      - wrapcheck ./...
+    silent: true
+
+  lint:staticcheck:
+    desc: "Run staticcheck"
+    cmds:
+      - staticcheck ./...
+    silent: true
+
+  templates:dev:
+    desc: "Runs 11ty dev server for template styling"
+    dir: template_dev
+    cmds:
+      - yarn dev
+    silent: true
+
+  templates:restore:
+    desc: "restores node deps"
+    dir: template_dev
+    cmds:
+      - yarn
+
+  docs:serve:
+    desc: "Serves the docs"
+    cmds:
+      - docsify serve docs
+    silent: true
+
+  test:misc:certificates:
+    desc: "Generate test certificates"
+    cmds:
+      - openssl genrsa -out .dev/id_rsa 4096 && openssl rsa -in .dev/id_rsa -RSAPublicKey_out -out .dev/id_rsa.pub
+    silent: true
+
+  test:
+    desc: "Runs unit tests"
+    cmds:
+      - go test -v ./...
+
+  test:integration:sqlite:
+    desc: "Integration tests for the sqlite db"
+    cmds:
+      - go test -tags=integration -count=1 -v ./...
+    env:
+      INTEGRATION_TEST_DB_TYPE: sqlite
+      INTEGRATION_TEST_DB_DSN: :memory:?cache=shared 
+    silent: true
+
+  test:integration:sqlite:coverage:
+    desc: "Integration tests for the sqlite db"
+    cmds:
+      - go test -coverprofile=coverage.out -tags=integration -count=1 -v ./...
+      - go tool cover -html=coverage.out
+    env:
+      INTEGRATION_TEST_DB_TYPE: sqlite
+      INTEGRATION_TEST_DB_DSN: :memory:?cache=shared 
+    silent: true
+
+  test:integration:mariadb:
+    desc: "Integration tests for the maria/mysql db (runs on mariadb:10.9.2)"
+    cmds:
+      - docker start gotrxx-mariadb || docker run -d  -p 3306:3306 --name gotrxx-mariadb --env MARIADB_DATABASE=gotrxx --env MARIADB_USER=example --env MARIADB_PASSWORD=example --env MARIADB_ROOT_PASSWORD=secret-example docker.io/library/mariadb:10.9.2
+      - go test -tags=integration -count=1 -v ./...
+      # - docker stop gotrxx-mariadb
+    env:
+      INTEGRATION_TEST_DB_TYPE: mysql
+      INTEGRATION_TEST_DB_DSN: example:example@tcp(localhost:3306)/gotrxx
+    silent: true
+  
+  test:integration:pg:
+    desc: "Integration tests for the postgres db (runs on postgres:14.5)"
+    cmds:
+      - docker start gotrxx-pg || docker run -d  -p 5432:5432 --name gotrxx-pg --env POSTGRES_USER=example --env POSTGRES_PASSWORD=example --env POSTGRES_DB=gotrxx docker.io/library/postgres:14.5
+      - go test -tags=integration -count=1 -v ./...
+      # - docker stop gotrxx-pg
+    env:
+      INTEGRATION_TEST_DB_TYPE: pg
+      INTEGRATION_TEST_DB_DSN: postgres://example:example@localhost:5432/gotrxx
+    silent: true

@@ -1,0 +1,45 @@
+@import "../src/_sass/_vars" 
+@import "../src/_sass/_mixins"
+
+html, .mail 
+  background-color: #fafbfc
+  height: 100%
+
+body
+  background-color: $body-background-color
+  font-size: $base-font-size
+  color: $base-font-color
+  font-family: $font-family
+
+.mail-container
+  margin: 0 auto
+  background-color: $content-background-color
+  padding: 25px
+  border: $input-border
+  border-radius: $border-radius
+
+.default-p
+  padding-top: 18px
+.header
+  margin: 0
+  padding: 0
+.space
+  margin-top: 25px
+
+.button
+  background-color: $primary-color
+  &:hover
+    background-color: $primary-color-hover
+  color: #fff
+  +padding-factor-x-y(2, 0.5)
+  border-radius: $border-radius
+  border: $input-border
+  font-size: $base-font-size
+  +block
+  width: auto
+  text-align: center
+.token
+  background-color: $input-backround
+  padding: 15px
+  border: $input-border
+  border-radius: $border-radius

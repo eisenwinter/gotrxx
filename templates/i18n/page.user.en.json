@@ -1,0 +1,6 @@
+{
+    "change_password": "change password",
+    "change_email": "change email",
+    "change_mfa": "change two-factor settings",
+    "signout": "signout"
+}

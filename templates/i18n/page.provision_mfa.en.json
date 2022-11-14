@@ -1,0 +1,14 @@
+{
+    "success": {
+        "activated": "You have successfuly enabled 2-FA, please copy your recovery key somewhere safe in case of device loss"
+    },
+    "errors": {
+        "unknown": "Unknown error occured"
+    },
+    "fields": {
+        "enable": "I scanned the QR Code"
+    },
+    "recovery_key": "Recovery Key",
+    "title": "Scan the QR code with your authenticator application",
+    "back_link": "Back"
+}

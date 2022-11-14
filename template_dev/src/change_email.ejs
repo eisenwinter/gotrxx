@@ -1,0 +1,38 @@
+---
+layout: layout.ejs
+permalink: "/<%- page.fileSlug %>.html"
+endpoint: "change-email"
+---
+<div class="card">
+  {{ if .successful }}
+  <%- include('/_components/alert-success.ejs') %>
+  {{ else }}
+  {{if .error}}
+  <%- include('/_components/alert-error.ejs');  %>
+  {{end}}
+  <form action="change-email" method="POST">
+      {{ .csrfField }}
+      <fieldset>
+          <legend>{{ .i18n.T "title"}}</legend>
+          <div class="field">
+              <label for="email">
+                   {{ .i18n.T "fields.email"}}
+              </label>
+              <input type="email" required value="{{ .email }}" name="email">
+          </div>
+        <div class="field">
+              <button type="submit">{{ .i18n.T "fields.save"}}</button>
+          </div>   
+      </fieldset>
+  </form>
+  {{end}}
+</div>
+<div class="mt">
+  <div class="text-align-center">
+      <small>
+          <a href="/account/">
+              {{ .i18n.T "back_link"}}
+          </a>
+      </small>
+  </div>
+</div>

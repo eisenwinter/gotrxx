@@ -1,0 +1,47 @@
+---
+layout: layout.ejs
+permalink: "/<%- page.fileSlug %>.html"
+endpoint: "change-mfa"
+---
+
+<div class="card">
+    {{ if .successful }}
+    <%- include('/_components/alert-success.ejs') %>
+    <p>
+    <strong>{{ .i18n.T "recovery_key"}}</strong> <br>
+    <div class="is-line"></div>
+    <i class="recovery-key">{{.recovery_key}}</i>
+    <div class="is-line"></div>
+  </p>
+    {{ else }}
+    {{if .error}}
+    <%- include('/_components/alert-error.ejs');  %>
+    {{else}}
+    <form action="set-mfa" method="POST">
+        {{ .csrfField }}
+        <fieldset>
+            <legend>{{ .i18n.T "title"}}</legend>
+            {{ if .qr }}
+            <div class="field">
+              <img class="m-0-a" width="256" height="256" src="data:image/png;base64,{{ .qr }}" />
+            </div>
+            {{end}}
+            <input type="hidden" required name="secret" value="{{.secret}}">
+          <div class="field">
+                <button type="submit">{{ .i18n.T "fields.enable"}}</button>
+            </div>   
+        </fieldset>
+    </form>
+    {{ end }}
+
+    {{end}}
+</div>
+<div class="mt">
+    <div class="text-align-center">
+        <small>
+            <a href="/account/">
+                {{ .i18n.T "back_link"}}
+            </a>
+        </small>
+    </div>
+</div>

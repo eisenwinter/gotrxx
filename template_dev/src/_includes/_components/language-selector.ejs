@@ -1,0 +1,13 @@
+<% // only show if more than 1 lang %>
+{{ if gt (len .i18n.Registry.Languages ) 1 }}
+<div class="is-line"></div>
+<ul class="lang-selector">
+{{ range $elm := .i18n.Registry.Languages }}
+   <li>
+        <a href="change-language?lang={{ $elm }}&return_url=/account/<%- endpoint %>">
+           <img alt="{{ $elm }}" src="static/language/{{ $elm }}.svg" />
+        </a>
+   </li>
+{{ end }}
+</ul>
+{{ end }}

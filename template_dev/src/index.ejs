@@ -1,0 +1,12 @@
+<html>
+
+<body>
+  <strong>generated:</strong>
+  <ul>
+    <% collections.all.forEach((post,index) => { %>
+    <li><a href="<%- post.url %>"><%- post.url %></a></li>
+    <% }); %>
+  </ul>
+</body>
+
+</html>

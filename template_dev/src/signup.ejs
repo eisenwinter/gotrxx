@@ -1,0 +1,66 @@
+---
+layout: layout.ejs
+permalink: "/<%- page.fileSlug %>.html"
+endpoint: "signup"
+---
+<div class="card">
+    {{ if .successful }}
+    <%- include('/_components/alert-success.ejs') %>
+    {{ else }}
+    {{if .error}}
+    <%- include('/_components/alert-error.ejs');  %>
+    {{end}}
+    <form action="signup" method="POST">
+        {{ .csrfField }}
+        <fieldset>
+            <legend>{{ .i18n.T "title" }}</legend>
+            {{if .show_invite_code}}
+            <div class="field">
+                <label for="code">
+                    {{ .i18n.T "fields.invite_code" }}
+                </label>
+                <input type="text" value="{{ .invite_code }}" name="invite_code">
+            </div>
+            {{end}}
+            <div class="field">
+                <label for="email">
+                   {{ .i18n.T "fields.email" }}
+                </label>
+                <input type="email" required value="{{ .email }}" name="email">
+            </div>
+            <div class="field">
+                <label for="password">
+                    {{ .i18n.T "fields.password" }}
+                </label>
+                <input type="password" required name="password" value="{{ .password }}">
+            </div>
+            <div class="field">
+                <label for="passwordAgain">
+                   {{ .i18n.T "fields.password_again" }}
+                </label>
+                <input type="password" required name="password_again">
+            </div>
+            <div class="field">
+                <button type="submit">{{ .i18n.T "fields.signup" }}</button>
+            </div>
+
+        </fieldset>
+    </form>
+    {{end}}
+</div>
+ <div class="flex mt">
+    <div class="flex-basis-49 text-align-center">
+        <small>
+            <a href="/account/forgotten-password">
+                {{ .i18n.T "forgot_password_link"}}
+            </a>
+        </small>
+    </div>
+    <div class="flex-basis-49 text-align-center">
+        <small>
+            <a href="/account/signin">
+                {{ .i18n.T "login_link"}}
+            </a>
+        </small>
+    </div>
+</div>

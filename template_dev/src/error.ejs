@@ -1,0 +1,16 @@
+---
+layout: layout.ejs
+permalink: "/<%- page.fileSlug %>.html"
+endpoint: ""
+---
+
+<div class="card">
+    <h1>{{ .i18n.T "title" }}</h1>
+    <p>
+        {{ .i18n.T "message" }}
+        <br />
+        <a  href="javascript:history.back()">
+            {{ .i18n.T "go_back" }}
+        </a>
+    </p>
+</div>

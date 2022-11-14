@@ -1,0 +1,16 @@
+{
+    "success": {
+        "email_changed": "Email has been successfuly changed!"
+    },
+    "errors": {
+        "invalid_email": "Invalid email supplied",
+        "email_already_in_use": "You already have an account with that email!",
+        "unknown": "Unknown error occured"
+    },
+    "fields": {
+        "save": "Save",
+        "email": "Email"
+    },
+    "title": "Change your Email-Address",
+    "back_link": "Back"
+}

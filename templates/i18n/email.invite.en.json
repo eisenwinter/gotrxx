@@ -1,0 +1,7 @@
+{
+    "title": "You have been invited",
+    "message": "You have been invited to create a account. Follow this link to accept the invite:",
+    "link_text": "Signup!",
+    "token_text": "Your invite code",
+    "subject": "You have been invited!"
+}

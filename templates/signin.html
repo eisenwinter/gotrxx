@@ -1,0 +1,110 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="static/css/main.css">
+</head>
+
+<body>
+    <section>
+        
+
+<div class="card">
+    {{if .error}}
+    <div class="alert is-error" role="alert">
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      width="24"
+      height="24"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      stroke-width="1.5"
+      stroke-linecap="round"
+      stroke-linejoin="round"
+    >
+      <path
+        d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"
+      ></path>
+      <line x1="12" y1="9" x2="12" y2="13"></line>
+      <line x1="12" y1="17" x2="12.01" y2="17"></line>
+    </svg>
+    <p>
+      {{ .i18n.T  "errors" .error }} 
+    </p>
+  </div>
+    {{end}}
+        <form method="post" action="signin">
+            {{ .csrfField }}
+            <input type="hidden" value="{{.returnUrl}}"  name="return_url" />
+            <fieldset>
+                <legend> {{ .i18n.T "title"}}</legend>
+                <div class="field">
+                    <label for="email">
+                        {{ .i18n.T "fields.email"}}
+                    </label>
+                    <input type="email" required value="{{ .email }}" name="email">
+                </div>
+                <div class="field">
+                    <label for="password">
+                        {{ .i18n.T "fields.password"}}
+                    </label> 
+                    <input type="password" value="{{ .password }}"  name="password">
+                </div>
+                {{ if .otp }}
+                <div class="field">
+                    <label for="otp">
+                        {{ .i18n.T "fields.otp"}}
+                    </label> 
+                    <input type="text" required name="otp">
+                </div>
+                {{ end }}
+                <div class="field flex-row flex-align-center">
+                    <input class="w-auto" type="checkbox" value="true" name="remember_me" />
+                    <label for="remember_me" class="pl-0-3">
+                       {{ .i18n.T "fields.remember_me"}}
+                    </label>                         
+                </div>
+                <div class="field">
+                    <button type="submit">{{ .i18n.T "fields.login"}}</button>
+                </div>    
+            </fieldset>
+        </form>
+    </div>
+    <div class="flex mt">
+        <div class="flex-basis-49 text-align-center">
+            <small>
+                <a href="/account/forgotten-password">
+                    {{ .i18n.T "forgot_password_link"}}
+                </a>
+            </small>
+        </div>
+        <div class="flex-basis-49 text-align-center">
+            <small>
+                <a href="/account/signup">
+                    {{ .i18n.T "new_account_link"}}
+                </a>
+            </small>
+        </div>
+    </div>
+        
+{{ if gt (len .i18n.Registry.Languages ) 1 }}
+<div class="is-line"></div>
+<ul class="lang-selector">
+{{ range $elm := .i18n.Registry.Languages }}
+   <li>
+        <a href="change-language?lang={{ $elm }}&return_url=/account/signin">
+           <img alt="{{ $elm }}" src="static/language/{{ $elm }}.svg" />
+        </a>
+   </li>
+{{ end }}
+</ul>
+{{ end }}
+    </section>
+</body>
+
+</html>

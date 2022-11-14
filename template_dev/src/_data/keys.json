@@ -1,0 +1,4 @@
+{
+    "default_success_message": "\"success\" .success_message",
+    "default_error_message": "\"errors\" .error"
+}

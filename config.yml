@@ -1,0 +1,56 @@
+server:
+  port: 5000
+  address: localhost
+  csrf-token: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA # you need to replace this
+  load-template-folder: false # indicates that the templates folder will be used instead of the embedded ressources
+smtp:
+  enable: true
+  host: localhost
+  port: 2500
+  username: 
+  password: 
+  display-name: Gotrxx Service
+  address: noreply@example.com
+database:
+  type: sqlite # mysql | pg
+  dsn: dev.db?cache=shared  #"root@/gotrxx" 
+behaviour:
+  name: Gotrxx Identity Service Example
+  site: https://github.com/eisenwinter/gotrxx # should be the main site, 404 excpect /account/ redirect there
+  service-domain: http://localhost:5000 # domain this service is hosted on
+  invite-only: true 
+  invite-expiry: 36h
+  invite-role: inviter # or admin
+  default-locale: en
+  auto-lockout-count: 10 # -1 to disable
+  auto-lockout-duration: 10m
+  password-min-length: 6
+jwt:
+  flatten-audience: false # you will either need a patched version of netlify components or set it to true
+  alg: RS256 # RS256 # HS256 # HS384 | HS512 | RS256 | RS384 | RS512
+  iss: login.example.com
+  aud: 
+    - my-super-api.subkonstrukt.at
+  no-roles-claim: false # this enalbes the roles claim to be added to the access token, be sure to understand the implications of this, when in doubt set it to true
+  exp: 900s
+  hmac-signing-key: 'mhm-yes-sign-me' # either this or a file
+  hmac-signing-key-file: '/home/jan/keys/my-hmac-key' # only supply those when using HS*
+  rsa-public-key: '' #only supply these with RS*
+  rsa-public-key-file: '.dev/id_rsa.pub' #either supply key OR file
+  rsa-private-key: ''
+  rsa-private-key-file: '.dev/id_rsa'
+  refresh-token-expiry: 3600s
+  remember-me-duration: 168h
+manage-endpoint:
+  enable: true
+  cors:
+    allowed-origins: 
+      - https://*
+      - http://*
+    allowed-methods:
+      - GET
+      - POST
+      - PUT
+      - DELETE
+      - OPTIONS
+    allow-credentials: false

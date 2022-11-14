@@ -1,0 +1,26 @@
+---
+layout: layout.ejs
+permalink: "/<%- page.fileSlug %>.html"
+endpoint: ""
+---
+
+<div class="card">
+    <form method="POST" action="signout">
+      <fieldset>
+        <legend>{{ .email }}</legend>
+        <div class="field">
+          <a href="/account/change-password" class="button">{{ .i18n.T "change_password"}}</a>
+        </div>
+        <div class="field">
+          <a  href="/account/change-email" class="button">{{ .i18n.T "change_email"}}</a>
+        </div>
+        <div class="field">
+          <a  href="/account/change-mfa" class="button">{{ .i18n.T "change_mfa"}}</a>
+        </div>
+        <div class="field">
+             {{ .csrfField }}
+             <button type="submit" class="button">{{ .i18n.T "signout"}}</button>
+        </div>
+      </fieldset>
+    </form>
+  </div>

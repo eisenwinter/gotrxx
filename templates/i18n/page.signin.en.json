@@ -1,0 +1,18 @@
+{
+    "errors": {
+        "mfa": "Account requires multi-factor login",
+        "invalid_otp": "Invalid one time password",
+        "locked_user": "Locked or unconfirmed user",
+        "unknown_or_invalid": "Invalid credentials or user does not exist"
+    },
+    "fields": {
+        "email": "Email",
+        "password": "Password",
+        "login": "Login",
+        "otp": "One Time Password (from Authenticator)",
+        "remember_me": "Remember me"
+    },
+    "title": "Sign In",
+    "forgot_password_link": "Forgot password?",
+    "new_account_link": "New account?"
+}

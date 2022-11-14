@@ -1,0 +1,11 @@
+{
+ "errors": {
+    "no_token": "No confirmation code supplied",
+    "does_not_exists_or_already_consumed": "This invite does not exist or you already consumed your invite code",
+    "unknown": "Unknown error occured"
+ },
+ "success": {
+   "account_confirmed": "Account has been confirmed"   
+ }
+
+}

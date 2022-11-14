@@ -1,0 +1,7 @@
+{
+    "title": "Welcome",
+    "message": "Please confirm your email address by clicking the link below!",
+    "link_text": "Confirm email address!",
+    "subject": "Please confirm your email address!",
+    "token_text": "Your confirmation code"
+}

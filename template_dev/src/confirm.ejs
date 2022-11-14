@@ -1,0 +1,13 @@
+---
+layout: layout.ejs
+permalink: "/<%- page.fileSlug %>.html"
+endpoint: "confirm"
+---
+
+<div class="card">
+    {{if .error}}
+    <%- include('/_components/alert-error.ejs');  %>
+     {{else}}
+     <%- include('/_components/alert-success.ejs', {keys: {default_success_message: "\"success.account_confirmed\""}});  %>
+     {{end}}
+</div>

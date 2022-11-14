@@ -1,0 +1,24 @@
+{
+    "errors": {
+        "unknown": "Unknown error occured!",
+        "ivnalid_email": "Invalid Email Address!",
+        "email_already_used": "You already have an account!",
+        "password_guidlines": "Your password does not match the password guidelines!",
+        "invite_code_expired": "This invite code already expired!",
+        "invite_code_required": "This registration requires a invite code!"
+    },
+    "success": {
+        "user_needs_confirm": "Thanks for signin up, please confirm your email address!",
+        "welcome_text": "successfuly signed up! Welcome!"
+    },
+    "fields": {
+        "email": "Email",
+        "password": "Password",
+        "password_again": "Password again",
+        "signup": "Signup",
+        "invite_code": "Invite Code"
+    },
+    "title": "Sign Up",
+    "forgot_password_link": "Forgot password?",
+    "login_link": "Already have an account?"
+}

@@ -1,0 +1,51 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <meta name="description" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="static/css/main.css">
+</head>
+
+<body>
+    <section>
+        
+<div class="card">
+    <form method="POST" action="signout">
+      <fieldset>
+        <legend>{{ .email }}</legend>
+        <div class="field">
+          <a href="/account/change-password" class="button">{{ .i18n.T "change_password"}}</a>
+        </div>
+        <div class="field">
+          <a  href="/account/change-email" class="button">{{ .i18n.T "change_email"}}</a>
+        </div>
+        <div class="field">
+          <a  href="/account/change-mfa" class="button">{{ .i18n.T "change_mfa"}}</a>
+        </div>
+        <div class="field">
+             {{ .csrfField }}
+             <button type="submit" class="button">{{ .i18n.T "signout"}}</button>
+        </div>
+      </fieldset>
+    </form>
+  </div>
+        
+{{ if gt (len .i18n.Registry.Languages ) 1 }}
+<div class="is-line"></div>
+<ul class="lang-selector">
+{{ range $elm := .i18n.Registry.Languages }}
+   <li>
+        <a href="change-language?lang={{ $elm }}&return_url=/account/">
+           <img alt="{{ $elm }}" src="static/language/{{ $elm }}.svg" />
+        </a>
+   </li>
+{{ end }}
+</ul>
+{{ end }}
+    </section>
+</body>
+
+</html>

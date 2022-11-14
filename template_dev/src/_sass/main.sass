@@ -1,0 +1,153 @@
+@import "_reset"
+@import "_font"
+@import "_vars" 
+@import "_mixins"
+
+body
+  background-color: $body-background-color
+  font-size: $base-font-size
+  color: $base-font-color
+  font-family: $font-family
+section
+  flex-grow: 1
+  margin: 0 auto
+  position: relative
+  width: auto
+  +desktop
+    max-width: $small-window-width
+    margin-top: $margin-d
+    &.is-wide
+      max-width: $default-window-width
+.card
+    background-color: $content-background-color
+    +padding-factor-x-y(0.5, 0.5)
+    +desktop
+      border: $input-border
+      border-radius: $border-radius
+form
+  p
+    display: block
+    +block
+  fieldset
+    .field
+      +block
+      display: flex
+      flex-direction: column
+      &.flex-end
+        justify-content: flex-end
+      &.flex-row
+        flex-direction: row
+    legend
+      +block
+      text-align: center
+      font-size: 1rem
+    label
+      +label
+      font-size: 1rem
+  input
+    background-color: $input-backround
+    border: $input-border
+    border-radius: $border-radius
+    width: 100%
+    +padding-factor(2)
+  button, .button
+    background-color: $primary-color
+    &:hover
+      background-color: $primary-color-hover
+    color: #fff
+    +padding-factor-x-y(2, 0.5)
+    border-radius: $border-radius
+    border: $input-border
+    font-size: $base-font-size
+    +block
+    width: auto
+    text-align: center
+  .button
+    text-decoration: none
+a
+  text-decoration: underline
+  color: $primary-color-hover
+  a:hover
+    color: $primary-color
+
+.flex
+  display: flex 
+  .space-evenly
+    justify-content: space-between
+  .flex-basis-32
+    flex-basis: 32%
+  .flex-basis-49
+    flex-basis: 49%
+.flex-align-center
+  align-items: center
+.text-align-center
+  text-align: center
+.text-align-right
+  text-align: right
+.m-0-a
+  margin: 0 auto
+.mt
+  margin-top: $margin-d
+.pl-0-3
+  padding-left: 0.3rem
+small
+  font-size: 0.8rem
+.w-auto
+  width: auto
+h1
+  font-size:1.5rem
+  +block
+.alert
+  display: flex
+  align-items: center
+  padding: 0.5rem
+  +block
+  & svg 
+    +margin-factor-x-y(2, 1)
+    vertical-align: center
+    flex-shrink: 0
+  &.is-error
+    background-color: lighten($error-color, 5%)
+    border: 1px solid #d63939
+    & svg
+      stroke: darken($error-color, 55%)
+    p
+      color: darken($error-color, 55%)
+  &.is-success
+    background-color: lighten($success-color, 5%)
+    border: 1px solid darken($success-color, 65%)
+    & svg
+      fill: darken($success-color, 70%)
+    p
+      color: darken($success-color, 70%)
+strong
+  font-weight: bold 
+
+p
+  word-wrap: break-word
+  word-break: break-word
+
+.recovery-key
+  word-wrap: break-word
+  white-space: pre-wrap
+  word-break: break-word
+  font-style: oblique
+
+.is-line
+  border-top: 1px solid $input-border-color
+  width: 100%
+  margin: $margin-d auto
+
+ul.lang-selector
+  display: flex
+  justify-content: center
+  & li
+    margin: 0 0.2rem
+    & a
+      text-decoration: none
+    & img
+      max-width: 32px
+      border-radius: $border-radius
+      opacity: 0.5
+      &:hover
+        opacity: 1

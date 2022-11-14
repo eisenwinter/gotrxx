@@ -1,0 +1,88 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" style="background-color: #fafbfc; height: 100%;">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+  </head>
+  <body style="background-color: #fafbfc; font-size: 16px; color: #0e1012; font-family: 'Inter', 'Segoe UI', Roboto, 'Helvetica Neue', Arial, 'Noto Sans', sans-serif;">
+    <!-- outter -->
+    <table border="0" cellpadding="0" cellspacing="0" width="100%" class="mail" style="background-color: #fafbfc; height: 100%;" height="100%" bgcolor="#fafbfc">
+      <tr>
+        <td>
+          <!-- container table -->
+          <table align="center" border="0" cellpadding="0" cellspacing="0" width="600">
+            <tr>
+              <td>
+              <div class="mail-container" style="margin: 0 auto; background-color: #fff; padding: 25px; border: 1px solid rgba(98, 105, 118, 0.16); border-radius: 3px;">
+                <!-- base structure -->
+                <table align="center" border="0" cellpadding="0" cellspacing="0" width="100%">
+                  <tr>
+                    <td class="default-p" align="center" style="padding-top: 18px;">
+                      <!-- begin header -->
+                      <h1 class="header" style="margin: 0; padding: 0;">{{ .service_name }}</h1>
+                      <!-- end header -->
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <!-- begin content area -->
+                      <table width="100%" border="0" cellpadding="0" cellspacing="0" class="space" style="margin-top: 25px;">
+                        <tr>
+                          <td class="default-p" style="padding-top: 18px;">{{ .title }}</td>
+                        </tr>
+                        <tr>
+                          <td class="default-p" style="padding-top: 18px;">
+                            {{ .message }}
+                            <br>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td class="default-p" align="center" style="padding-top: 18px;">
+                            {{ if .token }}
+                            <br />
+                            <strong>{{ .token_text }}</strong>
+                            <p class="token" style="background-color: #fafbfc; padding: 15px; border: 1px solid rgba(98, 105, 118, 0.16); border-radius: 3px;">{{ .token }}</p>
+                              {{ end }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td align="center" class="default-p" style="padding-top: 18px;">
+                            {{ if .link }}
+                            <br />
+                            <a href="{{ .link }}">
+                              <div class="button" style="background-color: #24292f; color: #fff; padding: 0.6rem 2.4rem; border-radius: 3px; border: 1px solid rgba(98, 105, 118, 0.16); font-size: 16px; width: auto; text-align: center;">{{ .link_text }}</div></a></td></tr></table></td></tr></table></div>
+                            {{ end }}
+                          </td>
+                        </tr>
+                      </table>
+                      <!-- end content area -->
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <!-- begin footer -->
+                      <table border="0" cellpadding="0" cellspacing="0" width="600" class="space" style="margin-top: 25px; margin: 25px auto; width: 600px;">
+                        <tr>
+                          <td>
+                            <a href="{{ .site }}">{{ .site }}</a>
+                          </td>
+                          <td align="right">{{ .date }}</td>
+                        </tr>
+                      </table>
+                      <!-- end footer -->
+                    </td>
+                  </tr>
+                </table>
+                <!-- end  base structure -->
+                
+              
+            
+          
+          <!-- end container table-->
+        
+      
+    
+  </body>
+</html>
