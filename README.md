@@ -6,7 +6,7 @@
 <strong>gotrxx</strong> is a <a href="https://github.com/netlify/gotrue">gotrue</a> API-compatible authorization server written in go, with support for OAuth <strong>Authorization Code Grant with PKCE</strong>, <strong>Client Credentials Grant</strong> and <strong>Password Grant</strong> (for gotrue compatibility).
 </p>
 
-[![Go Report Card](https://goreportcard.com/badge/github.com/eisenwinter/gotrxx)](https://goreportcard.com/report/github.com/eisenwinter/fiql-sql-adapter) [![Go](https://github.com/eisenwinter/gotrxx/actions/workflows/go.yml/badge.svg)](https://github.com/eisenwinter/fiql-sql-adapter/actions/workflows/go.yml) [![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) [![License](https://img.shields.io/badge/License-BSD_2--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
+[![Go Report Card](https://goreportcard.com/badge/github.com/eisenwinter/gotrxx)](https://goreportcard.com/report/github.com/eisenwinter/gotrxx) [![Go](https://github.com/eisenwinter/gotrxx/actions/workflows/go.yml/badge.svg)](https://github.com/eisenwinter/gotrxx/actions/workflows/go.yml) [![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) [![License](https://img.shields.io/badge/License-BSD_2--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause)
 
 
 # gotrxx
