@@ -83,7 +83,7 @@ For further setup please refer to the documentation https://eisenwinter.github.i
 Yes. We have em.
 
 ```
-docker run -v ./config.yml:/app/config.yml:ro gotrxx:latest
+docker run -v ./config.yml:/app/config.yml:ro ghcr.io/eisenwinter/gotrxx:latest
 ```
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
