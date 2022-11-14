@@ -65,7 +65,7 @@ version of netlify CMS. And things did not go as I wanted. Fast-forward - we are
 gotrxx is written and tested against Go 1.18+
 
 ```
-git clone [redacted]
+git clone https://github.com/eisenwinter/gotrxx.git
 ```
 
 ```
@@ -74,7 +74,7 @@ go build main.go -o gotrxx
 
 adapt the supplied `config.yml` to your needs and you are ready.
 
-For further setup please refer to the documentation [link-redacted].
+For further setup please refer to the documentation https://eisenwinter.github.io/gotrxx.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -90,9 +90,7 @@ docker run -v ./config.yml:/app/config.yml:ro gotrxx:latest
 
 ## Documentation 
 
-If you want a deeper dive check out the documentation 
-[link redacted]
-
+If you want a deeper dive check out the documentation https://eisenwinter.github.io/gotrxx or see the `docs` folder. 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 ## MFA
