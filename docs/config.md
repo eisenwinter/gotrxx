@@ -3,17 +3,15 @@
 This section explains how to gotrxx can be configured.
 You may use a configuration file or environment variables to configure gotrxx,
 but it is important to understand that environment variables always will take precedence
-over the configuration file and configuration values from the configuration file will be 
-overwritte by supplied environment variables.
+over the configuration file and configuration values from the configuration file will be overwritten by supplied environment variables.
 
-
-## MWE
+## Minimal working example
 
 This is the most basic configuration to run a gotrxx instance:
 
 !> This is not a recommended setup for a production instance, this is rather for test drives
 
-In `yaml` format for configuration fíles
+In `yaml` format for configuration files
 
 ```yaml
 database:
@@ -60,14 +58,13 @@ TRXX_SMTP_ENABLE=false
 
 ## Configuration File and environment variables
 
-This section explains the entire configuration file and the coresponding environment variables.
-
+This section explains the entire configuration file and the corresponding environment variables.
 
 ### The Server Section
 
 The server section contains the basic host configuration:
 
-```
+```yaml
 server:
   port: 5000 # integer, port to be listen on
   address: localhost # string, address to listen on
@@ -79,10 +76,14 @@ server:
 
 Those default values apply if the configuration is not defined:
 
-load-template-folder: false, when personalized html templates should be used set the value to true,
+```
+load-template-folder: false, when personalized HTML templates should be used set the value to true,
+```
 
-#### Coresponding environment variables:
+#### Corresponding environment variables:
 
+
+```
 PORT or TRXX_PORT -> server.port
 
 ADDRESS OR TRXX_ADDRESS -> server.address
@@ -90,16 +91,16 @@ ADDRESS OR TRXX_ADDRESS -> server.address
 TRXX_SERVER_CSRF_TOKEN -> server.csrf-token
 
 TRXX_SERVER_LOAD_TEMPLATE_FOLDER -> server.load-template-folder
-
+```
 
 ### The SMTP Section
 
 Configures the email settings to be used for emails.
 
-?> It is highly recommended to configure a valid SMTP instance this otherwise a lot of gotrxxs features will
+?> It is highly recommended to configure a valid SMTP instance otherwise a lot of gotrxxs features will
 not work correctly.
 
-```
+```yaml
 smtp:
   enable: true # enables emails
   host: localhost # smtp address
@@ -110,9 +111,9 @@ smtp:
   address: noreply@example.com # Display email for sent emails  (from: EMAIL)
 ```
 
-#### Coresponding environment variables:
+#### Corresponding environment variables:
 
-
+```
 TRXX_SMTP_ENABLE -> smtp.enable
 
 TRXX_SMTP_HOST -> smtp.host
@@ -126,17 +127,19 @@ TRXX_SMTP_PASSWORD -> smtp.password
 TRXX_SMTP_DISPLAYNAME -> smtp.display-name
 
 TRXX_SMTP_ADDRESS -> smtp.address
+```
 
 #### Default Values
 
 Those default values apply if the configuration is not defined:
 
+```
 smtp.enable false - altough this is the default value this is **not** recommended.
-
+```
 
 ### The Database Section
 
-```
+```yaml
 database:
   type: sqlite # database driver
   dsn: dev.db?cache=shared  # connection string
@@ -144,20 +147,25 @@ database:
 
 Possible values for type are `sqlite`, `pg` and `mysql`.
 
-`sqlite` is not recommended for production use, and if used in production only for a small amount of users.
+`sqlite` is only recommended for small and medium sized deployments. There have been recent advancements that 
+make it more viable as production setup, check out [Litestream](https://litestream.io/) for disaster recovery. 
 
-`pg` (PostgresSQL) is the recommded database but `mysql` or `mariadb` may also be used, tough those are less tested.
+`pg` (PostgresSQL) is the recommended database for larger deployments but `MySQL` or `MariaDB` may also be used, though those are less tested.
 
 
-#### Coresponding environment variables:
+#### Corresponding environment variables:
 
+```
 TRXX_DATABASE_TYPE -> database.type
 
 TRXX_DATABASE_DSN -> database.dsn
+```
+
 
 ### The Behaviour Section
+ 
 
-```
+```yaml
 behaviour:
   name: Gotrxx Identity Service Example # string, the display name for the service
   site: https://github.com/eisenwinter/gotrxx #  string, should be the main site, 404 excpect /account/ redirect there
@@ -175,6 +183,7 @@ behaviour:
 
 Those default values apply if the configuration is not defined:
 
+```
 behaviour.invite-role: "inviter"
 
 behaviour.default-locale: "en"
@@ -186,13 +195,11 @@ behaviour.auto-lockout-count: 5
 behaviour.auto-lockout-duration: 10m
 
 behaviour.password-min-length: 6
+```
 
-behaviour.remember-me-duration: 168h
+#### Corresponding environment variables:
 
-
-
-#### Coresponding environment variables:
-
+```
 TRXX_BEHAVIOUR_NAME -> behaviour.name
 
 TRXX_BEHAVIOUR_SITE -> behaviour.site
@@ -214,6 +221,7 @@ TRXX_BEHAVIOUR_AUTO_LOCKOUT_COUNT -> behaviour.auto-lockout-count
 TRXX_BEHAVIOUR_AUTO_LOCKOUT_DURATION -> behaviour.auto-lockout-duration
 
 TRXX_BEHAVIOUR_PASSWORD_MIN_LENGTH -> behaviour.password-min-length
+```
 
 ### The JWT Section
 
@@ -236,11 +244,11 @@ jwt:
   remember-me-duration: 168h # duration, expiry of the remember me token
 ```
 
-?> You may eitehr defined key files when using the -file postfixed keys (rsa-public-key-file,rsa-private-key-file OR hmac-signing-key-file) or keys directly by using the none postfixed keys (rsa-public-key, rsa-private-key OR hmac-signing-key)
+?> It is possible for the keys to supply them directly in configuration by using `hmac-signing-key` (HS* signing) or `rsa-public-key` and `rsa-private-key`. If you want to use files instead use the `hmac-signing-key-file` or `rsa-public-key-file` and `rsa-private-key-file` properties.
 
-#### Example with symetric signing key (HS256)
+#### Example with symmetric signing key (HS256)
 
-```
+```yaml
 jwt:
   flatten-audience: false
   alg: HS256 
@@ -254,10 +262,9 @@ jwt:
   remember-me-duration: 168h
 ```
 
-#### Example with asymetric signing key (RS256)
+#### Example with asymmetric signing key (RS256)
 
-
-```
+```yaml
 jwt:
   flatten-audience: false 
   alg: RS256
@@ -276,6 +283,7 @@ jwt:
 
 Those default values apply if the configuration is not defined:
 
+```
 jwt.flatten-audience: false
 
 jwt.exp: 900s
@@ -284,8 +292,12 @@ jwt.refresh-token-expiry: 3600s
 
 jwt.jwt.no-roles-claim: true
 
-#### Coresponding environment variables:
+jwt.remember-me-duration: 168h
+```
 
+#### Corresponding environment variables:
+
+```
 TRXX_JWT_FLATTEN_AUDIENCE -> jwt.flatten-audience
 
 TRXX_JWT_AUDIENCE -> jwt.aud
@@ -313,10 +325,11 @@ TRXX_JWT_RSA_PUBLIC_KEY -> jwt.rsa-public-key
 TRXX_JWT_RSA_PUBLIC_KEY_FILE -> jwt.rsa-public-key-file
 
 TRXX_JWT_REMEMBER_ME_DURATION -> jwt.remember-me-duration
+```
 
 ### The Manage Endpoint Section
 
-```
+```yaml
 manage-endpoint:
   enable: true # enables the /manage/* endpoints
   cors:
@@ -335,10 +348,13 @@ manage-endpoint:
 
 Those default values apply if the configuration is not defined:
 
+```
 manage-endpoint.enable: false
+```
 
-#### Coresponding environment variables:
+#### Corresponding environment variables:
 
+```
 TRXX_MANAGE_ENDPOINT_ENABLE -> manage-endpoint.enable
 
 TRXX_MANAGE_ENDPOINT_CORS_ALLOWED_ORIGINS -> manage-endpoint.cors.allowed-origins
@@ -346,7 +362,7 @@ TRXX_MANAGE_ENDPOINT_CORS_ALLOWED_ORIGINS -> manage-endpoint.cors.allowed-origin
 TRXX_MANAGE_ENDPOINT_CORS_ALLOWED_METHODS -> manage-endpoint.cors.allowed-methods
 
 TRXX_MANAGE_ENDPOINT_CORS_ALLOW_CREDENTIALS -> manage-endpoint.cors.allow-credentials
-
+```
 
 
 ### All YAML configuration options

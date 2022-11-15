@@ -1,59 +1,55 @@
 # The basics
 
-gotrxx is designed for contraint userbase (clients, family members, friends etc) but may also be used as a public
+gotrxx is designed for a constraint userbase (clients, family members, friends etc) but may also be used as a public
 authorization server with open registration.
 
-Its main purpose is grant authorization via the oauth protocol, it differs from most well etablished oauth turnkey solutions
-that it is able to constraint user access on a per app basis and user consent is always consider as implicit given.
+Its main purpose is to grant authorization via the OAuth protocol. It differs from most well-established OAuth turnkey solutions
+because it is designed for said constraint userbases and user consent is always implicitly given.
 
 The main entities involved in the gotrxx system are discussed below.
 
 ## Users
 
-A user is someone who can gain access through the authorization server. A user consist mainly of a email address and a password.
+A user is someone who can gain access through the authorization server. A user consists mainly of a way to contact the user (email address or phone number) and a password.
 
 ## Roles
 
-A user may be in `zero` to `n` roles, how those roles are treated is subject to the implementing solutions. 
-gotrxx itself comes with two default roles, `admin` which basically grants the administration rights for the gotrxx
+A user may be in `zero` to `n` roles, how those roles are treated is subject to the implementing solutions.
+gotrxx itself comes with two default roles, `admin` which grants the administration rights for the gotrxx instance
 and `inviter` which is used to grant a user the right to invite people to register an account.
 
 Any further usage of the roles systems may be decided by the implementing system. 
 
 ## Applications
 
-An application defines a application using gotrxx to identify a user. 
-In order to use gotrxx with your application it has to be registred within gotrxx.
+An application defines a system using gotrxx to identify a user. 
+To use gotrxx with your application it has to be registered within gotrxx.
 
-Applications are split into `confidental applications`, wich are able to store secret information safely (like Backend Services) and 
-`public application` wich are not able to store secret information securly (like SPAs and Mobile Applications).
+Applications are split into `confidential applications`, which can store secret information safely (like Backend Services) and `public applications` which are not able to store secret information securely (like SPAs and Mobile Applications).
 
-An application may be either `implicit granted` wich means that any user registred may also use this application as long as 
-there valid credentials are entered (authorizations for this application are automatically granted, see Authorizations), or 
-`explicit granted` wich means the application may only be used by a pre-approved user.
+An application may be `implicitly granted` which means that any user registered may also use this application as long as their valid credentials are entered. Otherwise, it's `explicitly granted` which means the application may only be used by a pre-approved user.
 
-An application may be eligble for `zero` up to `n` oauth flows.
+An application may be eligible for `zero`` up to `n` OAuth flows.
 
 The possible flow types are:
 
 `authorization_code`, `refresh_token`, `client_credentials` and `password`.
 
 When using `authorization_code` the application may also specify `Login Redirect URIs` and `Logout URIs` as well as the
-information if `Proof Key of Exchange` is required.
-
-For `confidential` applicications there is also a `client_secret` to authorize requests.
+information if `Proof Key of Exchange` is required. For `confidential` applications, there is also a `client_secret` to authorize requests.
 
 For further information regarding OAuth and OAuth-Flows please see: https://datatracker.ietf.org/doc/html/rfc6749
 
-
 ## Authorizations
 
-An authorization is grants a user authorization for an application, this means a user is eligble to sign into
+An authorization grants a user access to an application, this means a user is eligible to sign into
 the application with his credentials.
 
-There are two types of authorizations, `automatically granted authorizations` are authorizations that automatically get 
-granted when user signs into a application for the first time, hence any user registred may use the application automatically 
-and `manually granted authorizations` which need need to be granted by a authority (mostly the a user with the `admin` role). Hence
+There are two types of authorizations.
+`automatically granted authorizations` are authorizations that automatically get granted when the user signs into an application for the first time, 
+hence any user registered may use the application automatically.
+
+`manually granted authorizations` that need to be granted by an authority (mostly a user with the `admin` role). Hence
 a user needs to receive authorization in advance to use a certain application.
 
 ## Invites
@@ -65,12 +61,12 @@ Depending on the server configuration the invite is mandatory or optional.
 
 ## OAuth Flows
 
-Wich oauth flow to use?
+Wich OAuth flow to use?
 
 ### Public Clients (SPAs, JavaScript Frontends, Apps)
 
-For public clients the `Authorization Code Flow with PKCE` is recommended. 
+For public clients, the `Authorization Code Flow with PKCE` is recommended. 
 
 ### Private Clients (Backend Services, server-side rendered Web Applications)
 
-For private clients the `Client Credential Flow` is recommended.
+For private clients, the `Client Credential Flow` is recommended.

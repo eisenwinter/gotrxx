@@ -1,8 +1,7 @@
 # Translating gotrxx
 
 Gotrxx uses the same approach as various `i18n` libraries for handling translations.
-
-Navigate to the the `templates/i18n` folder. 
+Navigate to the `templates``/i18n`` folder. 
 
 ```
 templates
@@ -39,13 +38,11 @@ templates
 ````
 
 Each `json` file matches a template. 
-The pattern for naming this files is always `type.template.locale.json`. 
-Type can be either `email` or `page`. 
+The pattern for naming these files is always `type.template.locale.json`. The type can be either `email` or `page`. 
 
+The locale string is a two ISO 2 letter language code (ISO 639-1). 
 
-The locale string is a two ISO 2 letter language codes (ISO 639-1). 
-
-If we want to translate it to German for example, we would copy the English files and change the locale code to `de`. 
+If we want to translate it to German, for example, we would copy the English files and change the locale code to `de`. 
 
 ```
 ├───i18n
@@ -86,7 +83,7 @@ The next step is to open each of our newly created `json` files with a text edit
 
 For example `page.signin.de.json`:
 
-```
+```json
 {
     "change_password": "change password",
     "change_email": "change email",
@@ -97,8 +94,7 @@ For example `page.signin.de.json`:
 
 and translate all the right hand strings to German:
 
-
-```
+```json
 {
     "change_password": "Passwort ändern",
     "change_email": "Email ändern",
@@ -109,11 +105,9 @@ and translate all the right hand strings to German:
 
 Repeat this for all `json` files and the German translation is done.
 
+?> various i18n tools can assist you with this task, for a brief overview you can check out https://github.com/jpomykala/awesome-i18n#-desktop-apps-for-translation-management or do a quick Google search.
 
-?> There are also various `i18n` tools which can assist you with this task, for a brief overview you can check out https://github.com/jpomykala/awesome-i18n#-desktop-apps-for-translation-management or do a quick Google search.
-
-
-## ISO 639-1 codes
+## ISO 639-1 code table
 
 
 |  Language                                                                        |  ISO Code |
