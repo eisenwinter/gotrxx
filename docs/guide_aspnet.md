@@ -1,10 +1,10 @@
 # ASP.NET Core Web API
 
-This page contains multiple minimal workins examples for using gotrxx with a asp.net core api.
+This page contains multiple minimal working examples for using gotrxx with an ASP.NET Core Web API.
 
 ## With JWKs
 
-This only works with with certificate based signing (RSXXX).
+This only works with certificate-based signing (RSXXX).
 
 ```
 using Microsoft.AspNetCore.Authorization;
@@ -82,7 +82,7 @@ internal record WeatherForecast(DateTime Date, int TemperatureC, string? Summary
 
 ## With introspection
 
-Create application 
+Create application
 
 ```
 gotrxx app create -n MyAspnetApi -s MySecret -f client_credentials myaspnetapp

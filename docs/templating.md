@@ -29,11 +29,11 @@ templates
 ### Option A - Edit templates in the `template` folder. 
 
 Edit all the HTML files in the template folder to your needs. 
-Each template file consist of a single page, there is no templating mechanism such as `layouts` or `masterpages` in place.
+Each template file consists of a single page, there is no templating mechanism such as `layouts` or `masterpages` in place.
 
 Do not remove ``{{ .csrfField }}`` fields as those are used to protect against CSRF attacks.
 
-If you want a more pleasant editing expierence you may consider `Option B` below.
+If you want a more pleasant editing experience you may consider `Option B` below.
 
 
 ### Option B - Use `template_dev` 11ty template to create templates
@@ -42,7 +42,7 @@ Since the HTML files in the template folder are whole sites per file and updatin
 
 11ty is a static site generator, its main purpose is to generate static HTML.
 
-To get started with 11ty you need a NPM package manager of your choice installed (yarn, npm, etc).
+To get started with 11ty you need an NPM package manager of your choice installed (yarn, npm, etc).
 
 Change into the `template_dev` folder.
 
@@ -50,7 +50,7 @@ Change into the `template_dev` folder.
 cd template_dev\
 ```
 
-Install the dependecies either
+Install the dependencies either
 
 with yarn 
 
@@ -64,7 +64,7 @@ with npm
 npm install
 ```
 
-Once the depencies finished installing launch the dev server with
+Once the dependencies are finished installing launch the dev server with
 
 ```
 yarn dev
@@ -99,11 +99,9 @@ Your new templates are now located in `template_dev/templates`.
 
 ## Using the templates 
 
-The templates can be either by building gotrxx from source, in this case the template files get embedded into the binary
-and just the binary needs to be deployed without any additional files. 
+The templates can be integrated into the binary by building gotrxx from the source, just the binary needs to be deployed without any additional files. 
 
-If no custom build is wanted the template files can be used with a existing binary. 
-To archive this put the `templates` folder next to your binary 
+If no custom build is wanted the template files can be used with an existing binary, to archive this put the `templates` folder next to your gotrxx binary.
 
 ```
 gotrxx
@@ -120,7 +118,7 @@ server:
   load-template-folder: true
 ```
 
-or if you are using environment variable based configuration
+or if you are using the environment variable-based configuration
 
 ```
 TRXX_SERVER_LOAD_TEMPLATE_FOLDER=true
