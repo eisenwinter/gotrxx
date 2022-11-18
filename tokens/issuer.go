@@ -148,15 +148,17 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 				log.Fatal("Could not load key file", zap.String("file", cfg.HMACSigningKeyFile), zap.Error(err))
 			}
 			checkForWeakHMAC(log, cfg.Algorithm, string(content))
-			privateKeyJwk, err = jwk.New(content)
-			if err != nil {
-				log.Fatal("Unable to process symetric key")
-			}
+
 		} else {
 			log.Fatal("No HMAC key defined, either set jwt.hmac-signing-key or jwt.hmac-signing-key-file")
 		}
 		if len(privateKey.([]byte)) > 0 {
-			options = append(options, jwt.WithVerify(jwa.SignatureAlgorithm(cfg.Algorithm), privateKey))
+			var err error
+			privateKeyJwk, err = jwk.New(privateKey)
+			if err != nil {
+				log.Fatal("Unable to process symetric key")
+			}
+			options = append(options, jwt.WithVerify(jwa.SignatureAlgorithm(cfg.Algorithm), privateKeyJwk))
 		}
 	case "RS256", "RS384", "RS512":
 		if len(cfg.RSAPrivateKey) > 0 {
