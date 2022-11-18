@@ -9,7 +9,6 @@
   },
   "devDependencies": {
     "@11ty/eleventy": "^1.0.0",
-    "eleventy-plugin-dart-sass": "^1.0.3",
-    "eleventy-plugin-sass": "^1.2.0"
+    "eleventy-plugin-dart-sass": "^1.0.3"
   }
 }
