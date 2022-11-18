@@ -2,11 +2,14 @@ package tokens
 
 import (
 	"context"
+	"crypto"
 	"crypto/rsa"
 	"crypto/x509"
+	b64 "encoding/base64"
 	"encoding/pem"
 	"errors"
 	"fmt"
+	"hash/crc32"
 	"os"
 	"strings"
 	"time"
@@ -41,8 +44,8 @@ type CommonTokenInserter interface {
 
 type TokenIssuer struct {
 	log                *zap.Logger
-	privateKey         interface{}
-	publicKey          interface{}
+	privateKey         jwk.Key
+	publicKey          jwk.Key
 	alg                jwa.SignatureAlgorithm
 	aud                []string
 	expiry             time.Duration
@@ -52,6 +55,7 @@ type TokenIssuer struct {
 	tokenStorage       CommonTokenInserter
 	parseOptions       []jwt.ParseOption
 	rememberMeDuration time.Duration
+	kid                string
 }
 
 func checkForWeakHMAC(log *zap.Logger, alg string, key string) {
@@ -125,6 +129,10 @@ func parseRSAPublicKey(key []byte) (*rsa.PublicKey, error) {
 func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonTokenInserter) *TokenIssuer {
 	var privateKey interface{}
 	var publicKey interface{}
+
+	var privateKeyJwk jwk.Key
+	var publicKeyJwk jwk.Key
+	kid := ""
 	options := make([]jwt.ParseOption, 0)
 	options = append(options, jwt.WithValidate(true))
 	//okay this is probably the only reason and place to panic...
@@ -140,7 +148,10 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 				log.Fatal("Could not load key file", zap.String("file", cfg.HMACSigningKeyFile), zap.Error(err))
 			}
 			checkForWeakHMAC(log, cfg.Algorithm, string(content))
-			privateKey = content
+			privateKeyJwk, err = jwk.New(content)
+			if err != nil {
+				log.Fatal("Unable to process symetric key")
+			}
 		} else {
 			log.Fatal("No HMAC key defined, either set jwt.hmac-signing-key or jwt.hmac-signing-key-file")
 		}
@@ -175,22 +186,44 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 		} else {
 			log.Fatal("No RSA private key defined, either set jwt.rsa-public-key or jwt.rsa-public-key-file")
 		}
+		kid = fmt.Sprintf("%x", crc32.Checksum(publicKey.([]byte), crc32.IEEETable))
 		pubParsed, err := parseRSAPublicKey(publicKey.([]byte))
 		if err != nil {
 			log.Fatal("Unable to process supllied public key", zap.Error(err))
 		}
 		privateKey.(*rsa.PrivateKey).PublicKey = *pubParsed
-		publicKey = pubParsed
-		options = append(options, jwt.WithVerify(jwa.SignatureAlgorithm(cfg.Algorithm), pubParsed))
+		privateKeyJwk, err = jwk.New(privateKey)
+		if err != nil {
+			log.Fatal("Unable to process private key")
+		}
+		publicKeyJwk, err = jwk.New(pubParsed)
+		if err != nil {
+			log.Fatal("Unable to process public key")
+		}
+		publicKeyJwk.Set("alg", cfg.Algorithm)
+		publicKeyJwk.Set("use", "sig")
+		publicKeyJwk.Set("kid", kid)
+		privateKeyJwk.Set("kid", kid)
+		sha, err := publicKeyJwk.Thumbprint(crypto.SHA1)
+		if err == nil {
+			publicKeyJwk.Set("x5t", b64.StdEncoding.EncodeToString(sha))
+		}
+
+		options = append(options, jwt.WithVerify(jwa.SignatureAlgorithm(cfg.Algorithm), publicKeyJwk))
 
 	default:
 		log.Fatal("Invalid jwt.alg defined. Possible values: HS256,HS384,HS512,RS256,RS384,RS512")
 	}
-
+	privateKeyJwk.Set("alg", cfg.Algorithm)
+	privateKeyJwk.Set("use", "sig")
+	sha, err := privateKeyJwk.Thumbprint(crypto.SHA1)
+	if err == nil {
+		privateKeyJwk.Set("x5t", b64.StdEncoding.EncodeToString(sha))
+	}
 	return &TokenIssuer{
 		log:                log,
 		alg:                jwa.SignatureAlgorithm(cfg.Algorithm),
-		privateKey:         privateKey,
+		privateKey:         privateKeyJwk,
 		aud:                cfg.Audience,
 		expiry:             cfg.Expiry,
 		iss:                cfg.Issuer,
@@ -199,7 +232,8 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 		rememberMeDuration: cfg.RememberMeDuration,
 		tokenStorage:       storage,
 		parseOptions:       options,
-		publicKey:          publicKey,
+		publicKey:          publicKeyJwk,
+		kid:                kid,
 	}
 }
 
@@ -290,36 +324,28 @@ func (t *TokenIssuer) Alg() string {
 	return string(t.alg)
 }
 
-func (t *TokenIssuer) PrivateKey() interface{} {
+func (t *TokenIssuer) PrivateKey() jwk.Key {
 	return t.privateKey
 }
 
-func (t *TokenIssuer) PublicKey() interface{} {
+func (t *TokenIssuer) PublicKey() jwk.Key {
 	return t.publicKey
+}
+
+func (t *TokenIssuer) KeyID() string {
+	return t.kid
 }
 
 func (t *TokenIssuer) AsJWKSet() (jwk.Set, error) {
 	switch t.Alg() {
 	case "HS256", "HS384", "HS512":
 		set := jwk.NewSet()
-		priv, err := jwk.New(t.PrivateKey())
-		if err != nil {
-			return nil, err
-		}
-		set.Add(priv)
+		set.Add(t.PrivateKey())
 		return set, nil
 	case "RS256", "RS384", "RS512":
 		set := jwk.NewSet()
-		priv, err := jwk.New(t.PrivateKey())
-		if err != nil {
-			return nil, err
-		}
-		set.Add(priv)
-		pub, err := jwk.New(t.PublicKey())
-		if err != nil {
-			return nil, err
-		}
-		set.Add(pub)
+		set.Add(t.PrivateKey())
+		set.Add(t.PublicKey())
 		return set, nil
 	}
 	return nil, errors.New("unknown algorithm")
@@ -333,11 +359,11 @@ func (t *TokenIssuer) AsPublicOnlyJWKSet() (jwk.Set, error) {
 		return set, nil
 	case "RS256", "RS384", "RS512":
 		set := jwk.NewSet()
-		pub, err := jwk.New(t.PublicKey())
+		key, err := t.PublicKey().PublicKey()
 		if err != nil {
 			return nil, err
 		}
-		set.Add(pub)
+		set.Add(key)
 		return set, nil
 	}
 	return nil, errors.New("unknown algorithm")
