@@ -211,7 +211,8 @@ func NewSqliteStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*Dat
 	// check if dsn contains a directory which needs to be created
 	split := strings.Split(cfg.DSN, "?")
 	if len(split) >= 1 && strings.ContainsRune(split[0], os.PathSeparator) {
-		dir := filepath.Dir(split[0])
+		striped := strings.TrimPrefix(split[0], "file:")
+		dir := filepath.Dir(striped)
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
 			logger.Warn("Trying to create directory", zap.String("directory", dir))
 			err = os.Mkdir(dir, 0755)
