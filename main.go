@@ -67,12 +67,13 @@ func setDefaults() {
 	viper.SetDefault("server.load-template-folder", false)
 	viper.SetDefault("smtp.enable", false)
 	viper.SetDefault("behaviour.invite-role", "inviter")
+	viper.SetDefault("behaviour.invite-expiry", "36h")
 	viper.SetDefault("behaviour.default-locale", "en")
 	viper.SetDefault("behaviour.auto-confirm-users", false)
 	viper.SetDefault("behaviour.auto-lockout-count", 5)
 	viper.SetDefault("behaviour.auto-lockout-duration", "10m")
 	viper.SetDefault("behaviour.password-min-length", 6)
-	viper.SetDefault("behaviour.remember-me-duration", "168h")
+	viper.SetDefault("jwt.remember-me-duration", "168h")
 	viper.SetDefault("jwt.flatten-audience", false)
 	viper.SetDefault("jwt.exp", "900s")
 	viper.SetDefault("jwt.refresh-token-expiry", "3600s")
@@ -133,7 +134,7 @@ func initConfig(logger *zap.Logger) {
 	bind("TRXX_JWT_HMAC_SIGNING_KEY_FILE", "jwt.hmac-signing-key-file")
 
 	bind("TRXX_JWT_RSA_PRIVATE_KEY", "jwt.rsa-private-key")
-	bind("TRXX_JWT_RSA_PRIVATE_KEY_FILE", "jwt.rsa-private-key")
+	bind("TRXX_JWT_RSA_PRIVATE_KEY_FILE", "jwt.rsa-private-key-file")
 
 	bind("TRXX_JWT_RSA_PUBLIC_KEY", "jwt.rsa-public-key")
 	bind("TRXX_JWT_RSA_PUBLIC_KEY_FILE", "jwt.rsa-public-key-file")

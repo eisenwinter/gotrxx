@@ -71,6 +71,9 @@ func checkForWeakHMAC(log *zap.Logger, alg string, key string) {
 }
 
 func parseRSAPrivateKey(key []byte) (*rsa.PrivateKey, error) {
+	if len(key) == 0 {
+		return nil, fmt.Errorf("supplied private key is empty")
+	}
 	pemLoaded, _ := pem.Decode(key)
 	if pemLoaded.Type != "RSA PRIVATE KEY" {
 		return nil, fmt.Errorf("supplied private key is not a private key, got %s", pemLoaded.Type)
@@ -91,6 +94,9 @@ func parseRSAPrivateKey(key []byte) (*rsa.PrivateKey, error) {
 }
 
 func parseRSAPublicKey(key []byte) (*rsa.PublicKey, error) {
+	if len(key) == 0 {
+		return nil, fmt.Errorf("supplied public key is empty")
+	}
 	pemLoaded, _ := pem.Decode(key)
 	if pemLoaded == nil {
 		return nil, errors.New("could not parse RSA public key")
@@ -168,6 +174,9 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 			if err != nil {
 				log.Fatal("Could not load key file", zap.String("file", cfg.RSAPRivateKeyFile), zap.Error(err))
 			}
+			if len(content) == 0 {
+				log.Fatal("Read empty private key file", zap.String("file", cfg.RSAPRivateKeyFile), zap.Error(err))
+			}
 			privateKey = content
 		} else {
 			log.Fatal("No RSA private key defined, either set jwt.rsa-private-key or jwt.rsa-private-key-file")
@@ -175,7 +184,7 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 		var err error
 		privateKey, err = parseRSAPrivateKey(privateKey.([]byte))
 		if err != nil {
-			log.Fatal("Unable to process supllied private key", zap.Error(err))
+			log.Fatal("Unable to process suplied private key", zap.Error(err))
 		}
 		if len(cfg.RSAPublicKey) > 0 {
 			publicKey = []byte(cfg.RSAPublicKey)
