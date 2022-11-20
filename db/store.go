@@ -5,6 +5,8 @@ import (
 	"database/sql"
 	"embed"
 	"errors"
+	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/adlio/schema"
@@ -204,6 +206,21 @@ func NewSqliteStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*Dat
 	if err != nil {
 		logger.Error("Could open database", zap.Error(err))
 		return nil, err
+	}
+
+	// check if dsn contains a directory which needs to be created
+	split := strings.Split(cfg.DSN, "?")
+	if len(split) >= 1 && strings.ContainsRune(split[0], os.PathSeparator) {
+		dir := filepath.Dir(split[0])
+		if _, err := os.Stat(dir); os.IsNotExist(err) {
+			logger.Warn("Trying to create directory", zap.String("directory", dir))
+			err = os.Mkdir(dir, 0755)
+			if err != nil {
+				logger.Error("Could open database", zap.Error(err))
+				return nil, err
+			}
+		}
+
 	}
 
 	migrate := func() error {
