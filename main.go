@@ -2,6 +2,7 @@ package main
 
 import (
 	"embed"
+	"fmt"
 	"io/fs"
 	"log"
 	"os"
@@ -35,7 +36,19 @@ import (
 //go:embed templates/invite.html
 var templates embed.FS
 
+var (
+	Version   = "?"
+	BuildTime = "?"
+	GitCommit = "-"
+	GitRef    = "-"
+)
+
 func main() {
+	//version info
+	if len(os.Args) > 1 && os.Args[1] == "version" {
+		fmt.Printf("gotrxx %s, built %s from %s (%s)", Version, BuildTime, GitCommit, GitRef)
+		return
+	}
 	logger := bootstrap()
 	defer func() {
 		_ = logger.Sync()
