@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
+	"github.com/google/uuid"
 
 	"go.uber.org/zap"
 )
@@ -18,7 +19,8 @@ const NetlifyClientID = "netlify-gotrue"
 type NetlifyRessource struct {
 	logger *zap.Logger
 	//nelitfy ressource just wraps the underlying connect ressource
-	uc *connect.ConnnectRessource
+	uc      *connect.ConnnectRessource
+	rotator *tokens.TokenRotator
 }
 
 func (n *NetlifyRessource) Router() *chi.Mux {
@@ -37,6 +39,7 @@ func (n *NetlifyRessource) Router() *chi.Mux {
 	r.Group(func(gr chi.Router) {
 		gr.Use(jwtauth.Authenticator)
 		gr.Get("/user", n.user)
+		gr.Post("/logout", n.logout)
 	})
 	r.Get("/settings", n.settings)
 
@@ -140,13 +143,39 @@ func (n *NetlifyRessource) user(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
+func (n *NetlifyRessource) logout(w http.ResponseWriter, r *http.Request) {
+	n.logger.Debug("Netlify logout called")
+	j, _, err := jwtauth.FromContext(r.Context())
+	if err != nil {
+		w.WriteHeader(500)
+		return
+	}
+	autId, ok := j.Get(tokens.ClaimAuthorization)
+	if !ok {
+		w.WriteHeader(http.StatusBadRequest)
+		n.logger.Error("no authorization id in JWT")
+		return
+	}
+	id, err := uuid.Parse(autId.(string))
+	if err != nil {
+		w.WriteHeader(http.StatusBadRequest)
+		n.logger.Error("malformed authorization id in JWT")
+		return
+	}
+	err = n.rotator.RevokeCommonTokensForAuthorization(r.Context(), id)
+	if err != nil {
+		n.logger.Error("Could not revoked all common tokens for authorization", zap.Error(err), zap.String("authorization_id", id.String()))
+	}
+	w.WriteHeader(http.StatusNoContent)
+}
+
 func (n *NetlifyRessource) settings(w http.ResponseWriter, r *http.Request) {
 	//we just gonna abuse the full blown implementation here and wrap it in here
 	render.Respond(w, r, newSettingsResponse())
 }
 
-func NewNetlifyRessource(logger *zap.Logger, c *connect.ConnnectRessource) *NetlifyRessource {
-	return &NetlifyRessource{logger: logger, uc: c}
+func NewNetlifyRessource(logger *zap.Logger, c *connect.ConnnectRessource, rotator *tokens.TokenRotator) *NetlifyRessource {
+	return &NetlifyRessource{logger: logger, uc: c, rotator: rotator}
 }
 
 type userInfoResponse struct {

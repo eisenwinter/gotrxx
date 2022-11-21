@@ -75,7 +75,7 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 	}
 	err = c.rotator.RevokeCommonTokensForAuthorization(r.Context(), id)
 	if err != nil {
-		c.logger.Error("Could not revoked all commong tokens for authorization", zap.Error(err), zap.String("authorization_id", id.String()))
+		c.logger.Error("Could not revoked all common tokens for authorization", zap.Error(err), zap.String("authorization_id", id.String()))
 	}
 	co := &http.Cookie{
 		Name:     "__gotrxx",

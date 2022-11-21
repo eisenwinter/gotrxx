@@ -84,7 +84,7 @@ func compose(logger *zap.Logger,
 	}
 
 	connectRessource := connect.NewConnnectRessource(logger.Named("connect_ressource"), issuer, rotator, signInService, validate, authService, appService, verifier)
-	netlifyRessource := netlify.NewNetlifyRessource(logger.Named("netlify_ressource"), connectRessource)
+	netlifyRessource := netlify.NewNetlifyRessource(logger.Named("netlify_ressource"), connectRessource, rotator)
 	accountRessource := ar.NewAccountRessource(logger.Named("account_ressource"), signInService, cfg.Behaviour, userService, authService, issuer, registry, rotator, cfg.Server, fileSystems, verifier)
 	metaRessource := meta.NewMetaRessource(logger.Named("meta_ressource"), cfg.Behaviour, issuer)
 
