@@ -13,6 +13,8 @@ import (
 	"go.uber.org/zap"
 )
 
+const NetlifyClientID = "netlify-gotrue"
+
 type NetlifyRessource struct {
 	logger *zap.Logger
 	//nelitfy ressource just wraps the underlying connect ressource
@@ -77,7 +79,41 @@ func newSettingsResponse() *settingsResponse {
 }
 
 func (n *NetlifyRessource) token(w http.ResponseWriter, r *http.Request) {
-	n.uc.Token(w, r)
+	grant := r.FormValue("grant_type")
+	if grant != "password" {
+		err := render.Render(w, r, &errorResponse{Error: "invalid_grant", StatusCode: http.StatusBadRequest, ErrorDescription: "invalid grant_type for .netlify endpoint"})
+		if err != nil {
+			n.logger.Error("unable to render response", zap.Error(err))
+		}
+		return
+	}
+
+	username := r.FormValue("username")
+	if username == "" {
+		err := render.Render(w, r, &errorResponse{Error: "invalid_request", StatusCode: http.StatusBadRequest, ErrorDescription: "username field not supplied"})
+		if err != nil {
+			n.logger.Error("unable to render response", zap.Error(err))
+		}
+		return
+	}
+	password := r.FormValue("password")
+	if password == "" {
+		err := render.Render(w, r, &errorResponse{Error: "invalid_request", StatusCode: http.StatusBadRequest, ErrorDescription: "password field not supplied"})
+		if err != nil {
+			n.logger.Error("unable to render response", zap.Error(err))
+		}
+		return
+	}
+	clientSecret := r.FormValue("client_secret")
+	scope := r.FormValue("scope")
+	req := &connect.PasswordGrantTokenRequest{
+		Username:     username,
+		Password:     password,
+		ClientID:     NetlifyClientID,
+		ClientSecret: clientSecret,
+		Scope:        scope,
+	}
+	n.uc.PasswordGrant(req, w, r)
 }
 
 func (n *NetlifyRessource) user(w http.ResponseWriter, r *http.Request) {
@@ -115,5 +151,15 @@ type userInfoResponse struct {
 }
 
 func (e *userInfoResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	return nil
+}
+
+type errorResponse struct {
+	Error            string `json:"error,omitempty"`
+	ErrorDescription string `json:"error_description,omitempty"`
+	StatusCode       int    `json:"-"`
+}
+
+func (e *errorResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }

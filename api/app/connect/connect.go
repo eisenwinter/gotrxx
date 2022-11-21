@@ -105,15 +105,15 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 		clientSecret := r.FormValue("client_secret")
 		//we dont do scopes here - at all, but for the sake of completeness
 		scope := r.FormValue("scope")
-		req := &passwordGrantTokenRequest{
-			username:     username,
-			password:     password,
-			clientID:     clientID,
-			clientSecret: clientSecret,
-			scope:        scope,
+		req := &PasswordGrantTokenRequest{
+			Username:     username,
+			Password:     password,
+			ClientID:     clientID,
+			ClientSecret: clientSecret,
+			Scope:        scope,
 		}
-		c.logger.Debug("password_grant", zap.Any("req", req))
-		c.passwordGrant(req, w, r)
+		c.logger.Debug("password_grant called")
+		c.PasswordGrant(req, w, r)
 		return
 	case refreshTokenGrant:
 		refreshToken := r.FormValue("refresh_token")

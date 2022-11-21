@@ -14,8 +14,9 @@ import (
 
 //password grant flow
 
-func (c *ConnnectRessource) passwordGrant(req *passwordGrantTokenRequest, w http.ResponseWriter, r *http.Request) {
-	app, err := c.appService.ApplicationByClientID(r.Context(), req.clientID)
+// PasswordGrant is public so we can re-use this flow for the netlify wrapper
+func (c *ConnnectRessource) PasswordGrant(req *PasswordGrantTokenRequest, w http.ResponseWriter, r *http.Request) {
+	app, err := c.appService.ApplicationByClientID(r.Context(), req.ClientID)
 	if err != nil {
 		c.logger.Error("password flow: failed to get application", zap.Error(err))
 		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
@@ -28,15 +29,15 @@ func (c *ConnnectRessource) passwordGrant(req *passwordGrantTokenRequest, w http
 		render.Respond(w, r, createStdError(stdUnauthorziedClient, http.StatusBadRequest, ""))
 		return
 	}
-	if !app.ValidateClientSecret(req.clientSecret) {
+	if !app.ValidateClientSecret(req.ClientSecret) {
 		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, ""))
 		return
 	}
-	if !app.AreScopesCoveredByApplication(req.scope) {
+	if !app.AreScopesCoveredByApplication(req.Scope) {
 		render.Respond(w, r, createStdError(stdInvalidScope, http.StatusBadRequest, ""))
 		return
 	}
-	res, err := c.userSignIn.SignIn(r.Context(), req.username, req.password)
+	res, err := c.userSignIn.SignIn(r.Context(), req.Username, req.Password)
 	if err != nil {
 		c.logger.Debug("password flow: login failed", zap.Error(err))
 		if errors.Is(err, user.ErrEntityDoesNotExist) || errors.Is(err, user.ErrInvalidCredentials) {
@@ -51,9 +52,9 @@ func (c *ConnnectRessource) passwordGrant(req *passwordGrantTokenRequest, w http
 		return
 	}
 
-	auth, err := c.autService.VerifyUserAuthorization(r.Context(), res.UserID, req.clientID)
+	auth, err := c.autService.VerifyUserAuthorization(r.Context(), res.UserID, req.ClientID)
 	if err != nil && errors.Is(authorization.ErrUngrantedImplicitAutoGrant, err) {
-		auth, err = c.autService.ImplicitAuthorization(r.Context(), res.UserID, req.clientID, req.scope)
+		auth, err = c.autService.ImplicitAuthorization(r.Context(), res.UserID, req.ClientID, req.Scope)
 		if err != nil {
 			c.logger.Error("password flow: grantig implicit authorization failed", zap.Error(err))
 			render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))

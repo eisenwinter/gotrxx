@@ -98,12 +98,13 @@ const authorizationCodeGrant grantType = "authorization_code"
 const refreshTokenGrant grantType = "refresh_token"
 const passwordGrant grantType = "password"
 
-type passwordGrantTokenRequest struct {
-	username     string
-	password     string
-	clientID     string
-	clientSecret string
-	scope        string
+// PasswordGrantTokenRequest wraps everything from the password grant request
+type PasswordGrantTokenRequest struct {
+	Username     string
+	Password     string
+	ClientID     string
+	ClientSecret string
+	Scope        string
 }
 
 type refreshTokenTokenRequest struct {
