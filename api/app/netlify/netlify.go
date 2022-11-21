@@ -129,8 +129,11 @@ func (n *NetlifyRessource) user(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	err = render.Render(w, r, &userInfoResponse{
-		Subject: j.Subject(),
-		Email:   email.(string),
+		Subject:      j.Subject(),
+		Email:        email.(string),
+		ID:           j.Subject(),
+		AppMetaData:  map[string]string{},
+		UserMetaData: map[string]string{},
 	})
 	if err != nil {
 		n.logger.Error("unable to render response", zap.Error(err))
@@ -147,8 +150,11 @@ func NewNetlifyRessource(logger *zap.Logger, c *connect.ConnnectRessource) *Netl
 }
 
 type userInfoResponse struct {
-	Subject string `json:"sub"`
-	Email   string `json:"email"`
+	Subject      string            `json:"sub"`
+	Email        string            `json:"email"`
+	ID           string            `json:"id"`
+	AppMetaData  map[string]string `json:"app_metadata"`
+	UserMetaData map[string]string `json:"user_metadata"`
 }
 
 func (e *userInfoResponse) Render(w http.ResponseWriter, r *http.Request) error {

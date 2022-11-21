@@ -117,14 +117,14 @@ func (d *DataStore) UserById(ctx context.Context, id uuid.UUID) (*UserData, erro
 	}
 	if len(authorizations) > 0 {
 		provider.Authorizations = make([]*UserAuthorization, len(authorizations))
-		for _, v := range authorizations {
-			provider.Authorizations = append(provider.Authorizations, &UserAuthorization{
+		for i, v := range authorizations {
+			provider.Authorizations[i] = &UserAuthorization{
 				ID:              v.ID,
 				ApplicationType: v.ApplicationType,
 				RevokedAt:       v.RevokedAt,
 				ClientID:        v.ClientID,
 				Properties:      v.Properties,
-			})
+			}
 		}
 	}
 
@@ -141,8 +141,8 @@ func (d *DataStore) UserById(ctx context.Context, id uuid.UUID) (*UserData, erro
 	}
 	if len(roleSlice) > 0 {
 		provider.Roles = make([]string, len(roleSlice))
-		for _, v := range roleSlice {
-			provider.Roles = append(provider.Roles, v.Name)
+		for i, v := range roleSlice {
+			provider.Roles[i] = v.Name
 		}
 	}
 	return provider, nil

@@ -44,8 +44,8 @@ func (a *Authorization) Scopes() []string {
 			return []string{}
 		}
 		res := make([]string, len(arr))
-		for _, v := range arr {
-			res = append(res, v.(string))
+		for i, v := range arr {
+			res[i] = v.(string)
 		}
 		return res
 	}
