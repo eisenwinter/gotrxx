@@ -8,12 +8,14 @@ import (
 	"go.uber.org/zap"
 )
 
+// InviteService is used to managed invitations
 type InviteService struct {
 	store      *db.DataStore
 	log        *zap.Logger
 	dispatcher *events.Dispatcher
 }
 
+// List lists all invitations in a paginated response
 func (i *InviteService) List(ctx context.Context, page int, pageSize int, q string, sort string) (*PaginationResponse, error) {
 	invites, total, err := i.store.Invites(ctx, db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort})
 	if err != nil {
@@ -34,6 +36,7 @@ func (i *InviteService) List(ctx context.Context, page int, pageSize int, q stri
 	}, nil
 }
 
+// NewInviteService returns a new invite service
 func NewInviteService(store *db.DataStore,
 	log *zap.Logger,
 	dispatcher *events.Dispatcher) *InviteService {

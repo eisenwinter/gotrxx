@@ -45,7 +45,7 @@ var serveCommand = cobra.Command{
 		if autoSeedAdminInvite != "" {
 			roles := make([]string, 0)
 			roles = append(roles, "admin")
-			if *&LoadedConfig.Behaviour.InviteOnly && *LoadedConfig.Behaviour.InviteRole != "" {
+			if LoadedConfig.Behaviour.InviteOnly && *LoadedConfig.Behaviour.InviteRole != "" {
 				roles = append(roles, *LoadedConfig.Behaviour.InviteRole)
 			}
 			err := userManager.InitialUserInvite(context.Background(), autoSeedAdminInvite, roles, []int{})
