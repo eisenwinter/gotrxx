@@ -403,3 +403,18 @@ func (g *Service) ChangeEmail(ctx context.Context, id uuid.UUID, email string) e
 	})
 	return nil
 }
+
+// InRole check if given user id is in role
+func (g *Service) InRole(ctx context.Context, id uuid.UUID, role string) bool {
+	ok, err := g.store.IsUserInRole(ctx, id, role)
+	if err != nil {
+		return false
+	}
+	return ok
+}
+
+// InviteUser is a user initiaized invite without roles and apps
+func (g *Service) InviteUser(ctx context.Context, email string) error {
+	_, err := g.manager.InviteUser(ctx, &email, []string{}, []int{})
+	return err
+}

@@ -25,6 +25,11 @@
         <div class="field">
           <a  href="/account/change-mfa" class="button">{{ .i18n.T "change_mfa"}}</a>
         </div>
+        {{ if .canInvite }}
+        <div class="field">
+          <a  href="/account/invite" class="button">{{ .i18n.T "invite"}}</a>
+        </div>
+        {{end}}
         <div class="field">
              {{ .csrfField }}
              <button type="submit" class="button">{{ .i18n.T "signout"}}</button>

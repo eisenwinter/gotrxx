@@ -11,7 +11,7 @@ import (
 	"github.com/eisenwinter/gotrxx/application"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/go-chi/jwtauth/v5"
-	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 
 /*

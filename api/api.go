@@ -101,5 +101,24 @@ func compose(logger *zap.Logger,
 
 	r.Mount("/.well-known", metaRessource.Router())
 
+	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
+		favicon, err := fileSystems.StaticFolder.Open("favicon.ico")
+		if err == nil {
+			defer favicon.Close()
+			s, err := favicon.Stat()
+			if err == nil {
+				buffer := make([]byte, s.Size())
+				_, err = favicon.Read(buffer)
+				if err != nil {
+					logger.Warn("Unable to load favicon", zap.Error(err))
+				}
+				w.Write(buffer)
+				return
+			}
+
+		}
+		logger.Warn("No favicon found", zap.Error(err))
+	})
+
 	return r, nil
 }

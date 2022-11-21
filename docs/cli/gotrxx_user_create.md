@@ -1,19 +1,19 @@
-## gotrxx user unlock
+## gotrxx user create
 
-unlocks a user
+launches a on terminal user creation dialog
 
 ### Synopsis
 
-Lifts temporary anti-bruteforce lock for the user
+this command may be used to create a user account from command line
 
 ```
-gotrxx user unlock [flags]
+gotrxx user create [flags]
 ```
 
 ### Options
 
 ```
-  -h, --help   help for unlock
+  -h, --help   help for create
 ```
 
 ### Options inherited from parent commands

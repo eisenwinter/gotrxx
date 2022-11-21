@@ -1,0 +1,15 @@
+{
+    "success": {
+        "invite_sent": "Your invite has been sent!"
+    },
+    "errors": {
+        "invalid_email": "Invalid email supplied",
+        "unknown": "Unknown error occured"
+    },
+    "fields": {
+        "invite": "Invite",
+        "email": "Email"
+    },
+    "title": "Invite",
+    "back_link": "Back"
+}

@@ -1,6 +1,9 @@
 package cmd
 
 import (
+	"context"
+	"os"
+
 	"github.com/eisenwinter/gotrxx/api"
 	"github.com/eisenwinter/gotrxx/application"
 	"github.com/eisenwinter/gotrxx/authorization"
@@ -11,6 +14,8 @@ import (
 	"github.com/spf13/viper"
 	"go.uber.org/zap"
 )
+
+var autoSeedAdminInvite string
 
 var serveCommand = cobra.Command{
 	Use:   "serve",
@@ -35,6 +40,20 @@ var serveCommand = cobra.Command{
 
 		//setup management services
 		userManager := manage.NewUserService(dataStore, TopLevelLogger.Named("user_manager"), LoadedConfig, mailer, dispatcher)
+
+		//check if auto invite seed is configured
+		if autoSeedAdminInvite != "" {
+			roles := make([]string, 0)
+			roles = append(roles, "admin")
+			if *&LoadedConfig.Behaviour.InviteOnly && *LoadedConfig.Behaviour.InviteRole != "" {
+				roles = append(roles, *LoadedConfig.Behaviour.InviteRole)
+			}
+			err := userManager.InitialUserInvite(context.Background(), autoSeedAdminInvite, roles, []int{})
+			if err != nil {
+				TopLevelLogger.Error("unable to seed initial admin invite", zap.Error(err))
+			}
+		}
+
 		authanager := manage.NewAuthorizationService(dataStore, TopLevelLogger.Named("authorization_manager"), LoadedConfig, dispatcher)
 		appManager := manage.NewApplicationSevice(dataStore, TopLevelLogger.Named("application_manager"), LoadedConfig, dispatcher)
 		inviteManager := manage.NewInviteService(dataStore, TopLevelLogger.Named("invite_manager"), dispatcher)
@@ -80,4 +99,12 @@ var serveCommand = cobra.Command{
 func init() {
 	viper.SetDefault("port", "3000")
 	viper.SetDefault("log_level", "debug")
+
+	serveCommand.Flags().StringVar(&autoSeedAdminInvite, "auto-seed-invite", "", "if defined seeds the given invite code for an admin account")
+	if autoSeedAdminInvite == "" {
+		// check for container specific env variable
+		if r := os.Getenv("TRXX_AUTO_SEED_INVITE"); r != "" {
+			autoSeedAdminInvite = r
+		}
+	}
 }

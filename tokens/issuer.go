@@ -19,9 +19,9 @@ import (
 	"github.com/eisenwinter/gotrxx/generator"
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/google/uuid"
-	"github.com/lestrrat-go/jwx/jwa"
-	"github.com/lestrrat-go/jwx/jwk"
-	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/lestrrat-go/jwx/v2/jwa"
+	"github.com/lestrrat-go/jwx/v2/jwk"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"go.uber.org/zap"
 )
 
@@ -160,11 +160,11 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 		}
 		if len(privateKey.([]byte)) > 0 {
 			var err error
-			privateKeyJwk, err = jwk.New(privateKey)
+			privateKeyJwk, err = jwk.FromRaw(privateKey)
 			if err != nil {
 				log.Fatal("Unable to process symetric key")
 			}
-			options = append(options, jwt.WithVerify(jwa.SignatureAlgorithm(cfg.Algorithm), privateKeyJwk))
+			options = append(options, jwt.WithKey(jwa.SignatureAlgorithm(cfg.Algorithm), privateKeyJwk))
 		}
 	case "RS256", "RS384", "RS512":
 		if len(cfg.RSAPrivateKey) > 0 {
@@ -203,11 +203,11 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 			log.Fatal("Unable to process supllied public key", zap.Error(err))
 		}
 		privateKey.(*rsa.PrivateKey).PublicKey = *pubParsed
-		privateKeyJwk, err = jwk.New(privateKey)
+		privateKeyJwk, err = jwk.FromRaw(privateKey)
 		if err != nil {
 			log.Fatal("Unable to process private key")
 		}
-		publicKeyJwk, err = jwk.New(pubParsed)
+		publicKeyJwk, err = jwk.FromRaw(pubParsed)
 		if err != nil {
 			log.Fatal("Unable to process public key")
 		}
@@ -220,7 +220,7 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 			publicKeyJwk.Set("x5t", b64.StdEncoding.EncodeToString(sha))
 		}
 
-		options = append(options, jwt.WithVerify(jwa.SignatureAlgorithm(cfg.Algorithm), publicKeyJwk))
+		options = append(options, jwt.WithKey(jwa.SignatureAlgorithm(cfg.Algorithm), publicKeyJwk))
 
 	default:
 		log.Fatal("Invalid jwt.alg defined. Possible values: HS256,HS384,HS512,RS256,RS384,RS512")
@@ -328,7 +328,7 @@ func (t *TokenIssuer) IssueAccessTokenForUser(user *user.SignedInUser, authoriza
 }
 
 func (t *TokenIssuer) Sign(token jwt.Token) ([]byte, error) {
-	return jwt.Sign(token, t.alg, t.privateKey)
+	return jwt.Sign(token, jwt.WithKey(t.alg, t.privateKey))
 }
 
 func (t *TokenIssuer) Alg() string {
@@ -351,12 +351,12 @@ func (t *TokenIssuer) AsJWKSet() (jwk.Set, error) {
 	switch t.Alg() {
 	case "HS256", "HS384", "HS512":
 		set := jwk.NewSet()
-		set.Add(t.PrivateKey())
+		set.AddKey(t.PrivateKey())
 		return set, nil
 	case "RS256", "RS384", "RS512":
 		set := jwk.NewSet()
-		set.Add(t.PrivateKey())
-		set.Add(t.PublicKey())
+		set.AddKey(t.PrivateKey())
+		set.AddKey(t.PublicKey())
 		return set, nil
 	}
 	return nil, errors.New("unknown algorithm")
@@ -374,7 +374,7 @@ func (t *TokenIssuer) AsPublicOnlyJWKSet() (jwk.Set, error) {
 		if err != nil {
 			return nil, err
 		}
-		set.Add(key)
+		set.AddKey(key)
 		return set, nil
 	}
 	return nil, errors.New("unknown algorithm")

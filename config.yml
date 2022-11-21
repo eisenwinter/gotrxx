@@ -27,7 +27,7 @@ behaviour:
   password-min-length: 6
 jwt:
   flatten-audience: false # you will either need a patched version of netlify components or set it to true
-  alg: RS256 # RS256 # HS256 # HS384 | HS512 | RS256 | RS384 | RS512
+  alg: HS256 # RS256 # HS256 # HS384 | HS512 | RS256 | RS384 | RS512
   iss: login.example.com
   aud: 
     - my-super-api.subkonstrukt.at

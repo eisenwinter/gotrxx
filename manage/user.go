@@ -222,6 +222,39 @@ func (g *UserService) UnbanUser(ctx context.Context, id uuid.UUID) error {
 	return nil
 }
 
+// InitialUserInvite used for docker container setup, it seeds a predefined a user invite for the admin user
+// so the admin user can signup with his wanted credentials
+func (g *UserService) InitialUserInvite(ctx context.Context, inviteCode string, roles []string, appIds []int) error {
+	exists, err := g.store.InviteCodeExists(ctx, string(inviteCode))
+	if err != nil {
+		return err
+	}
+	if exists {
+		return nil
+	}
+	for _, r := range roles {
+		if r != "" {
+			_, err = g.store.AddRole(ctx, r)
+			if err != nil && !errors.Is(err, db.ErrAlreadyExists) {
+				g.log.Error("Could not create role for user invite", zap.Error(err))
+				return err
+			}
+		}
+	}
+	expiryDate := time.Now().Add(g.cfg.Behaviour.InviteExpiry).UTC()
+	err = g.store.InviteUser(ctx, expiryDate, nil, string(inviteCode), roles, appIds...)
+	if err != nil {
+		g.log.Error("Could not persist user invite", zap.Error(err))
+		return err
+	}
+	g.dispatcher.Dispatch(ctx, &event.UserInvited{
+		ExpiryDate: expiryDate,
+		Email:      "",
+		InviteCode: string(inviteCode),
+	})
+	return nil
+}
+
 func (g *UserService) InviteUser(ctx context.Context, email *string, roles []string, appIds []int) (generator.RandomTokenType, error) {
 	tokenGen := generator.New()
 	inviteCode := tokenGen.CreatePINLikeToken()

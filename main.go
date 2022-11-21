@@ -32,6 +32,7 @@ import (
 //go:embed templates/signin.html
 //go:embed templates/signup.html
 //go:embed templates/user.html
+//go:embed templates/invite.html
 var templates embed.FS
 
 func main() {

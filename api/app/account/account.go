@@ -19,7 +19,7 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
-	"github.com/lestrrat-go/jwx/jwt"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"go.uber.org/zap"
 )
 
@@ -40,17 +40,20 @@ type AccountRessource struct {
 	requestRecoverTmpl     *template.Template
 	chageMfaTmpl           *template.Template
 	mfaSetupTmpl           *template.Template
-	log                    *zap.Logger
-	userSignIn             *user.SigninService
-	userService            *user.Service
-	cfg                    *config.BehaviourConfiguration
-	serverCfg              *config.ServerConfiguration
-	autService             *authorization.Service
-	issuer                 *tokens.TokenIssuer
-	verifier               *tokens.TokenVerifier
-	registry               *i18n.TranslationRegistry
-	rotator                *tokens.TokenRotator
-	statics                fs.FS
+	inviteTmpl             *template.Template
+
+	log         *zap.Logger
+	userSignIn  *user.SigninService
+	userService *user.Service
+
+	cfg        *config.BehaviourConfiguration
+	serverCfg  *config.ServerConfiguration
+	autService *authorization.Service
+	issuer     *tokens.TokenIssuer
+	verifier   *tokens.TokenVerifier
+	registry   *i18n.TranslationRegistry
+	rotator    *tokens.TokenRotator
+	statics    fs.FS
 }
 
 func (a *AccountRessource) Router() *chi.Mux {
@@ -90,11 +93,25 @@ func (a *AccountRessource) Router() *chi.Mux {
 
 	r.Get("/change-language", a.changeLanguage)
 
+	r.Get("/invite", a.invitePage)
+	r.Post("/invite", a.sendInvite)
+
 	fs := http.FileServer(http.FS(a.statics))
 	r.Handle("/static/*", http.StripPrefix("/account/static/", fs))
 
 	r.NotFound(a.fourOFour)
 	return r
+}
+
+func (a *AccountRessource) canUserInvite(ctx context.Context, token jwt.Token) bool {
+	if a.cfg.InviteOnly && a.cfg.InviteRole != nil {
+		id := token.Subject()
+		userid, err := uuid.Parse(id)
+		if err == nil && a.userService.InRole(ctx, userid, *a.cfg.InviteRole) {
+			return true
+		}
+	}
+	return false
 }
 
 func (a *AccountRessource) currentLocale(ctx context.Context) string {
@@ -260,6 +277,7 @@ func (a *AccountRessource) userPage(w http.ResponseWriter, r *http.Request) {
 	err := a.userPageTmpl.Execute(w, map[string]interface{}{
 		"i18n":           a.getTranslatorFor(r.Context(), "user"),
 		"email":          email,
+		"canInvite":      a.canUserInvite(r.Context(), token),
 		csrf.TemplateTag: csrf.TemplateField(r),
 	})
 	if err != nil {
@@ -428,6 +446,11 @@ func NewAccountRessource(log *zap.Logger,
 		log.Fatal("unable to load required template file", zap.String("file", "provision_mfa.html"), zap.Error(err))
 	}
 
+	inviteTemplate, err := mustLoadTemplate(fsConfig.Templates, "templates/invite.html", log)
+	if err != nil {
+		log.Fatal("unable to load required template file", zap.String("file", "invite.html"), zap.Error(err))
+	}
+
 	fourOFour, err := mustLoadTemplate(fsConfig.Templates, "templates/404.html", log)
 	if err != nil {
 		log.Fatal("unable to load required template file", zap.String("file", "404.html"), zap.Error(err))
@@ -456,6 +479,7 @@ func NewAccountRessource(log *zap.Logger,
 		requestRecoverTmpl:     requestRecoverTmpl,
 		chageMfaTmpl:           changeMfaTemplate,
 		mfaSetupTmpl:           provisionMfaTemplate,
+		inviteTmpl:             inviteTemplate,
 		verifier:               verifier,
 	}
 }
