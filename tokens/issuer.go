@@ -39,6 +39,9 @@ const (
 
 	//ClaimNetlifyAppMetaData represents the app_metadata claim used in netlifys token
 	ClaimNetlifyAppMetaData = "app_metadata"
+
+	//ClaimNetlifyUserMetaData represents the user_metadata claim used in netlifys token
+	ClaimNetlifyUserMetaData = "user_metadata"
 )
 
 type CommonTokenInserter interface {
@@ -331,7 +334,7 @@ func (t *TokenIssuer) IssueAccessTokenForUser(user *user.SignedInUser, authoriza
 	return tokenBuilder.Build()
 }
 
-// IssueNetlifyAccessTokenForUser differs from the standard access token, it has the app_metadata claim
+// IssueNetlifyAccessTokenForUser differs from the standard access token, it has the app_metadata and user_metadata claims
 func (t *TokenIssuer) IssueNetlifyAccessTokenForUser(user *user.SignedInUser, authorizationID uuid.UUID, clientID string, scopes []string) (jwt.Token, error) {
 	tokenBuilder := jwt.NewBuilder()
 	scope := strings.Join(scopes, " ")
@@ -347,7 +350,8 @@ func (t *TokenIssuer) IssueNetlifyAccessTokenForUser(user *user.SignedInUser, au
 		Claim(ClaimClientID, clientID).
 		Claim(ClaimNetlifyAppMetaData, map[string][]string{
 			"roles": user.Roles,
-		})
+		}).
+		Claim(ClaimNetlifyUserMetaData, map[string][]string{})
 	if !t.noRoles {
 		tokenBuilder.Claim(ClaimRoles, user.Roles)
 	}
