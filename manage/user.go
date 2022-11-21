@@ -131,14 +131,16 @@ func (g *UserService) ConfirmUser(ctx context.Context, id uuid.UUID) error {
 
 func (g *UserService) AddUserToRole(ctx context.Context, id uuid.UUID, role string) error {
 	canonicalRole := strings.ToLower(role)
-	err := g.store.AddUserToRole(ctx, id, canonicalRole)
-	if err != nil {
-		return err
+	if canonicalRole != "" {
+		err := g.store.AddUserToRole(ctx, id, canonicalRole)
+		if err != nil {
+			return err
+		}
+		g.dispatcher.Dispatch(ctx, &event.UserAddedToRole{
+			UserID: id,
+			Role:   canonicalRole,
+		})
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserAddedToRole{
-		UserID: id,
-		Role:   canonicalRole,
-	})
 	return nil
 }
 

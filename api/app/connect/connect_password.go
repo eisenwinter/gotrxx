@@ -9,6 +9,7 @@ import (
 	"github.com/eisenwinter/gotrxx/authorization"
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/go-chi/render"
+	"github.com/lestrrat-go/jwx/v2/jwt"
 	"go.uber.org/zap"
 )
 
@@ -19,32 +20,40 @@ func (c *ConnnectRessource) PasswordGrant(req *PasswordGrantTokenRequest, w http
 	app, err := c.appService.ApplicationByClientID(r.Context(), req.ClientID)
 	if err != nil {
 		c.logger.Error("password flow: failed to get application", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		render.Status(r, http.StatusInternalServerError)
+		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, "Internal server error"))
+		return
 	}
 	if app.IsRetired() {
+		render.Status(r, http.StatusBadRequest)
 		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, "Application does not exist."))
 		return
 	}
 	if !app.IsFlowAllowed(application.PasswordFlow) {
-		render.Respond(w, r, createStdError(stdUnauthorziedClient, http.StatusBadRequest, ""))
+		render.Status(r, http.StatusBadRequest)
+		render.Respond(w, r, createStdError(stdUnauthorziedClient, http.StatusBadRequest, "Bad request"))
 		return
 	}
 	if !app.ValidateClientSecret(req.ClientSecret) {
-		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, ""))
+		render.Status(r, http.StatusBadRequest)
+		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, "Bad request"))
 		return
 	}
 	if !app.AreScopesCoveredByApplication(req.Scope) {
-		render.Respond(w, r, createStdError(stdInvalidScope, http.StatusBadRequest, ""))
+		render.Status(r, http.StatusBadRequest)
+		render.Respond(w, r, createStdError(stdInvalidScope, http.StatusBadRequest, "Bad request"))
 		return
 	}
 	res, err := c.userSignIn.SignIn(r.Context(), req.Username, req.Password)
 	if err != nil {
 		c.logger.Debug("password flow: login failed", zap.Error(err))
 		if errors.Is(err, user.ErrEntityDoesNotExist) || errors.Is(err, user.ErrInvalidCredentials) {
+			render.Status(r, http.StatusBadRequest)
 			render.Respond(w, r, createStdError(stdInvalidGrant, http.StatusBadRequest, "No user found with that email, or password invalid."))
 			return
 		}
 		if errors.Is(err, user.ErrEntityOperationForbidden) {
+			render.Status(r, http.StatusUnauthorized)
 			render.Respond(w, r, createStdError(stdInvalidClient, http.StatusUnauthorized, "No user found with that email, or password invalid."))
 			return
 		}
@@ -57,24 +66,41 @@ func (c *ConnnectRessource) PasswordGrant(req *PasswordGrantTokenRequest, w http
 		auth, err = c.autService.ImplicitAuthorization(r.Context(), res.UserID, req.ClientID, req.Scope)
 		if err != nil {
 			c.logger.Error("password flow: grantig implicit authorization failed", zap.Error(err))
+			render.Status(r, http.StatusInternalServerError)
 			render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
 			return
 		}
 	} else if err != nil {
 		c.logger.Error("password flow: verifing authorization failed", zap.Error(err))
+		render.Status(r, http.StatusInternalServerError)
 		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
 		return
 	}
 
-	t, err := c.issuer.IssueAccessTokenForUser(res, auth.ID(), auth.Application().ClientID(), auth.Scopes())
-	if err != nil {
-		c.logger.Error("password flow: failed to issue a new access token", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
-		return
+	var t jwt.Token
+	if req.IssueNetlifyToken {
+		t, err = c.issuer.IssueNetlifyAccessTokenForUser(res, auth.ID(), auth.Application().ClientID(), auth.Scopes())
+		if err != nil {
+			c.logger.Error("password flow: failed to issue a new netlify access token", zap.Error(err))
+			render.Status(r, http.StatusInternalServerError)
+			render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+			return
+		}
+
+	} else {
+		t, err = c.issuer.IssueAccessTokenForUser(res, auth.ID(), auth.Application().ClientID(), auth.Scopes())
+		if err != nil {
+			c.logger.Error("password flow: failed to issue a new access token", zap.Error(err))
+			render.Status(r, http.StatusInternalServerError)
+			render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+			return
+		}
 	}
+
 	signed, err := c.issuer.Sign(t)
 	if err != nil {
 		c.logger.Error("password flow: failed to sign a access token", zap.Error(err))
+		render.Status(r, http.StatusInternalServerError)
 		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
 		return
 	}
@@ -83,6 +109,7 @@ func (c *ConnnectRessource) PasswordGrant(req *PasswordGrantTokenRequest, w http
 		refreshToken, err = c.issuer.IssueRefreshToken(r.Context(), auth.ID())
 		if err != nil {
 			c.logger.Error("password flow: failed to issue refresh token", zap.Error(err))
+			render.Status(r, http.StatusInternalServerError)
 			render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
 			return
 		}

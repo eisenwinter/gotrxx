@@ -23,7 +23,7 @@ type NetlifyRessource struct {
 
 func (n *NetlifyRessource) Router() *chi.Mux {
 	r := chi.NewRouter()
-
+	r.Use(render.SetContentType(render.ContentTypeJSON))
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -107,11 +107,12 @@ func (n *NetlifyRessource) token(w http.ResponseWriter, r *http.Request) {
 	clientSecret := r.FormValue("client_secret")
 	scope := r.FormValue("scope")
 	req := &connect.PasswordGrantTokenRequest{
-		Username:     username,
-		Password:     password,
-		ClientID:     NetlifyClientID,
-		ClientSecret: clientSecret,
-		Scope:        scope,
+		Username:          username,
+		Password:          password,
+		ClientID:          NetlifyClientID,
+		ClientSecret:      clientSecret,
+		Scope:             scope,
+		IssueNetlifyToken: true,
 	}
 	n.uc.PasswordGrant(req, w, r)
 }
@@ -161,5 +162,6 @@ type errorResponse struct {
 }
 
 func (e *errorResponse) Render(w http.ResponseWriter, r *http.Request) error {
+	render.Status(r, e.StatusCode)
 	return nil
 }

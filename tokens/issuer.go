@@ -36,6 +36,9 @@ const (
 	ClaimAuthorization = "aut"
 	//ClaimScope is the claim storing the scopes
 	ClaimScope = "scope"
+
+	//ClaimNetlifyAppMetaData represents the app_metadata claim used in netlifys token
+	ClaimNetlifyAppMetaData = "app_metadata"
 )
 
 type CommonTokenInserter interface {
@@ -308,6 +311,7 @@ func (t *TokenIssuer) IssueAccessTokenForMachineClient(clientID string, scopes [
 	return tokenBuilder.Build()
 }
 
+// IssueAccessTokenForUser issues a standard access token for a user
 func (t *TokenIssuer) IssueAccessTokenForUser(user *user.SignedInUser, authorizationID uuid.UUID, clientID string, scopes []string) (jwt.Token, error) {
 	tokenBuilder := jwt.NewBuilder()
 	scope := strings.Join(scopes, " ")
@@ -321,6 +325,29 @@ func (t *TokenIssuer) IssueAccessTokenForUser(user *user.SignedInUser, authoriza
 		Claim(ClaimEmail, user.Email).
 		Claim(ClaimAuthorization, authorizationID).
 		Claim(ClaimClientID, clientID)
+	if !t.noRoles {
+		tokenBuilder.Claim(ClaimRoles, user.Roles)
+	}
+	return tokenBuilder.Build()
+}
+
+// IssueNetlifyAccessTokenForUser differs from the standard access token, it has the app_metadata claim
+func (t *TokenIssuer) IssueNetlifyAccessTokenForUser(user *user.SignedInUser, authorizationID uuid.UUID, clientID string, scopes []string) (jwt.Token, error) {
+	tokenBuilder := jwt.NewBuilder()
+	scope := strings.Join(scopes, " ")
+	tokenBuilder.
+		Audience(t.aud).
+		IssuedAt(time.Now().UTC()).
+		Expiration(time.Now().UTC().Add(t.expiry)).
+		Subject(user.UserID.String()).
+		Issuer(t.iss).
+		Claim(ClaimScope, scope).
+		Claim(ClaimEmail, user.Email).
+		Claim(ClaimAuthorization, authorizationID).
+		Claim(ClaimClientID, clientID).
+		Claim(ClaimNetlifyAppMetaData, map[string][]string{
+			"roles": user.Roles,
+		})
 	if !t.noRoles {
 		tokenBuilder.Claim(ClaimRoles, user.Roles)
 	}

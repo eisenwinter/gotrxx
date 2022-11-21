@@ -105,6 +105,8 @@ type PasswordGrantTokenRequest struct {
 	ClientID     string
 	ClientSecret string
 	Scope        string
+
+	IssueNetlifyToken bool
 }
 
 type refreshTokenTokenRequest struct {
