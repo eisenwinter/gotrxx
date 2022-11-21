@@ -113,8 +113,8 @@ func (m *Mailer) send(email string, subject string, viewModel map[string]interfa
 	msg.SetAddressHeader("From", m.cfg.SMTP.Address, m.cfg.SMTP.DisplayName)
 	msg.SetAddressHeader("To", email, "")
 	msg.SetHeader("Subject", subject)
-	msg.SetBody("text/html", html)
-	msg.AddAlternative("text/plain", text)
+	msg.SetBody("text/plain", text)
+	msg.AddAlternative("text/html", html)
 	return m.client.DialAndSend(msg)
 }
 
