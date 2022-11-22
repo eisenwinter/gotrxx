@@ -26,7 +26,7 @@ type ApplicationDTO struct {
 	LogoutURIs      []string `json:"logout_uris"`
 }
 
-func (a *ApplicationDTO) Render(w http.ResponseWriter, r *http.Request) error {
+func (*ApplicationDTO) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }
 

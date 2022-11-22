@@ -42,7 +42,7 @@ func (c *ConnnectRessource) Router() *chi.Mux {
 		MaxAge:           300,
 	}))
 
-	r.Post("/token", c.Token)
+	r.Post("/token", c.token)
 
 	r.Get("/authorize", c.authorize)
 	r.Post("/authorize", c.authorize)
@@ -63,8 +63,7 @@ func (c *ConnnectRessource) Router() *chi.Mux {
 	return r
 }
 
-// the token endpoint is public so it can be shared with netlify wrapper
-func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
+func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 	//issues accessTokenResponse
 	err := r.ParseForm()
 	if err != nil {

@@ -17,6 +17,6 @@ type openIdMetaData struct {
 	RequestParameterSupported bool     `json:"request_parameter_supported"`
 }
 
-func (e *openIdMetaData) Render(w http.ResponseWriter, r *http.Request) error {
+func (*openIdMetaData) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }

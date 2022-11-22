@@ -32,7 +32,7 @@ var userCreateCommand = cobra.Command{
 		reader := bufio.NewReader(os.Stdin)
 
 		trimmed := ""
-		if len(trimmed) == 0 {
+		if trimmed == "" {
 			fmt.Println("email?")
 			email, err := reader.ReadString('\n')
 			if err != nil {
@@ -50,7 +50,7 @@ var userCreateCommand = cobra.Command{
 			os.Exit(1)
 			return
 		}
-		for len(string(pwd)) < LoadedConfig.Behaviour.PasswordMinLength {
+		for len(pwd) < LoadedConfig.Behaviour.PasswordMinLength {
 			fmt.Printf(
 				"password needs to be at least %d long.\r\n",
 				LoadedConfig.Behaviour.PasswordMinLength,

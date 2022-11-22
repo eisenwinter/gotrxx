@@ -249,7 +249,7 @@ func NewSqliteStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*Dat
 		dir := filepath.Dir(striped)
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
 			logger.Warn("Trying to create directory", zap.String("directory", dir))
-			err = os.Mkdir(dir, 0755)
+			err = os.Mkdir(dir, 0650)
 			if err != nil {
 				logger.Error("Could open database", zap.Error(err))
 				return nil, err

@@ -13,7 +13,7 @@ type genericSuccessResponse struct {
 	ID      *string `json:"id,omitempty"`
 }
 
-func (g *genericSuccessResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (*genericSuccessResponse) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }
 
@@ -30,7 +30,7 @@ type genericErrorResponse struct {
 	StatusCode int    `json:"-"`
 }
 
-func (e *genericErrorResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (e *genericErrorResponse) Render(_ http.ResponseWriter, r *http.Request) error {
 	render.Status(r, e.StatusCode)
 	return nil
 }

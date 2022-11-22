@@ -1,7 +1,6 @@
 package events
 
 import (
-	"context"
 	"fmt"
 
 	"go.uber.org/zap"
@@ -21,7 +20,7 @@ type Event interface {
 // EventListener enables to listen for a certain event
 type EventListener interface {
 	ForEvent() EventName
-	Handle(ctx context.Context, ev Event) error
+	Handle(ev Event) error
 }
 
 // Dispatcher is used to dispatch events to listeners
@@ -49,7 +48,7 @@ func (d *Dispatcher) Register(listener ...EventListener) {
 	}
 }
 
-func (d *Dispatcher) executeEvent(ctx context.Context, el EventListener, ev Event) {
+func (d *Dispatcher) executeEvent(el EventListener, ev Event) {
 	defer func() {
 		if r := recover(); r != nil {
 			d.log.Error(
@@ -60,7 +59,7 @@ func (d *Dispatcher) executeEvent(ctx context.Context, el EventListener, ev Even
 			)
 		}
 	}()
-	err := el.Handle(ctx, ev)
+	err := el.Handle(ev)
 	if err != nil {
 		d.log.Error(
 			"Event listener returned error",
@@ -73,10 +72,10 @@ func (d *Dispatcher) executeEvent(ctx context.Context, el EventListener, ev Even
 }
 
 // Dispatch given event
-func (d *Dispatcher) Dispatch(ctx context.Context, event Event) {
+func (d *Dispatcher) Dispatch(event Event) {
 	if e, ok := d.registry[event.Name()]; ok {
 		for _, v := range e {
-			d.executeEvent(ctx, v, event)
+			d.executeEvent(v, event)
 		}
 	} else {
 		d.log.Info("No event listener for event", zap.String("event", string(event.Name())))

@@ -19,7 +19,7 @@ type accessTokenResponse struct {
 	Scope        *[]string `json:"scope,omitempty"` //to be complete but we are not building a oauth server here (I guess)
 }
 
-func (e *accessTokenResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (*accessTokenResponse) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }
 
@@ -29,7 +29,7 @@ type authorizedAuthorizationCodeResponse struct {
 	Callback string `json:"-,omitempty"`
 }
 
-func (e *authorizedAuthorizationCodeResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (*authorizedAuthorizationCodeResponse) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }
 
@@ -78,7 +78,7 @@ type stdErrorResponse struct {
 	StatusCode       int        `json:"-"`
 }
 
-func (e *stdErrorResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (e *stdErrorResponse) Render(_ http.ResponseWriter, r *http.Request) error {
 	render.Status(r, e.StatusCode)
 	return nil
 }
@@ -159,7 +159,7 @@ type userInfoResponse struct {
 	Roles   []string `json:"roles,omitempty"`
 }
 
-func (e *userInfoResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (*userInfoResponse) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }
 
@@ -180,6 +180,6 @@ type introspectionResponse struct {
 	AuthorizationID string   `json:"aut,omitempty"`
 }
 
-func (e *introspectionResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (*introspectionResponse) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }

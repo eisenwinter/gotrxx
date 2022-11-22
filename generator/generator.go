@@ -12,7 +12,7 @@ import (
 type RandomTokenType string
 
 func tokenTypeFromString(token string) RandomTokenType {
-	if len(token) == 0 {
+	if token == "" {
 		panic("zero length token issued, this is probably the only reason to ever panic")
 	}
 	return RandomTokenType(token)

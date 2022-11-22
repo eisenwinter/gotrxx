@@ -218,7 +218,7 @@ type userInfoResponse struct {
 	UserMetaData map[string]string `json:"user_metadata"`
 }
 
-func (e *userInfoResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (*userInfoResponse) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }
 
@@ -228,7 +228,7 @@ type errorResponse struct {
 	StatusCode       int    `json:"-"`
 }
 
-func (e *errorResponse) Render(w http.ResponseWriter, r *http.Request) error {
+func (e *errorResponse) Render(_ http.ResponseWriter, r *http.Request) error {
 	render.Status(r, e.StatusCode)
 	return nil
 }

@@ -2,10 +2,12 @@ package api
 
 import (
 	"context"
-	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"os/signal"
+	"strconv"
+	"time"
 
 	"github.com/eisenwinter/gotrxx/application"
 	"github.com/eisenwinter/gotrxx/authorization"
@@ -58,10 +60,11 @@ func NewServer(
 	if err != nil {
 		return nil, err
 	}
-	bind := fmt.Sprintf("%s:%d", cfg.Server.Address, cfg.Server.Port)
+	bind := net.JoinHostPort(cfg.Server.Address, strconv.Itoa(cfg.Server.Port))
 	srv := http.Server{
-		Addr:    bind,
-		Handler: api,
+		Addr:              bind,
+		Handler:           api,
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 	return &Server{
 		server: &srv,

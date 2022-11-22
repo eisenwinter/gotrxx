@@ -138,7 +138,7 @@ func (g *Service) RegisterFromInvite(
 				zap.Error(err),
 			)
 		} else {
-			g.dispatcher.Dispatch(ctx, &event.AuthorizationGranted{
+			g.dispatcher.Dispatch(&event.AuthorizationGranted{
 				AuthorizationID: aid,
 				ApplicationID:   v.ApplicationID,
 				UserID:          id,
@@ -156,7 +156,7 @@ func (g *Service) RegisterFromInvite(
 			zap.Error(err),
 		)
 	} else {
-		g.dispatcher.Dispatch(ctx, &event.UserInviteConsumed{
+		g.dispatcher.Dispatch(&event.UserInviteConsumed{
 			InviteCode: inviteCode,
 			UserID:     id,
 		})
@@ -229,13 +229,13 @@ func (g *Service) register(
 		return uuid.UUID{}, err
 	}
 
-	g.dispatcher.Dispatch(ctx, &event.UserSignup{
+	g.dispatcher.Dispatch(&event.UserSignup{
 		UserID: id,
 		Email:  email,
 	})
 
 	if g.cfg.Behaviour.AutoConfirmUsers {
-		g.dispatcher.Dispatch(ctx, &event.UserConfirmed{
+		g.dispatcher.Dispatch(&event.UserConfirmed{
 			UserID:        id,
 			AutoConfirmed: true,
 			ConfirmCode:   "",
@@ -249,7 +249,7 @@ func (g *Service) register(
 			g.log.Error("Registration mail could not be sent", zap.Error(err))
 		} else {
 
-			g.dispatcher.Dispatch(ctx, &event.EmailSignupConfirmSent{
+			g.dispatcher.Dispatch(&event.EmailSignupConfirmSent{
 				UserID:       id,
 				ConfirmToken: t,
 				Sent:         time.Now(),
@@ -275,7 +275,7 @@ func (g *Service) ConfirmUser(ctx context.Context, token string) error {
 	if !ok {
 		return ErrEntityDoesNotExist
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserConfirmed{
+	g.dispatcher.Dispatch(&event.UserConfirmed{
 		ConfirmCode:   token,
 		UserID:        id,
 		AutoConfirmed: false,
@@ -315,7 +315,7 @@ func (g *Service) EnableMFA(ctx context.Context, userID uuid.UUID, secret string
 	if !ok {
 		return "", ErrEntityInvalidTransition
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserMFAEnabled{
+	g.dispatcher.Dispatch(&event.UserMFAEnabled{
 		UserID: userID,
 	})
 	return string(recoveryKey), nil
@@ -330,7 +330,7 @@ func (g *Service) DisableMFA(ctx context.Context, userID uuid.UUID) error {
 	if !ok {
 		return ErrEntityInvalidTransition
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserMFADisabled{
+	g.dispatcher.Dispatch(&event.UserMFADisabled{
 		UserID: userID,
 	})
 	return nil
@@ -359,7 +359,7 @@ func (g *Service) TriggerPasswordRecovery(ctx context.Context, id uuid.UUID) err
 	if !ok {
 		return ErrEntityDoesNotExist
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserPasswordRecoveryRequested{
+	g.dispatcher.Dispatch(&event.UserPasswordRecoveryRequested{
 		UserID: id,
 	})
 	ud, err := g.getUserByID(ctx, id)
@@ -371,7 +371,7 @@ func (g *Service) TriggerPasswordRecovery(ctx context.Context, id uuid.UUID) err
 		g.log.Error("Unable to send recovery email", zap.Error(err))
 		return err
 	}
-	g.dispatcher.Dispatch(ctx, &event.EmailPasswordRecoverySent{
+	g.dispatcher.Dispatch(&event.EmailPasswordRecoverySent{
 		UserID:       id,
 		Email:        ud.Email,
 		ConfirmToken: string(token),
@@ -399,7 +399,7 @@ func (g *Service) RecoverPassword(
 	if !ok {
 		return uuid.UUID{}, ErrEntityDoesNotExist
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserPasswordRecoveryUsed{
+	g.dispatcher.Dispatch(&event.UserPasswordRecoveryUsed{
 		UserID: id,
 		Email:  email,
 		Token:  token,
@@ -423,7 +423,7 @@ func (g *Service) ChangePassword(ctx context.Context, id uuid.UUID, password str
 	if !ok {
 		return ErrEntityDoesNotExist
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserPasswordChanged{
+	g.dispatcher.Dispatch(&event.UserPasswordChanged{
 		UserID: id,
 	})
 	return nil
@@ -446,7 +446,7 @@ func (g *Service) ChangeEmail(ctx context.Context, id uuid.UUID, email string) e
 	if !ok {
 		return ErrEntityDoesNotExist
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserEmailChanged{
+	g.dispatcher.Dispatch(&event.UserEmailChanged{
 		UserID: id,
 		Email:  email,
 	})

@@ -84,7 +84,7 @@ func (a *ApplicationService) CreateApplication(
 		}
 		return 0, err
 	}
-	a.dispatcher.Dispatch(ctx, &event.ApplicationCreated{
+	a.dispatcher.Dispatch(&event.ApplicationCreated{
 		ApplicationID:   id,
 		ClientID:        clientID,
 		ApplicationName: name,
@@ -97,7 +97,7 @@ func (a *ApplicationService) PurgeRetiredApplications(ctx context.Context) error
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.AllRetiredApplicationsPurged{
+	a.dispatcher.Dispatch(&event.AllRetiredApplicationsPurged{
 		AffectedClientIDs: affectedClientIds,
 	})
 	return nil
@@ -115,7 +115,7 @@ func (a *ApplicationService) RetireApplication(ctx context.Context, clientID str
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.ApplicationRetired{
+	a.dispatcher.Dispatch(&event.ApplicationRetired{
 		ApplicationID:   app.ID,
 		ClientID:        clientID,
 		ApplicationName: app.Name,
@@ -133,7 +133,7 @@ func (a *ApplicationService) TogglePKCE(ctx context.Context, clientID string, en
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.ApplicationSettingsChanged{
+	a.dispatcher.Dispatch(&event.ApplicationSettingsChanged{
 		ApplicationID:   app.ID,
 		ClientID:        clientID,
 		ApplicationName: app.Name,
@@ -165,7 +165,7 @@ func (a *ApplicationService) AddRedirectURI(
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.ApplicationSettingsChanged{
+	a.dispatcher.Dispatch(&event.ApplicationSettingsChanged{
 		ApplicationID:   app.ID,
 		ClientID:        clientID,
 		ApplicationName: app.Name,
@@ -204,7 +204,7 @@ func (a *ApplicationService) RemoveRedirectURI(
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.ApplicationSettingsChanged{
+	a.dispatcher.Dispatch(&event.ApplicationSettingsChanged{
 		ApplicationID:   app.ID,
 		ClientID:        clientID,
 		ApplicationName: app.Name,
@@ -233,7 +233,7 @@ func (a *ApplicationService) AddLogoutURI(
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.ApplicationSettingsChanged{
+	a.dispatcher.Dispatch(&event.ApplicationSettingsChanged{
 		ApplicationID:   app.ID,
 		ClientID:        clientID,
 		ApplicationName: app.Name,
@@ -272,7 +272,7 @@ func (a *ApplicationService) RemoveLogoutURI(
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.ApplicationSettingsChanged{
+	a.dispatcher.Dispatch(&event.ApplicationSettingsChanged{
 		ApplicationID:   app.ID,
 		ClientID:        clientID,
 		ApplicationName: app.Name,
@@ -301,7 +301,7 @@ func (a *ApplicationService) AddFlow(
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.ApplicationSettingsChanged{
+	a.dispatcher.Dispatch(&event.ApplicationSettingsChanged{
 		ApplicationID:   app.ID,
 		ClientID:        clientID,
 		ApplicationName: app.Name,
@@ -340,7 +340,7 @@ func (a *ApplicationService) RemoveFlow(
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.ApplicationSettingsChanged{
+	a.dispatcher.Dispatch(&event.ApplicationSettingsChanged{
 		ApplicationID:   app.ID,
 		ClientID:        clientID,
 		ApplicationName: app.Name,
@@ -367,7 +367,7 @@ func (a *ApplicationService) SetSecret(ctx context.Context, clientID string, sec
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.ApplicationSettingsChanged{
+	a.dispatcher.Dispatch(&event.ApplicationSettingsChanged{
 		ApplicationID:   app.ID,
 		ClientID:        clientID,
 		ApplicationName: app.Name,

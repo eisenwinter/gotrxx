@@ -147,7 +147,7 @@ func (s *Service) ImplicitAuthorization(
 	if err != nil {
 		return nil, err
 	}
-	s.dispatcher.Dispatch(ctx, &event.AuthorizationGranted{
+	s.dispatcher.Dispatch(&event.AuthorizationGranted{
 		AuthorizationID: a,
 		ApplicationID:   app.ID(),
 		UserID:          userID,

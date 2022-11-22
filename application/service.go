@@ -25,7 +25,7 @@ func NewApplicationSevice(log *zap.Logger,
 	}
 }
 
-func (s *Service) build(table *tables.ApplicationTable) *Application {
+func (*Service) build(table *tables.ApplicationTable) *Application {
 	return ApplicationFromDbType(table)
 }
 

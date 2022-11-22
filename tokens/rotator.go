@@ -28,7 +28,7 @@ type CommonTokenUpdater interface {
 }
 
 type Dispatcher interface {
-	Dispatch(ctx context.Context, event events.Event)
+	Dispatch(event events.Event)
 }
 
 type TokenRotator struct {
@@ -121,7 +121,7 @@ func (t *TokenRotator) RevokeCommonToken(
 	}
 	if details.RedeemedAt != nil {
 		t.log.Warn("redeemed token used - this one has been already rotated! revocation starting")
-		t.dispatcher.Dispatch(ctx, &event.TokenAlreadyRedeemed{TokenID: details.ID,
+		t.dispatcher.Dispatch(&event.TokenAlreadyRedeemed{TokenID: details.ID,
 			AuthorizationID: details.AuthorizationId,
 			UserID:          details.UserID,
 			Token:           details.Token,
@@ -170,7 +170,7 @@ func (t *TokenRotator) RotateCommonToken(
 	}
 	if details.RedeemedAt != nil {
 		t.log.Warn("redeemed token used - this one has been already rotated! revocation starting")
-		t.dispatcher.Dispatch(ctx, &event.TokenAlreadyRedeemed{TokenID: details.ID,
+		t.dispatcher.Dispatch(&event.TokenAlreadyRedeemed{TokenID: details.ID,
 			AuthorizationID: details.AuthorizationId,
 			UserID:          details.UserID,
 			Token:           details.Token,

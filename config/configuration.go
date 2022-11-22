@@ -153,7 +153,7 @@ func (c *Configuration) Validate() error {
 }
 
 // DebugMode returns true if the DEBUG_MODE variable is set
-func (c *Configuration) DebugMode() bool {
+func (*Configuration) DebugMode() bool {
 	if r := os.Getenv("TRXX_DEBUG_MODE"); r == "true" {
 		return true
 	}

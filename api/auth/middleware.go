@@ -46,11 +46,11 @@ var (
 
 func ConnectAuthenticator(as ApplicationQuerySource) func(http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
-		return connectAuthenticator(&BasicAuth{as: as}, next)
+		return connectAuthenticatorHandler(&BasicAuth{as: as}, next)
 	}
 }
 
-func connectAuthenticator(ba *BasicAuth, next http.Handler) http.Handler {
+func connectAuthenticatorHandler(ba *BasicAuth, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, _, err := jwtauth.FromContext(r.Context())
 		if err != nil && !errors.Is(jwtauth.ErrNoTokenFound, err) {

@@ -85,7 +85,7 @@ func (a *AuthorizationService) GrantAuthorization(
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.AuthorizationGranted{
+	a.dispatcher.Dispatch(&event.AuthorizationGranted{
 		AuthorizationID: aid,
 		ApplicationID:   app.ID,
 		UserID:          userID,
@@ -113,7 +113,7 @@ func (a *AuthorizationService) RevokeAuthorizationByClientIDAndUserID(
 	if err != nil {
 		return err
 	}
-	a.dispatcher.Dispatch(ctx, &event.AuthorizationRevoked{
+	a.dispatcher.Dispatch(&event.AuthorizationRevoked{
 		AuthorizationID: auth.ID,
 		TokensAffected:  affected,
 		ApplicationID:   auth.ApplicationID,

@@ -1,8 +1,6 @@
 package db
 
 import (
-	"context"
-
 	"github.com/eisenwinter/gotrxx/db/tables"
 	"github.com/eisenwinter/gotrxx/events"
 	"github.com/eisenwinter/gotrxx/events/event"
@@ -129,7 +127,7 @@ func (*userIniviteListener) ForEvent() events.EventName {
 	return event.UserInvitedEvent
 }
 
-func (l *userIniviteListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userIniviteListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserInvited)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"email": e.Email,
@@ -150,7 +148,7 @@ func (*userInviteConsumedListener) ForEvent() events.EventName {
 	return event.UserInviteConsumedEvent
 }
 
-func (l *userInviteConsumedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userInviteConsumedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserInviteConsumed)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"invite_code": e.InviteCode,
@@ -178,7 +176,7 @@ func (*userConfirmedListener) ForEvent() events.EventName {
 	return event.UserConfirmedEvent
 }
 
-func (l *userConfirmedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userConfirmedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserConfirmed)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"auto_confirm": toString(e.AutoConfirmed),
@@ -200,7 +198,7 @@ func (*userSignupListener) ForEvent() events.EventName {
 	return event.UserSignupEvent
 }
 
-func (l *userSignupListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userSignupListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserSignup)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -221,7 +219,7 @@ func (*userLockedListener) ForEvent() events.EventName {
 	return event.UserLockedEvent
 }
 
-func (l *userLockedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userLockedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserLocked)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id":      e.UserID.String(),
@@ -243,7 +241,7 @@ func (*userUnlockedListener) ForEvent() events.EventName {
 	return event.UserUnlockedEvent
 }
 
-func (l *userUnlockedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userUnlockedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserUnlocked)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -264,7 +262,7 @@ func (*userBannedListener) ForEvent() events.EventName {
 	return event.UserBannedEvent
 }
 
-func (l *userBannedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userBannedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserUnlocked)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -285,7 +283,7 @@ func (*userUnbannedListener) ForEvent() events.EventName {
 	return event.UserUnbannedEvent
 }
 
-func (l *userUnbannedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userUnbannedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserUnlocked)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -306,7 +304,7 @@ func (*userLoginListener) ForEvent() events.EventName {
 	return event.UserLoginEvent
 }
 
-func (l *userLoginListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userLoginListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserLogin)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -327,7 +325,7 @@ func (*userPasswordRecoveryRequestedListener) ForEvent() events.EventName {
 	return event.UserPasswordRecoveryRequestedEvent
 }
 
-func (l *userPasswordRecoveryRequestedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userPasswordRecoveryRequestedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserPasswordRecoveryRequested)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -348,7 +346,7 @@ func (*userPasswordRecoveryUsedListener) ForEvent() events.EventName {
 	return event.UserPasswordRecoveryUsedEvent
 }
 
-func (l *userPasswordRecoveryUsedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userPasswordRecoveryUsedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserPasswordRecoveryUsed)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -371,7 +369,7 @@ func (*userEmailChangedListener) ForEvent() events.EventName {
 	return event.UserEmailChangedEvent
 }
 
-func (l *userEmailChangedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userEmailChangedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserEmailChanged)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id":   e.UserID.String(),
@@ -393,7 +391,7 @@ func (*userPasswordChangedListener) ForEvent() events.EventName {
 	return event.UserPasswordChangedEvent
 }
 
-func (l *userPasswordChangedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userPasswordChangedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserPasswordChanged)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -413,7 +411,7 @@ func (*userRemovedFromRoleListener) ForEvent() events.EventName {
 	return event.UserRemovedFromRoleEvent
 }
 
-func (l *userRemovedFromRoleListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userRemovedFromRoleListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserRemovedFromRole)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -434,7 +432,7 @@ func (*userAddedToRoleListener) ForEvent() events.EventName {
 	return event.UserAddedToRoleEvent
 }
 
-func (l *userAddedToRoleListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *userAddedToRoleListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserAddedToRole)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -455,7 +453,7 @@ func (*emailSignupConfirmSentListener) ForEvent() events.EventName {
 	return event.EmailSignupConfirmSentEvent
 }
 
-func (l *emailSignupConfirmSentListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *emailSignupConfirmSentListener) Handle(ev events.Event) error {
 	e := ev.(*event.EmailSignupConfirmSent)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -477,7 +475,7 @@ func (*emailPasswordRecoverySentListener) ForEvent() events.EventName {
 	return event.EmailPasswordRecoverySentEvent
 }
 
-func (l *emailPasswordRecoverySentListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *emailPasswordRecoverySentListener) Handle(ev events.Event) error {
 	e := ev.(*event.EmailPasswordRecoverySent)
 
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
@@ -500,7 +498,7 @@ func (*emailInviteSentListener) ForEvent() events.EventName {
 	return event.EmailInviteSentEvent
 }
 
-func (l *emailInviteSentListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *emailInviteSentListener) Handle(ev events.Event) error {
 	e := ev.(*event.EmailInviteSent)
 
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
@@ -522,7 +520,7 @@ func (*securityAuthorizationGrantedListener) ForEvent() events.EventName {
 	return event.AuthorizationGrantedEvent
 }
 
-func (l *securityAuthorizationGrantedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *securityAuthorizationGrantedListener) Handle(ev events.Event) error {
 	e := ev.(*event.AuthorizationGranted)
 
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
@@ -545,7 +543,7 @@ func (*securityAuthorizationRevokedListener) ForEvent() events.EventName {
 	return event.AuthorizationRevokedEvent
 }
 
-func (l *securityAuthorizationRevokedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *securityAuthorizationRevokedListener) Handle(ev events.Event) error {
 	e := ev.(*event.AuthorizationRevoked)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"email":           e.AuthorizationID.String(),
@@ -568,7 +566,7 @@ func (*tokenRevokedListener) ForEvent() events.EventName {
 	return event.TokenRevokedEvent
 }
 
-func (l *tokenRevokedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *tokenRevokedListener) Handle(ev events.Event) error {
 	e := ev.(*event.TokenRevoked)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"email":      e.AuthorizationID.String(),
@@ -592,7 +590,7 @@ func (*mfaEnabledListener) ForEvent() events.EventName {
 	return event.UserMFAEnabledEvent
 }
 
-func (l *mfaEnabledListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *mfaEnabledListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserMFAEnabled)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -612,7 +610,7 @@ func (*mfaDisabledListener) ForEvent() events.EventName {
 	return event.UserMFADisabledEvent
 }
 
-func (l *mfaDisabledListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *mfaDisabledListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserMFADisabled)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id": e.UserID.String(),
@@ -632,7 +630,7 @@ func (*applicationCreatedListener) ForEvent() events.EventName {
 	return event.ApplicationCreatedEvent
 }
 
-func (l *applicationCreatedListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *applicationCreatedListener) Handle(ev events.Event) error {
 	e := ev.(*event.ApplicationCreated)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"application_id": e.ApplicationID,
@@ -653,7 +651,7 @@ func (*applicationRetiredListener) ForEvent() events.EventName {
 	return event.ApplicationRetiredEvent
 }
 
-func (l *applicationRetiredListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *applicationRetiredListener) Handle(ev events.Event) error {
 	e := ev.(*event.ApplicationRetired)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"application_id": e.ApplicationID,
@@ -674,7 +672,7 @@ func (*applicationPurgeListener) ForEvent() events.EventName {
 	return event.AllRetiredApplicationsPurgedEvent
 }
 
-func (l *applicationPurgeListener) Handle(ctx context.Context, ev events.Event) error {
+func (l *applicationPurgeListener) Handle(ev events.Event) error {
 	e := ev.(*event.AllRetiredApplicationsPurged)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"affected_client_ids": e.AffectedClientIDs,

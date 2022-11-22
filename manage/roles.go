@@ -44,7 +44,7 @@ func (r *RoleService) CreateRole(ctx context.Context, name string) (int, error) 
 	if err != nil {
 		return id, err
 	}
-	r.dispatcher.Dispatch(ctx, &event.RoleCreated{Role: name})
+	r.dispatcher.Dispatch(&event.RoleCreated{Role: name})
 	return id, nil
 }
 
@@ -53,7 +53,7 @@ func (r *RoleService) DeleteRole(ctx context.Context, name string) error {
 	if err != nil {
 		return err
 	}
-	r.dispatcher.Dispatch(ctx, &event.RoleDeleted{Role: name})
+	r.dispatcher.Dispatch(&event.RoleDeleted{Role: name})
 	return nil
 }
 

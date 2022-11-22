@@ -132,7 +132,7 @@ func (g *UserService) ConfirmUser(ctx context.Context, id uuid.UUID) error {
 	if err != nil {
 		return err
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserConfirmed{
+	g.dispatcher.Dispatch(&event.UserConfirmed{
 		ConfirmCode:   "",
 		UserID:        id,
 		AutoConfirmed: true,
@@ -147,7 +147,7 @@ func (g *UserService) AddUserToRole(ctx context.Context, id uuid.UUID, role stri
 		if err != nil {
 			return err
 		}
-		g.dispatcher.Dispatch(ctx, &event.UserAddedToRole{
+		g.dispatcher.Dispatch(&event.UserAddedToRole{
 			UserID: id,
 			Role:   canonicalRole,
 		})
@@ -161,7 +161,7 @@ func (g *UserService) RemoveUserFromRole(ctx context.Context, id uuid.UUID, role
 	if err != nil {
 		return err
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserRemovedFromRole{
+	g.dispatcher.Dispatch(&event.UserRemovedFromRole{
 		UserID: id,
 		Role:   canonicalRole,
 	})
@@ -190,7 +190,7 @@ func (g *UserService) LockUser(ctx context.Context, id uuid.UUID, until time.Tim
 	if !ok {
 		return ErrEntityInvalidTransition
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserLocked{
+	g.dispatcher.Dispatch(&event.UserLocked{
 		UserID:      id,
 		LockedUntil: until,
 	})
@@ -205,7 +205,7 @@ func (g *UserService) UnlockUser(ctx context.Context, id uuid.UUID) error {
 	if !ok {
 		return ErrEntityInvalidTransition
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserUnlocked{
+	g.dispatcher.Dispatch(&event.UserUnlocked{
 		UserID: id,
 	})
 	return nil
@@ -217,7 +217,7 @@ func (g *UserService) BanUser(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 
-	g.dispatcher.Dispatch(ctx, &event.UserBanned{
+	g.dispatcher.Dispatch(&event.UserBanned{
 		UserID: id,
 	})
 	return nil
@@ -229,7 +229,7 @@ func (g *UserService) UnbanUser(ctx context.Context, id uuid.UUID) error {
 		return err
 	}
 
-	g.dispatcher.Dispatch(ctx, &event.UserUnbanned{
+	g.dispatcher.Dispatch(&event.UserUnbanned{
 		UserID: id,
 	})
 	return nil
@@ -265,7 +265,7 @@ func (g *UserService) InitialUserInvite(
 		g.log.Error("Could not persist user invite", zap.Error(err))
 		return err
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserInvited{
+	g.dispatcher.Dispatch(&event.UserInvited{
 		ExpiryDate: expiryDate,
 		Email:      "",
 		InviteCode: string(inviteCode),
@@ -340,14 +340,14 @@ func (g *UserService) InviteUser(
 			if err != nil {
 				g.log.Error("Could not persist sent date for invite email to user", zap.String("email", e), zap.Error(err))
 			}
-			g.dispatcher.Dispatch(ctx, &event.EmailInviteSent{
+			g.dispatcher.Dispatch(&event.EmailInviteSent{
 				InviteCode: string(inviteCode),
 				Email:      e,
 				Sent:       time.Now(),
 			})
 		}
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserInvited{
+	g.dispatcher.Dispatch(&event.UserInvited{
 		ExpiryDate: expiryDate,
 		Email:      e,
 		InviteCode: string(inviteCode),

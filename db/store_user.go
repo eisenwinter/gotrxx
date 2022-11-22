@@ -485,7 +485,7 @@ func (d *DataStore) InsertUser(
 }
 
 func (d *DataStore) ConfirmUser(ctx context.Context, confirmToken string) (bool, uuid.UUID, error) {
-	if len(confirmToken) == 0 {
+	if confirmToken == "" {
 		return false, uuid.UUID{}, errors.New("empty confirm token")
 	}
 	var user tables.UserTable

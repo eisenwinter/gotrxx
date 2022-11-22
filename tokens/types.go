@@ -8,12 +8,16 @@ import (
 
 type CommonTokenType string
 
+// RefreshTokenType is a refresh token wich can be traded for a new set
 const RefreshTokenType CommonTokenType = "refresh_token"
+
+// AuthorizationCodeType is a authorization code token
 const AuthorizationCodeType CommonTokenType = "authorization_code"
 
-// single sign on token to remember signed in user
+// RememberMeTokenType is a single sign on token to remember signed in user
 const RememberMeTokenType CommonTokenType = "remember_me"
 
+// AccessTokenType is a common access token
 const AccessTokenType CommonTokenType = "access_token"
 
 type CommonToken struct {

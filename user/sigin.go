@@ -18,7 +18,7 @@ type UserLocker interface {
 }
 
 type Dispatcher interface {
-	Dispatch(ctx context.Context, event events.Event)
+	Dispatch(event events.Event)
 }
 
 type LoginStorer interface {
@@ -117,7 +117,7 @@ func (g *SigninService) SignInByIDFromToken(
 	if !provider.CanLogin() {
 		return nil, ErrEntityOperationForbidden
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserSignedInByToken{
+	g.dispatcher.Dispatch(&event.UserSignedInByToken{
 		UserID:    provider.ID(),
 		TokenType: tokenType,
 	})
@@ -225,7 +225,7 @@ func (g *SigninService) SignInMFA(
 			g.log.Error("unable to reset otp timestamp", zap.Error(err))
 		}
 	}
-	g.dispatcher.Dispatch(ctx, &event.UserLogin{
+	g.dispatcher.Dispatch(&event.UserLogin{
 		UserID: provider.ID(),
 	})
 	if provider.CurrentFailureCount() > 0 {

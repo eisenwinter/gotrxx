@@ -57,8 +57,7 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 
 	tokenTypeHint := r.FormValue("token_type_hint")
 	token := r.FormValue("token")
-	switch tokenTypeHint {
-	case "refresh_token":
+	if tokenTypeHint == "refresh_token" {
 		refreshToken, err := c.verifier.ValidateRefreshTokenDetails(r.Context(), token)
 		if err != nil {
 			jwtoken, err := c.verifier.ValidateAccessTokenDetails(r.Context(), token)
