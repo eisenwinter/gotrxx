@@ -13,7 +13,7 @@ type openIdMetaData struct {
 	IntrospectionEndpoint  string   `json:"introspection_endpoint"`
 	RevocationEndpoint     string   `json:"revocation_endpoint"`
 	//it doesnt issue id token hence it will always be empty
-	IdTokenSinginAlg          []string `json:"id_token_signing_alg_values_supported"`
+	IDTokenSinginAlg          []string `json:"id_token_signing_alg_values_supported"`
 	RequestParameterSupported bool     `json:"request_parameter_supported"`
 }
 

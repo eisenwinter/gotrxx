@@ -72,7 +72,7 @@ func (m *MetaRessource) openidConfiguration(w http.ResponseWriter, r *http.Reque
 		IntrospectionEndpoint:  fmt.Sprintf("%s/connect/introspect", m.cfg.ServiceDomain),
 		RevocationEndpoint:     fmt.Sprintf("%s/connect/revoke", m.cfg.ServiceDomain),
 		//this is not a openid comptabile server and doesnt issue idtokens ... hence none
-		IdTokenSinginAlg: []string{
+		IDTokenSinginAlg: []string{
 			// m.issuer.Alg()
 		},
 		RequestParameterSupported: true,
@@ -83,6 +83,10 @@ func (m *MetaRessource) openidConfiguration(w http.ResponseWriter, r *http.Reque
 	}
 }
 
-func NewMetaRessource(log *zap.Logger, cfg *config.BehaviourConfiguration, issuer *tokens.TokenIssuer) *MetaRessource {
+func NewMetaRessource(
+	log *zap.Logger,
+	cfg *config.BehaviourConfiguration,
+	issuer *tokens.TokenIssuer,
+) *MetaRessource {
 	return &MetaRessource{log: log, cfg: cfg, issuer: issuer}
 }

@@ -50,17 +50,27 @@ func (d *DataStore) EnsureUsable() error {
 	return nil
 }
 
-func (d *DataStore) exists(table string, pred interface{}, args ...interface{}) (bool, error) {
+func (d *DataStore) exists(
+	ctx context.Context,
+	table string,
+	pred interface{},
+	args ...interface{},
+) (bool, error) {
 	var result bool
 	q := sq.Select("1").Prefix("SELECT EXISTS (").From(table).Where(pred, args).Suffix(")")
-	err := q.RunWith(d.db).Scan(&result)
+	err := q.RunWith(d.db).ScanContext(ctx, &result)
 	if err != nil {
 		return false, err
 	}
 	return result, nil
 }
 
-func (d *DataStore) getStatement(ctx context.Context, dest interface{}, statement sq.SelectBuilder, tx *sqlx.Tx) error {
+func (d *DataStore) getStatement(
+	ctx context.Context,
+	dest interface{},
+	statement sq.SelectBuilder,
+	tx *sqlx.Tx,
+) error {
 	q, a, err := statement.ToSql()
 	if err != nil {
 		d.log.Error("Unable to construct sql", zap.Error(err))
@@ -73,7 +83,12 @@ func (d *DataStore) getStatement(ctx context.Context, dest interface{}, statemen
 	return d.db.GetContext(ctx, dest, q, a...)
 }
 
-func (d *DataStore) returningInsertStatement(ctx context.Context, dest interface{}, statement sq.InsertBuilder, tx *sqlx.Tx) error {
+func (d *DataStore) returningInsertStatement(
+	ctx context.Context,
+	dest interface{},
+	statement sq.InsertBuilder,
+	tx *sqlx.Tx,
+) error {
 	q, a, err := statement.ToSql()
 	if err != nil {
 		d.log.Error("Unable to construct sql", zap.Error(err))
@@ -85,7 +100,12 @@ func (d *DataStore) returningInsertStatement(ctx context.Context, dest interface
 	return d.db.GetContext(ctx, dest, q, a...)
 }
 
-func (d *DataStore) selectStatement(ctx context.Context, dest interface{}, statement sq.SelectBuilder, tx *sqlx.Tx) error {
+func (d *DataStore) selectStatement(
+	ctx context.Context,
+	dest interface{},
+	statement sq.SelectBuilder,
+	tx *sqlx.Tx,
+) error {
 	q, a, err := statement.ToSql()
 	if err != nil {
 		d.log.Error("Unable to construct sql", zap.Error(err))
@@ -97,7 +117,11 @@ func (d *DataStore) selectStatement(ctx context.Context, dest interface{}, state
 	return d.db.SelectContext(ctx, dest, q, a...)
 }
 
-func (d *DataStore) deleteStatement(ctx context.Context, statement sq.DeleteBuilder, tx *sqlx.Tx) (sql.Result, error) {
+func (d *DataStore) deleteStatement(
+	ctx context.Context,
+	statement sq.DeleteBuilder,
+	tx *sqlx.Tx,
+) (sql.Result, error) {
 	q, a, err := statement.ToSql()
 	if err != nil {
 		d.log.Error("Unable to construct sql", zap.Error(err))
@@ -108,7 +132,12 @@ func (d *DataStore) deleteStatement(ctx context.Context, statement sq.DeleteBuil
 	}
 	return d.db.ExecContext(ctx, q, a...)
 }
-func (d *DataStore) insertStatement(ctx context.Context, statement sq.InsertBuilder, tx *sqlx.Tx) (sql.Result, error) {
+
+func (d *DataStore) insertStatement(
+	ctx context.Context,
+	statement sq.InsertBuilder,
+	tx *sqlx.Tx,
+) (sql.Result, error) {
 	q, a, err := statement.ToSql()
 	if err != nil {
 		d.log.Error("Unable to construct sql", zap.Error(err))
@@ -119,7 +148,12 @@ func (d *DataStore) insertStatement(ctx context.Context, statement sq.InsertBuil
 	}
 	return d.db.ExecContext(ctx, q, a...)
 }
-func (d *DataStore) updateStatement(ctx context.Context, statement sq.UpdateBuilder, tx *sqlx.Tx) (sql.Result, error) {
+
+func (d *DataStore) updateStatement(
+	ctx context.Context,
+	statement sq.UpdateBuilder,
+	tx *sqlx.Tx,
+) (sql.Result, error) {
 	q, a, err := statement.ToSql()
 	if err != nil {
 		d.log.Error("Unable to construct sql", zap.Error(err))
@@ -134,9 +168,9 @@ func (d *DataStore) updateStatement(ctx context.Context, statement sq.UpdateBuil
 func NewMysqlStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
 	adaptedDsn := cfg.DSN
 	if strings.Contains(adaptedDsn, "?") {
-		adaptedDsn = adaptedDsn + "&parseTime=true"
+		adaptedDsn += "&parseTime=true"
 	} else {
-		adaptedDsn = adaptedDsn + "?parseTime=true"
+		adaptedDsn += "?parseTime=true"
 	}
 	db, err := sqlx.Open("mysql", adaptedDsn)
 	if err != nil {

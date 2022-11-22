@@ -51,7 +51,9 @@ var (
 	ErrEntityOperationForbidden = errors.New("entity does not support operation")
 	ErrInvalidCredentials       = errors.New("invalid credentials")
 	ErrMFARequired              = errors.New("entity requires mfa")
-	ErrInvalidOTP               = errors.New("supplied one time password was not correct or already consumed")
+	ErrInvalidOTP               = errors.New(
+		"supplied one time password was not correct or already consumed",
+	)
 )
 
 type SignedInUser struct {
@@ -62,7 +64,7 @@ type SignedInUser struct {
 
 // CanLogin checks if a user is eligble to login (not lockedout, not banned, not unconfirmed)
 func (g *SigninService) CanLogin(ctx context.Context, userID uuid.UUID) (bool, error) {
-	ud, err := g.store.UserById(ctx, userID)
+	ud, err := g.store.UserByID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			return false, ErrEntityDoesNotExist
@@ -74,8 +76,11 @@ func (g *SigninService) CanLogin(ctx context.Context, userID uuid.UUID) (bool, e
 }
 
 // UserFromSubject returns a user by id, this should be only used in special cases
-func (g *SigninService) UserFromSubject(ctx context.Context, userID uuid.UUID) (*SignedInUser, error) {
-	ud, err := g.store.UserById(ctx, userID)
+func (g *SigninService) UserFromSubject(
+	ctx context.Context,
+	userID uuid.UUID,
+) (*SignedInUser, error) {
+	ud, err := g.store.UserByID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			return nil, ErrEntityDoesNotExist
@@ -96,8 +101,12 @@ func (g *SigninService) UserFromSubject(ctx context.Context, userID uuid.UUID) (
 
 // SignInByIDFromToken creates a signed in user after the supplied token type has been
 // validated - do not use this without validating the token before!
-func (g *SigninService) SignInByIDFromToken(ctx context.Context, userID uuid.UUID, tokenType string) (*SignedInUser, error) {
-	ud, err := g.store.UserById(ctx, userID)
+func (g *SigninService) SignInByIDFromToken(
+	ctx context.Context,
+	userID uuid.UUID,
+	tokenType string,
+) (*SignedInUser, error) {
+	ud, err := g.store.UserByID(ctx, userID)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			return nil, ErrEntityDoesNotExist
@@ -146,7 +155,7 @@ func (g *SigninService) InitializeMFA(ctx context.Context, email string) error {
 // this method is exclusively only to be used for this not any other things
 // as it doesnt increase lockout counts and check MFA settings
 func (g *SigninService) Validate(ctx context.Context, id uuid.UUID, password string) error {
-	ud, err := g.store.UserById(ctx, id)
+	ud, err := g.store.UserByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			return ErrEntityDoesNotExist
@@ -166,7 +175,12 @@ func (g *SigninService) Validate(ctx context.Context, id uuid.UUID, password str
 }
 
 // SignInMFA signs in the user with the credentials and the OTP
-func (g *SigninService) SignInMFA(ctx context.Context, email string, password string, otp string) (*SignedInUser, error) {
+func (g *SigninService) SignInMFA(
+	ctx context.Context,
+	email string,
+	password string,
+	otp string,
+) (*SignedInUser, error) {
 	ud, err := g.store.UserByEmail(ctx, email)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
@@ -182,7 +196,11 @@ func (g *SigninService) SignInMFA(ctx context.Context, email string, password st
 	ok := provider.ValidatePassword(password)
 	if !ok {
 		if g.cfg.AutoLockoutCount > 0 && provider.CurrentFailureCount() >= g.cfg.AutoLockoutCount {
-			err = g.userLocker.LockUser(ctx, provider.ID(), time.Now().UTC().Add(g.cfg.AutoLockoutDuration))
+			err = g.userLocker.LockUser(
+				ctx,
+				provider.ID(),
+				time.Now().UTC().Add(g.cfg.AutoLockoutDuration),
+			)
 			if err != nil {
 				g.log.Error("could not lock user after failure count exceeded", zap.Error(err))
 			}
@@ -226,6 +244,10 @@ func (g *SigninService) SignInMFA(ctx context.Context, email string, password st
 }
 
 // SignIn signs in a user with the supplied credentials
-func (g *SigninService) SignIn(ctx context.Context, email string, password string) (*SignedInUser, error) {
+func (g *SigninService) SignIn(
+	ctx context.Context,
+	email string,
+	password string,
+) (*SignedInUser, error) {
 	return g.SignInMFA(ctx, email, password, "")
 }

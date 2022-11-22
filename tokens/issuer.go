@@ -45,7 +45,14 @@ const (
 )
 
 type CommonTokenInserter interface {
-	InsertCommonToken(ctx context.Context, authorizationID uuid.UUID, tokenType string, token string, expires time.Time, properties tables.MapStructure) (int, error)
+	InsertCommonToken(
+		ctx context.Context,
+		authorizationID uuid.UUID,
+		tokenType string,
+		token string,
+		expires time.Time,
+		properties tables.MapStructure,
+	) (int, error)
 }
 
 type TokenIssuer struct {
@@ -138,7 +145,11 @@ func parseRSAPublicKey(key []byte) (*rsa.PublicKey, error) {
 	return nil, fmt.Errorf("supplied public key is not a public key, got %s", pemLoaded.Type)
 }
 
-func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonTokenInserter) *TokenIssuer {
+func NewIssuer(
+	log *zap.Logger,
+	cfg *config.JWTConfiguration,
+	storage CommonTokenInserter,
+) *TokenIssuer {
 	var privateKey interface{}
 	var publicKey interface{}
 
@@ -170,7 +181,10 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 			if err != nil {
 				log.Fatal("Unable to process symetric key")
 			}
-			options = append(options, jwt.WithKey(jwa.SignatureAlgorithm(cfg.Algorithm), privateKeyJwk))
+			options = append(
+				options,
+				jwt.WithKey(jwa.SignatureAlgorithm(cfg.Algorithm), privateKeyJwk),
+			)
 		}
 	case "RS256", "RS384", "RS512":
 		if len(cfg.RSAPrivateKey) > 0 {
@@ -217,13 +231,13 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 		if err != nil {
 			log.Fatal("Unable to process public key")
 		}
-		publicKeyJwk.Set("alg", cfg.Algorithm)
-		publicKeyJwk.Set("use", "sig")
-		publicKeyJwk.Set("kid", kid)
-		privateKeyJwk.Set("kid", kid)
+		_ = publicKeyJwk.Set("alg", cfg.Algorithm)
+		_ = publicKeyJwk.Set("use", "sig")
+		_ = publicKeyJwk.Set("kid", kid)
+		_ = privateKeyJwk.Set("kid", kid)
 		sha, err := publicKeyJwk.Thumbprint(crypto.SHA1)
 		if err == nil {
-			publicKeyJwk.Set("x5t", b64.StdEncoding.EncodeToString(sha))
+			_ = publicKeyJwk.Set("x5t", b64.StdEncoding.EncodeToString(sha))
 		}
 
 		options = append(options, jwt.WithKey(jwa.SignatureAlgorithm(cfg.Algorithm), publicKeyJwk))
@@ -231,11 +245,11 @@ func NewIssuer(log *zap.Logger, cfg *config.JWTConfiguration, storage CommonToke
 	default:
 		log.Fatal("Invalid jwt.alg defined. Possible values: HS256,HS384,HS512,RS256,RS384,RS512")
 	}
-	privateKeyJwk.Set("alg", cfg.Algorithm)
-	privateKeyJwk.Set("use", "sig")
+	_ = privateKeyJwk.Set("alg", cfg.Algorithm)
+	_ = privateKeyJwk.Set("use", "sig")
 	sha, err := privateKeyJwk.Thumbprint(crypto.SHA1)
 	if err == nil {
-		privateKeyJwk.Set("x5t", b64.StdEncoding.EncodeToString(sha))
+		_ = privateKeyJwk.Set("x5t", b64.StdEncoding.EncodeToString(sha))
 	}
 	return &TokenIssuer{
 		log:                log,
@@ -266,42 +280,75 @@ func (t *TokenIssuer) RememberMeDuration() time.Duration {
 	return t.rememberMeDuration
 }
 
-func (t *TokenIssuer) IssueRememberMeToken(ctx context.Context, authorizationID uuid.UUID) (string, error) {
+func (t *TokenIssuer) IssueRememberMeToken(
+	ctx context.Context,
+	authorizationID uuid.UUID,
+) (string, error) {
 	gen := generator.New()
 	token := gen.CreateSecureTokenWithSize(64)
-	_, err := t.tokenStorage.InsertCommonToken(ctx, authorizationID, string(RememberMeTokenType), string(token), time.Now().Add(t.rememberMeDuration), tables.MapStructure{})
+	_, err := t.tokenStorage.InsertCommonToken(
+		ctx,
+		authorizationID,
+		string(RememberMeTokenType),
+		string(token),
+		time.Now().Add(t.rememberMeDuration),
+		tables.MapStructure{},
+	)
 	if err != nil {
 		return "", err
 	}
 	return string(token), nil
 }
 
-func (t *TokenIssuer) IssueRefreshToken(ctx context.Context, authorizationID uuid.UUID) (string, error) {
+func (t *TokenIssuer) IssueRefreshToken(
+	ctx context.Context,
+	authorizationID uuid.UUID,
+) (string, error) {
 	gen := generator.New()
 	token := gen.CreateSecureToken()
-	_, err := t.tokenStorage.InsertCommonToken(ctx, authorizationID, string(RefreshTokenType), string(token), time.Now().Add(t.refreshTokenExpiry), tables.MapStructure{})
+	_, err := t.tokenStorage.InsertCommonToken(
+		ctx,
+		authorizationID,
+		string(RefreshTokenType),
+		string(token),
+		time.Now().Add(t.refreshTokenExpiry),
+		tables.MapStructure{},
+	)
 	if err != nil {
 		return "", err
 	}
 	return string(token), nil
 }
 
-func (t *TokenIssuer) IssueAuthorizationCode(ctx context.Context, authorizationID uuid.UUID, codeChallenge string, codeChallengeMethod string) (string, error) {
+func (t *TokenIssuer) IssueAuthorizationCode(
+	ctx context.Context,
+	authorizationID uuid.UUID,
+	codeChallenge string,
+	codeChallengeMethod string,
+) (string, error) {
 	gen := generator.New()
 	token := gen.CreateSecureToken()
-	_, err := t.tokenStorage.InsertCommonToken(ctx,
+	_, err := t.tokenStorage.InsertCommonToken(
+		ctx,
 		authorizationID,
 		string(AuthorizationCodeType),
 		string(token),
 		time.Now().Add(t.refreshTokenExpiry),
-		tables.MapStructure{"code_challenge": codeChallenge, "code_challenge_method": codeChallengeMethod})
+		tables.MapStructure{
+			"code_challenge":        codeChallenge,
+			"code_challenge_method": codeChallengeMethod,
+		},
+	)
 	if err != nil {
 		return "", err
 	}
 	return string(token), nil
 }
 
-func (t *TokenIssuer) IssueAccessTokenForMachineClient(clientID string, scopes []string) (jwt.Token, error) {
+func (t *TokenIssuer) IssueAccessTokenForMachineClient(
+	clientID string,
+	scopes []string,
+) (jwt.Token, error) {
 	tokenBuilder := jwt.NewBuilder()
 	scope := strings.Join(scopes, " ")
 	tokenBuilder.
@@ -315,7 +362,12 @@ func (t *TokenIssuer) IssueAccessTokenForMachineClient(clientID string, scopes [
 }
 
 // IssueAccessTokenForUser issues a standard access token for a user
-func (t *TokenIssuer) IssueAccessTokenForUser(user *user.SignedInUser, authorizationID uuid.UUID, clientID string, scopes []string) (jwt.Token, error) {
+func (t *TokenIssuer) IssueAccessTokenForUser(
+	user *user.SignedInUser,
+	authorizationID uuid.UUID,
+	clientID string,
+	scopes []string,
+) (jwt.Token, error) {
 	tokenBuilder := jwt.NewBuilder()
 	scope := strings.Join(scopes, " ")
 	tokenBuilder.
@@ -335,7 +387,12 @@ func (t *TokenIssuer) IssueAccessTokenForUser(user *user.SignedInUser, authoriza
 }
 
 // IssueNetlifyAccessTokenForUser differs from the standard access token, it has the app_metadata and user_metadata claims
-func (t *TokenIssuer) IssueNetlifyAccessTokenForUser(user *user.SignedInUser, authorizationID uuid.UUID, clientID string, scopes []string) (jwt.Token, error) {
+func (t *TokenIssuer) IssueNetlifyAccessTokenForUser(
+	user *user.SignedInUser,
+	authorizationID uuid.UUID,
+	clientID string,
+	scopes []string,
+) (jwt.Token, error) {
 	tokenBuilder := jwt.NewBuilder()
 	scope := strings.Join(scopes, " ")
 	tokenBuilder.
@@ -382,12 +439,12 @@ func (t *TokenIssuer) AsJWKSet() (jwk.Set, error) {
 	switch t.Alg() {
 	case "HS256", "HS384", "HS512":
 		set := jwk.NewSet()
-		set.AddKey(t.PrivateKey())
+		_ = set.AddKey(t.PrivateKey())
 		return set, nil
 	case "RS256", "RS384", "RS512":
 		set := jwk.NewSet()
-		set.AddKey(t.PrivateKey())
-		set.AddKey(t.PublicKey())
+		_ = set.AddKey(t.PrivateKey())
+		_ = set.AddKey(t.PublicKey())
 		return set, nil
 	}
 	return nil, errors.New("unknown algorithm")
@@ -405,7 +462,7 @@ func (t *TokenIssuer) AsPublicOnlyJWKSet() (jwk.Set, error) {
 		if err != nil {
 			return nil, err
 		}
-		set.AddKey(key)
+		_ = set.AddKey(key)
 		return set, nil
 	}
 	return nil, errors.New("unknown algorithm")

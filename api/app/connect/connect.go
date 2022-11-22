@@ -80,7 +80,15 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 	case passwordGrant:
 		username := r.FormValue("username")
 		if username == "" {
-			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "username field not supplied"))
+			err = render.Render(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"username field not supplied",
+				),
+			)
 			if err != nil {
 				c.logger.Error("unable to render response", zap.Error(err))
 			}
@@ -88,7 +96,15 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 		}
 		password := r.FormValue("password")
 		if password == "" {
-			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "password field not supplied"))
+			err = render.Render(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"password field not supplied",
+				),
+			)
 			if err != nil {
 				c.logger.Error("unable to render response", zap.Error(err))
 			}
@@ -96,7 +112,15 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 		}
 		clientID := r.FormValue("client_id")
 		if clientID == "" {
-			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "client_id field not supplied"))
+			err = render.Render(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"client_id field not supplied",
+				),
+			)
 			if err != nil {
 				c.logger.Error("unable to render response", zap.Error(err))
 			}
@@ -118,7 +142,15 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 	case refreshTokenGrant:
 		refreshToken := r.FormValue("refresh_token")
 		if refreshToken == "" {
-			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "refresh_token field not supplied"))
+			err = render.Render(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"refresh_token field not supplied",
+				),
+			)
 			if err != nil {
 				c.logger.Error("unable to render response", zap.Error(err))
 			}
@@ -158,7 +190,15 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 			id, suppliedSecret, err := auth.ClientIDFromBasicAuth(r, c.appService)
 			if err != nil {
 				c.logger.Info("unable to get client_id from basic auth", zap.Error(err))
-				err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "client_id field not supplied"))
+				err = render.Render(
+					w,
+					r,
+					createStdError(
+						stdInvalidRequest,
+						http.StatusBadRequest,
+						"client_id field not supplied",
+					),
+				)
 				if err != nil {
 					c.logger.Error("unable to render response", zap.Error(err))
 				}
@@ -168,14 +208,30 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 			clientSecret = suppliedSecret
 		}
 		if clientID == "" {
-			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "client_id field not supplied"))
+			err = render.Render(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"client_id field not supplied",
+				),
+			)
 			if err != nil {
 				c.logger.Error("unable to render response", zap.Error(err))
 			}
 			return
 		}
 		if clientSecret == "" {
-			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "client_secret field not supplied"))
+			err = render.Render(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"client_secret field not supplied",
+				),
+			)
 			if err != nil {
 				c.logger.Error("unable to render response", zap.Error(err))
 			}
@@ -195,7 +251,11 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 		c.logger.Debug("auth code")
 		code := r.FormValue("code")
 		if code == "" {
-			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "code field not supplied"))
+			err = render.Render(
+				w,
+				r,
+				createStdError(stdInvalidRequest, http.StatusBadRequest, "code field not supplied"),
+			)
 			if err != nil {
 				c.logger.Error("unable to render response", zap.Error(err))
 			}
@@ -203,7 +263,15 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 		}
 		redirectURI := r.FormValue("redirect_uri")
 		if redirectURI == "" {
-			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "redirect_uri field not supplied"))
+			err = render.Render(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"redirect_uri field not supplied",
+				),
+			)
 			if err != nil {
 				c.logger.Error("unable to render response", zap.Error(err))
 			}
@@ -211,7 +279,15 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 		}
 		clientID := r.FormValue("client_id")
 		if clientID == "" {
-			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "client_id field not supplied"))
+			err = render.Render(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"client_id field not supplied",
+				),
+			)
 			if err != nil {
 				c.logger.Error("unable to render response", zap.Error(err))
 			}
@@ -221,7 +297,10 @@ func (c *ConnnectRessource) Token(w http.ResponseWriter, r *http.Request) {
 		codeVerifier := r.FormValue("code_verifier")
 		if codeVerifier == "" && clientSecret == "" {
 			//https://datatracker.ietf.org/doc/html/rfc7636
-			c.logger.Warn("no code verifier for PKCE AND no client secret!", zap.String("client_id", clientID))
+			c.logger.Warn(
+				"no code verifier for PKCE AND no client secret!",
+				zap.String("client_id", clientID),
+			)
 		}
 
 		req := &authorizationCodeTokenRequest{
@@ -253,7 +332,15 @@ func (c *ConnnectRessource) authorize(w http.ResponseWriter, r *http.Request) {
 	case "code":
 		clientID := r.FormValue("client_id")
 		if clientID == "" {
-			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "client_id field not supplied"))
+			err = render.Render(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"client_id field not supplied",
+				),
+			)
 			if err != nil {
 				c.logger.Error("unable to render response", zap.Error(err))
 			}
@@ -276,7 +363,11 @@ func (c *ConnnectRessource) authorize(w http.ResponseWriter, r *http.Request) {
 		c.authorizeAuthorizationCode(req, w, r)
 		return
 	default:
-		err = render.Render(w, r, createStdError(stdUnspportedResponseType, http.StatusBadRequest, ""))
+		err = render.Render(
+			w,
+			r,
+			createStdError(stdUnspportedResponseType, http.StatusBadRequest, ""),
+		)
 		if err != nil {
 			c.logger.Error("unable to render response", zap.Error(err))
 		}
@@ -307,7 +398,11 @@ func (c *ConnnectRessource) userinfo(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := c.userSignIn.UserFromSubject(r.Context(), id)
 	if err != nil {
-		err = render.Render(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		err = render.Render(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		if err != nil {
 			c.logger.Error("unable to render response", zap.Error(err))
 		}

@@ -45,7 +45,8 @@ func Execute() {
 
 func init() {
 
-	rootCommand.PersistentFlags().StringVar(&ConfigFileLocation, "config", "", "config file to be used")
+	rootCommand.PersistentFlags().
+		StringVar(&ConfigFileLocation, "config", "", "config file to be used")
 
 	verifyCommand.AddCommand(&sendTestMailCommand)
 

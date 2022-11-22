@@ -3,9 +3,9 @@ package connect
 import (
 	"errors"
 	"fmt"
+	"html/template"
 	"net/http"
 	"net/url"
-	"text/template"
 	"time"
 
 	"github.com/eisenwinter/gotrxx/application"
@@ -16,23 +16,46 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizationCodeRequest, w http.ResponseWriter, r *http.Request) {
+func (c *ConnnectRessource) authorizeAuthorizationCode(
+	req *authorizeAuthorizationCodeRequest,
+	w http.ResponseWriter,
+	r *http.Request,
+) {
 	if req.clientID == "" {
-		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, "requires client_id"))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInvalidClient, http.StatusBadRequest, "requires client_id"),
+		)
 		return
 	}
 	app, err := c.appService.ApplicationByClientID(r.Context(), req.clientID)
 	if err != nil {
 		if errors.Is(application.ErrNotFound, err) {
-			render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, "invalid client_id"))
+			render.Respond(
+				w,
+				r,
+				createStdError(stdInvalidClient, http.StatusBadRequest, "invalid client_id"),
+			)
 			return
 		}
-		c.logger.Error("authorization code flow: (authorize) unexpected error getting application", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		c.logger.Error(
+			"authorization code flow: (authorize) unexpected error getting application",
+			zap.Error(err),
+		)
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
 	if app.IsRetired() {
-		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, "invalid client_id"))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInvalidClient, http.StatusBadRequest, "invalid client_id"),
+		)
 		return
 	}
 	if !app.IsFlowAllowed(application.AuthorizationCodeFlow) {
@@ -46,18 +69,38 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizati
 
 	if app.Properties().PKCE() {
 		if req.codeChallenge == "" {
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "PKCE: missing code_challenge"))
+			render.Respond(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"PKCE: missing code_challenge",
+				),
+			)
 			return
 		}
 		if req.codeChallengeMethod != "S256" {
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "PKCE: unsupoorted code_challenge_method, plain is not supported"))
+			render.Respond(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"PKCE: unsupoorted code_challenge_method, plain is not supported",
+				),
+			)
 			return
 		}
 	}
 	redirectToUse := ""
 	if req.redirectURI != "" {
 		if !app.IsAllowedRedirectURI(req.redirectURI) {
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid redirect_uri"))
+			render.Respond(
+				w,
+				r,
+				createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid redirect_uri"),
+			)
 		}
 		redirectToUse = req.redirectURI
 	} else if len(app.Properties().RedirectURIs()) > 0 {
@@ -83,7 +126,12 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizati
 
 		returnParam := url.Values{}
 		returnParam.Add("return_url", fmt.Sprintf("/connect/authorize?%s", params.Encode()))
-		http.Redirect(w, r, fmt.Sprintf("/account/signin?%s", returnParam.Encode()), http.StatusFound)
+		http.Redirect(
+			w,
+			r,
+			fmt.Sprintf("/account/signin?%s", returnParam.Encode()),
+			http.StatusFound,
+		)
 	}
 
 	tokenCookie, err := r.Cookie("__gotrxx")
@@ -92,8 +140,15 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizati
 			redirect()
 			return
 		}
-		c.logger.Error("authorization code flow: (authorize) unexpected cookie error", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		c.logger.Error(
+			"authorization code flow: (authorize) unexpected cookie error",
+			zap.Error(err),
+		)
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
 
@@ -106,6 +161,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizati
 			Path:     "/",
 			Expires:  time.Unix(0, 0),
 			HttpOnly: true,
+			Secure:   true,
 		}
 		http.SetCookie(w, c)
 		redirect()
@@ -113,16 +169,30 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizati
 	}
 	userID, err := uuid.Parse(t.Subject())
 	if err != nil {
-		c.logger.Error("authorization code flow: (authorize) invalid user id issued", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		c.logger.Error(
+			"authorization code flow: (authorize) invalid user id issued",
+			zap.Error(err),
+		)
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 	}
 	auth, err := c.autService.VerifyUserAuthorization(r.Context(), userID, req.clientID)
 	if err != nil && errors.Is(authorization.ErrUngrantedImplicitAutoGrant, err) {
 		c.logger.Debug("authorization code flow: (authorize) grantig implicit authorization")
 		auth, err = c.autService.ImplicitAuthorization(r.Context(), userID, req.clientID, req.scope)
 		if err != nil {
-			c.logger.Error("authorization code flow: (authorize) grantig implicit authorization failed", zap.Error(err))
-			render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+			c.logger.Error(
+				"authorization code flow: (authorize) grantig implicit authorization failed",
+				zap.Error(err),
+			)
+			render.Respond(
+				w,
+				r,
+				createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+			)
 			return
 		}
 	} else if err != nil {
@@ -131,24 +201,47 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizati
 		return
 	}
 
-	code, err := c.issuer.IssueAuthorizationCode(r.Context(), auth.ID(), req.codeChallenge, req.codeChallengeMethod)
+	code, err := c.issuer.IssueAuthorizationCode(
+		r.Context(),
+		auth.ID(),
+		req.codeChallenge,
+		req.codeChallengeMethod,
+	)
 	if err != nil {
 		c.logger.Error("authorization code flow: (authorize) unable to issue authorization code")
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
 
 	switch req.responseMode {
 	case "query":
 		if req.redirectURI == "" {
-			c.logger.Error("authorization code flow: (authorize) query is only supported with supplied return url")
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "redirect_uri is needed when using response_mode=query"))
+			c.logger.Error(
+				"authorization code flow: (authorize) query is only supported with supplied return url",
+			)
+			render.Respond(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"redirect_uri is needed when using response_mode=query",
+				),
+			)
 			return
 		}
 		rurl, err := url.Parse(req.redirectURI)
 		if err != nil {
 			c.logger.Error("authorization code flow: (authorize) invalid return url")
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "redirect_uri invalid"))
+			render.Respond(
+				w,
+				r,
+				createStdError(stdInvalidRequest, http.StatusBadRequest, "redirect_uri invalid"),
+			)
 			return
 		}
 		qs := rurl.Query()
@@ -160,14 +253,28 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizati
 		http.Redirect(w, r, res, http.StatusFound)
 	case "fragment":
 		if req.redirectURI == "" {
-			c.logger.Error("authorization code flow: (authorize) fragment is only supported with supplied return url")
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "redirect_uri is needed when using response_mode=fragment"))
+			c.logger.Error(
+				"authorization code flow: (authorize) fragment is only supported with supplied return url",
+			)
+			render.Respond(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"redirect_uri is needed when using response_mode=fragment",
+				),
+			)
 			return
 		}
 		rurl, err := url.Parse(req.redirectURI)
 		if err != nil {
 			c.logger.Error("authorization code flow: (authorize) invalid return url")
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "redirect_uri invalid"))
+			render.Respond(
+				w,
+				r,
+				createStdError(stdInvalidRequest, http.StatusBadRequest, "redirect_uri invalid"),
+			)
 			return
 		}
 		fp := url.Values{}
@@ -178,8 +285,18 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizati
 		http.Redirect(w, r, res, http.StatusFound)
 	case "form_post":
 		if req.redirectURI == "" {
-			c.logger.Error("authorization code flow: (authorize) form_post is only supported with supplied return url")
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "redirect_uri is needed when using response_mode=query"))
+			c.logger.Error(
+				"authorization code flow: (authorize) form_post is only supported with supplied return url",
+			)
+			render.Respond(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"redirect_uri is needed when using response_mode=query",
+				),
+			)
 			return
 		}
 		postData := &authorizedAuthorizationCodeResponse{
@@ -201,10 +318,17 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizati
 	   </html>`)
 		if err != nil {
 			c.logger.Error("authorization code flow: (authorize) invalid form_post template")
-			render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+			render.Respond(
+				w,
+				r,
+				createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+			)
 			return
 		}
-		t.Execute(w, postData)
+		err = t.Execute(w, postData)
+		if err != nil {
+			c.logger.Error("authorization code flow: unable to execute form template")
+		}
 	default:
 		response := &authorizedAuthorizationCodeResponse{
 			Code:  code,
@@ -214,15 +338,31 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(req *authorizeAuthorizati
 	}
 }
 
-func (c *ConnnectRessource) authorizationCodeGrant(req *authorizationCodeTokenRequest, w http.ResponseWriter, r *http.Request) {
+func (c *ConnnectRessource) authorizationCodeGrant(
+	req *authorizationCodeTokenRequest,
+	w http.ResponseWriter,
+	r *http.Request,
+) {
 	if req.clientID == "" {
-		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, "requires client_id"))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInvalidClient, http.StatusBadRequest, "requires client_id"),
+		)
 		return
 	}
-	auth, err := c.autService.AuthorizationByCommonToken(r.Context(), string(tokens.AuthorizationCodeType), req.code)
+	auth, err := c.autService.AuthorizationByCommonToken(
+		r.Context(),
+		string(tokens.AuthorizationCodeType),
+		req.code,
+	)
 	if err != nil {
 		c.logger.Error("authorization code flow: failed to get application", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
 	if auth.IsRevoked() {
@@ -231,7 +371,11 @@ func (c *ConnnectRessource) authorizationCodeGrant(req *authorizationCodeTokenRe
 	}
 	app := auth.Application()
 	if app.IsRetired() {
-		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, "Application does not exist."))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInvalidClient, http.StatusBadRequest, "Application does not exist."),
+		)
 		return
 	}
 	if !app.IsFlowAllowed(application.AuthorizationCodeFlow) {
@@ -239,7 +383,15 @@ func (c *ConnnectRessource) authorizationCodeGrant(req *authorizationCodeTokenRe
 		return
 	}
 	if app.ClientID() != req.clientID {
-		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusUnauthorized, "Client authentication failed, due to missing or invalid client credentials."))
+		render.Respond(
+			w,
+			r,
+			createStdError(
+				stdInvalidClient,
+				http.StatusUnauthorized,
+				"Client authentication failed, due to missing or invalid client credentials.",
+			),
+		)
 		return
 	}
 	if !app.ValidateClientSecret(req.clientSecret) {
@@ -247,19 +399,39 @@ func (c *ConnnectRessource) authorizationCodeGrant(req *authorizationCodeTokenRe
 		return
 	}
 	if !app.IsAllowedRedirectURI(req.redirectURI) {
-		c.logger.Debug("invalid redirect uri for application", zap.String("supplied_uri", req.redirectURI), zap.Strings("accepted_uris", app.Properties().RedirectURIs()))
-		render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid redirect_uri"))
+		c.logger.Debug(
+			"invalid redirect uri for application",
+			zap.String("supplied_uri", req.redirectURI),
+			zap.Strings("accepted_uris", app.Properties().RedirectURIs()),
+		)
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid redirect_uri"),
+		)
 		return
 	}
 
 	if app.Properties().PKCE() {
 		if req.codeVerifier == "" {
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "missing code_verifier"))
+			render.Respond(
+				w,
+				r,
+				createStdError(stdInvalidRequest, http.StatusBadRequest, "missing code_verifier"),
+			)
 			return
 		}
 		//https://datatracker.ietf.org/doc/html/rfc7636#section-4.1
 		if len(req.codeVerifier) < 43 || len(req.codeVerifier) > 128 {
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid code_verifier supplied"))
+			render.Respond(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"invalid code_verifier supplied",
+				),
+			)
 			return
 		}
 	}
@@ -269,7 +441,11 @@ func (c *ConnnectRessource) authorizationCodeGrant(req *authorizationCodeTokenRe
 			if errors.Is(tokens.ErrChallengeFailed, err) {
 				c.logger.Info("PKCE code validation failed")
 				//https://datatracker.ietf.org/doc/html/rfc7636#section-4.6
-				render.Respond(w, r, createStdError(stdInvalidGrant, http.StatusBadRequest, "pixi verification"))
+				render.Respond(
+					w,
+					r,
+					createStdError(stdInvalidGrant, http.StatusBadRequest, "pixi verification"),
+				)
 				return
 			}
 			c.logger.Error("unexpected PKCE code verification error", zap.Error(err))
@@ -277,41 +453,81 @@ func (c *ConnnectRessource) authorizationCodeGrant(req *authorizationCodeTokenRe
 		}
 	}
 
-	err = c.rotator.RotateCommonToken(r.Context(), tokens.AuthorizationCodeType, req.code, app.ClientID())
+	err = c.rotator.RotateCommonToken(
+		r.Context(),
+		tokens.AuthorizationCodeType,
+		req.code,
+		app.ClientID(),
+	)
 	if err != nil {
 		if errors.Is(tokens.ErrTokenInvalidClientId, err) {
 			c.logger.Error("authorization code flow: failed to rotate code", zap.Error(err))
 			render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, ""))
 		}
 		c.logger.Error("authorization code flow: failed to rotate code", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
 
-	user, err := c.userSignIn.SignInByIDFromToken(r.Context(), auth.UserID(), string(tokens.AuthorizationCodeType))
+	user, err := c.userSignIn.SignInByIDFromToken(
+		r.Context(),
+		auth.UserID(),
+		string(tokens.AuthorizationCodeType),
+	)
 	if err != nil {
 		c.logger.Error("authorization code flow: failed to sign in user", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
-	t, err := c.issuer.IssueAccessTokenForUser(user, auth.ID(), auth.Application().ClientID(), auth.Scopes())
+	t, err := c.issuer.IssueAccessTokenForUser(
+		user,
+		auth.ID(),
+		auth.Application().ClientID(),
+		auth.Scopes(),
+	)
 	if err != nil {
-		c.logger.Error("authorization code flow: failed to issue a new access token", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		c.logger.Error(
+			"authorization code flow: failed to issue a new access token",
+			zap.Error(err),
+		)
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
 	signed, err := c.issuer.Sign(t)
 	if err != nil {
 		c.logger.Error("authorization code flow: failed to sign a access token", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
 	refresh := ""
 	if auth.Application().IsFlowAllowed(application.RefreshTokenFlow) {
 		refresh, err = c.issuer.IssueRefreshToken(r.Context(), auth.ID())
 		if err != nil {
-			c.logger.Error("authorization code flow: failed to issue a new refresh token", zap.Error(err))
-			render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+			c.logger.Error(
+				"authorization code flow: failed to issue a new refresh token",
+				zap.Error(err),
+			)
+			render.Respond(
+				w,
+				r,
+				createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+			)
 			return
 		}
 	}

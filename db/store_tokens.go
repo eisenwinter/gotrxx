@@ -14,21 +14,34 @@ import (
 
 // all token related things in store
 
-type autIdPair struct {
+type autIDPair struct {
 	ApplicationID int       `db:"application_id"`
 	UserID        uuid.UUID `db:"user_id"`
 }
 
-func (d *DataStore) InsertCommonToken(ctx context.Context, authorizationID uuid.UUID, tokenType string, token string, expires time.Time, properties tables.MapStructure) (int, error) {
-	exists, err := d.exists("tokens", sq.And{sq.Eq{"token_type": tokenType}, sq.Eq{"token": token}})
+func (d *DataStore) InsertCommonToken(
+	ctx context.Context,
+	authorizationID uuid.UUID,
+	tokenType string,
+	token string,
+	expires time.Time,
+	properties tables.MapStructure,
+) (int, error) {
+	exists, err := d.exists(
+		ctx,
+		"tokens",
+		sq.And{sq.Eq{"token_type": tokenType}, sq.Eq{"token": token}},
+	)
 	if err != nil {
 		return 0, err
 	}
 	if exists {
 		return 0, ErrAlreadyExists
 	}
-	s := sq.Select("application_id", "user_id").From("authorizations").Where(sq.And{sq.Eq{"id": authorizationID}, sq.Eq{"revoked_at": nil}})
-	var pair autIdPair
+	s := sq.Select("application_id", "user_id").
+		From("authorizations").
+		Where(sq.And{sq.Eq{"id": authorizationID}, sq.Eq{"revoked_at": nil}})
+	var pair autIDPair
 	err = d.getStatement(ctx, &pair, s, nil)
 	if err != nil {
 		return 0, err
@@ -53,7 +66,10 @@ func (d *DataStore) InsertCommonToken(ctx context.Context, authorizationID uuid.
 	return id, nil
 }
 
-func (d *DataStore) RevokeCommonTokensForAuthorization(ctx context.Context, authorizationID uuid.UUID) (int, error) {
+func (d *DataStore) RevokeCommonTokensForAuthorization(
+	ctx context.Context,
+	authorizationID uuid.UUID,
+) (int, error) {
 	a := sq.Update("tokens").
 		Set("revoked_at", time.Now().UTC()).
 		Set("updated_at", time.Now().UTC()).
@@ -83,7 +99,11 @@ func (d *DataStore) RevokeCommonToken(ctx context.Context, tokenType string, tok
 	return nil
 }
 
-func (d *DataStore) CommonTokenDetails(ctx context.Context, tokenType string, token string) (*CommonTokenDetails, error) {
+func (d *DataStore) CommonTokenDetails(
+	ctx context.Context,
+	tokenType string,
+	token string,
+) (*CommonTokenDetails, error) {
 	s := sq.Select("tokens.id",
 		"tokens.authorization_id",
 		"tokens.user_id",

@@ -55,7 +55,7 @@ func compose(logger *zap.Logger,
 	if err != nil {
 		logger.Error("Could not create mindpwd validation", zap.Error(err))
 	}
-	//use same settings as issuer (duh)
+	// use same settings as issuer (duh)
 	tokenAuth = jwtauth.New(issuer.Alg(), issuer.PrivateKey(), issuer.PublicKey())
 
 	r := chi.NewRouter()
@@ -83,13 +83,46 @@ func compose(logger *zap.Logger,
 		})
 	}
 
-	connectRessource := connect.NewConnnectRessource(logger.Named("connect_ressource"), issuer, rotator, signInService, validate, authService, appService, verifier)
-	netlifyRessource := netlify.NewNetlifyRessource(logger.Named("netlify_ressource"), connectRessource, rotator)
-	accountRessource := ar.NewAccountRessource(logger.Named("account_ressource"), signInService, cfg.Behaviour, userService, authService, issuer, registry, rotator, cfg.Server, fileSystems, verifier)
+	connectRessource := connect.NewConnnectRessource(
+		logger.Named("connect_ressource"),
+		issuer,
+		rotator,
+		signInService,
+		validate,
+		authService,
+		appService,
+		verifier,
+	)
+	netlifyRessource := netlify.NewNetlifyRessource(
+		logger.Named("netlify_ressource"),
+		connectRessource,
+		rotator,
+	)
+	accountRessource := ar.NewAccountRessource(
+		logger.Named("account_ressource"),
+		signInService,
+		cfg.Behaviour,
+		userService,
+		authService,
+		issuer,
+		registry,
+		rotator,
+		cfg.Server,
+		fileSystems,
+		verifier,
+	)
 	metaRessource := meta.NewMetaRessource(logger.Named("meta_ressource"), cfg.Behaviour, issuer)
 
 	if cfg.ManageEndpoint.Enable {
-		manageRessource := management.NewManagementRessource(logger.Named("management_ressource"), *cfg, manageUserService, manageAppService, manageAuthService, manageRoleService, manageInviteService)
+		manageRessource := management.NewManagementRessource(
+			logger.Named("management_ressource"),
+			*cfg,
+			manageUserService,
+			manageAppService,
+			manageAuthService,
+			manageRoleService,
+			manageInviteService,
+		)
 		r.Mount("/manage", manageRessource.Router())
 	}
 
@@ -112,7 +145,10 @@ func compose(logger *zap.Logger,
 				if err != nil {
 					logger.Warn("Unable to load favicon", zap.Error(err))
 				}
-				w.Write(buffer)
+				_, err = w.Write(buffer)
+				if err != nil {
+					logger.Warn("Unable to write favicon", zap.Error(err))
+				}
 				return
 			}
 

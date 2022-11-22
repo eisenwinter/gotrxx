@@ -66,14 +66,18 @@ func (m *ManagementRessource) grantAuthorization(w http.ResponseWriter, r *http.
 }
 
 func (m *ManagementRessource) revokeAuthorization(w http.ResponseWriter, r *http.Request) {
-	var req *clientIdAndUserIdRequest
+	var req *clientIDAndUserIDRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		m.log.Info("invalid payload data", zap.Error(err))
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
-	err = m.authService.RevokeAuthorizationByClientIDAndUserID(r.Context(), req.ClientID, req.UserID)
+	err = m.authService.RevokeAuthorizationByClientIDAndUserID(
+		r.Context(),
+		req.ClientID,
+		req.UserID,
+	)
 	success := true
 	message := "Successfully revoked authorization"
 	if err != nil {

@@ -14,7 +14,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func (d *DataStore) whereFromAdapater(table string, query string) (func(sq.SelectBuilder) sq.SelectBuilder, error) {
+func (d *DataStore) whereFromAdapater(
+	table string,
+	query string,
+) (func(sq.SelectBuilder) sq.SelectBuilder, error) {
 	if query != "" {
 		where, err := d.adapters[table].Where(query)
 		if err != nil {
@@ -34,7 +37,12 @@ func (d *DataStore) whereFromAdapater(table string, query string) (func(sq.Selec
 	}, nil
 }
 
-func (d *DataStore) orderByFromAdapater(q sq.SelectBuilder, table string, defaultOrderby string, opts ListOptions) sq.SelectBuilder {
+func (d *DataStore) orderByFromAdapater(
+	q sq.SelectBuilder,
+	table string,
+	defaultOrderby string,
+	opts ListOptions,
+) sq.SelectBuilder {
 	if opts.Sort != "" {
 		order, err := d.adapters[table].OrderBy(opts.Sort)
 		if err != nil {
@@ -49,7 +57,10 @@ func (d *DataStore) orderByFromAdapater(q sq.SelectBuilder, table string, defaul
 	return q
 }
 
-func (d *DataStore) Applications(ctx context.Context, opts ListOptions) ([]*tables.ApplicationTable, int, error) {
+func (d *DataStore) Applications(
+	ctx context.Context,
+	opts ListOptions,
+) ([]*tables.ApplicationTable, int, error) {
 	if opts.Page <= 0 {
 		opts.Page = 1
 	}
@@ -75,7 +86,16 @@ func (d *DataStore) Applications(ctx context.Context, opts ListOptions) ([]*tabl
 
 	var entities []*tables.ApplicationTable
 	q := sq.
-		Select("id", "client_id", "name", "type", "properties", "retired_on", "confidentiality", "client_secret").
+		Select(
+			"id",
+			"client_id",
+			"name",
+			"type",
+			"properties",
+			"retired_on",
+			"confidentiality",
+			"client_secret",
+		).
 		From("applications")
 	q = applyWhere(q)
 	q = d.orderByFromAdapater(q, "applications", "id DESC", opts)
@@ -91,10 +111,22 @@ func (d *DataStore) Applications(ctx context.Context, opts ListOptions) ([]*tabl
 	return entities, c, nil
 }
 
-func (d *DataStore) ApplicationByClientID(ctx context.Context, clientID string) (*tables.ApplicationTable, error) {
+func (d *DataStore) ApplicationByClientID(
+	ctx context.Context,
+	clientID string,
+) (*tables.ApplicationTable, error) {
 	var entity tables.ApplicationTable
 	q := sq.
-		Select("id", "client_id", "name", "type", "properties", "retired_on", "confidentiality", "client_secret").
+		Select(
+			"id",
+			"client_id",
+			"name",
+			"type",
+			"properties",
+			"retired_on",
+			"confidentiality",
+			"client_secret",
+		).
 		From("applications").Where(sq.Eq{"client_id": clientID})
 	err := d.getStatement(ctx, &entity, q, nil)
 	if err != nil {
@@ -109,7 +141,16 @@ func (d *DataStore) ApplicationByClientID(ctx context.Context, clientID string) 
 func (d *DataStore) ApplicationByID(ctx context.Context, id int) (*tables.ApplicationTable, error) {
 	var entity tables.ApplicationTable
 	q := sq.
-		Select("id", "client_id", "name", "type", "properties", "retired_on", "confidentiality", "client_secret").
+		Select(
+			"id",
+			"client_id",
+			"name",
+			"type",
+			"properties",
+			"retired_on",
+			"confidentiality",
+			"client_secret",
+		).
 		From("applications").Where(sq.Eq{"id": id})
 	err := d.getStatement(ctx, &entity, q, nil)
 	if err != nil {
@@ -121,7 +162,10 @@ func (d *DataStore) ApplicationByID(ctx context.Context, id int) (*tables.Applic
 	return &entity, nil
 }
 
-func (d *DataStore) ActiveApplicationsWithUserAuthorizations(ctx context.Context, userID uuid.UUID) ([]*tables.ApplicationTable, error) {
+func (d *DataStore) ActiveApplicationsWithUserAuthorizations(
+	ctx context.Context,
+	userID uuid.UUID,
+) ([]*tables.ApplicationTable, error) {
 	q := sq.
 		Select("applications.id",
 			"applications.client_id",
@@ -178,7 +222,11 @@ func (d *DataStore) CreateApplication(ctx context.Context,
 	return id, nil
 }
 
-func (d *DataStore) UpdateApplicationProperties(ctx context.Context, clientID string, properties tables.MapStructure) error {
+func (d *DataStore) UpdateApplicationProperties(
+	ctx context.Context,
+	clientID string,
+	properties tables.MapStructure,
+) error {
 	ts := time.Now().UTC()
 	app := sq.
 		Update("applications").
@@ -189,7 +237,11 @@ func (d *DataStore) UpdateApplicationProperties(ctx context.Context, clientID st
 	return err
 }
 
-func (d *DataStore) SetApplicationSecret(ctx context.Context, clientID string, secret string) error {
+func (d *DataStore) SetApplicationSecret(
+	ctx context.Context,
+	clientID string,
+	secret string,
+) error {
 	ts := time.Now().UTC()
 	app := sq.
 		Update("applications").
@@ -202,17 +254,17 @@ func (d *DataStore) SetApplicationSecret(ctx context.Context, clientID string, s
 
 func (d *DataStore) DeleteAllRetiredApplications(ctx context.Context) ([]string, error) {
 	sel := sq.Select("client_id").From("applications").Where("retired_on IS NOT NULL")
-	var clientIds []string
-	err := d.selectStatement(ctx, &clientIds, sel, nil)
+	var clientIDs []string
+	err := d.selectStatement(ctx, &clientIDs, sel, nil)
 	if err != nil {
-		return clientIds, err
+		return clientIDs, err
 	}
 	del := sq.Delete("applications").Where("retired_on IS NOT NULL")
 	_, err = del.RunWith(d.db).ExecContext(ctx)
 	if err != nil {
-		return clientIds, err
+		return clientIDs, err
 	}
-	return clientIds, nil
+	return clientIDs, nil
 }
 
 func (d *DataStore) RetireApplication(ctx context.Context, id int) (int64, int64, error) {

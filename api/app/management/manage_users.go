@@ -24,7 +24,7 @@ func (m *ManagementRessource) listUsers(w http.ResponseWriter, r *http.Request) 
 	render.Respond(w, r, apps)
 }
 
-func (m *ManagementRessource) userById(w http.ResponseWriter, r *http.Request) {
+func (m *ManagementRessource) userByID(w http.ResponseWriter, r *http.Request) {
 	u := r.URL.Query().Get("id")
 	id, err := uuid.Parse(u)
 	if err != nil {
@@ -32,7 +32,7 @@ func (m *ManagementRessource) userById(w http.ResponseWriter, r *http.Request) {
 		render.Respond(w, r, createError("invalid query data", http.StatusBadRequest))
 		return
 	}
-	user, err := m.userService.ById(r.Context(), id)
+	user, err := m.userService.ByID(r.Context(), id)
 	if err != nil {
 		m.log.Error("error getting user by id", zap.Error(err))
 		render.Respond(w, r, createError("internal server error", http.StatusInternalServerError))

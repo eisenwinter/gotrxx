@@ -11,17 +11,24 @@ import (
 	"go.uber.org/zap"
 )
 
-func (d *DataStore) InviteUser(ctx context.Context, expires time.Time, email *string, code string, roles []string, applications ...int) error {
+func (d *DataStore) InviteUser(
+	ctx context.Context,
+	expires time.Time,
+	email *string,
+	code string,
+	roles []string,
+	applications ...int,
+) error {
 	tx, err := d.db.BeginTxx(ctx, nil)
 	if err != nil {
 		return err
 	}
-	var inviteId int32
+	var inviteID int32
 	inv := sq.Insert("user_invites").
 		Columns("email", "code", "expires_at", "created_at").
 		Values(email, code, expires, time.Now().UTC()).
 		Suffix("RETURNING id")
-	err = d.returningInsertStatement(ctx, &inviteId, inv, tx)
+	err = d.returningInsertStatement(ctx, &inviteID, inv, tx)
 	if err != nil {
 		d.log.Debug("retunring insert statement failed")
 		rerr := tx.Rollback()
@@ -40,7 +47,7 @@ func (d *DataStore) InviteUser(ctx context.Context, expires time.Time, email *st
 		for _, v := range rolesIds {
 			i := sq.Insert("user_invite_roles").
 				Columns("role_id", "user_invite_id").
-				Values(v, inviteId)
+				Values(v, inviteID)
 			_, err := d.insertStatement(ctx, i, tx)
 			if err != nil {
 				rerr := tx.Rollback()
@@ -56,7 +63,7 @@ func (d *DataStore) InviteUser(ctx context.Context, expires time.Time, email *st
 		for _, v := range applications {
 			i := sq.Insert("user_invite_applications").
 				Columns("application_id", "user_invite_id").
-				Values(v, inviteId)
+				Values(v, inviteID)
 			_, err := d.insertStatement(ctx, i, tx)
 			if err != nil {
 				rerr := tx.Rollback()
@@ -71,18 +78,22 @@ func (d *DataStore) InviteUser(ctx context.Context, expires time.Time, email *st
 }
 
 func (d *DataStore) InviteCodeExists(ctx context.Context, code string) (bool, error) {
-	return d.exists("user_invites", sq.Eq{"code": code})
+	return d.exists(ctx, "user_invites", sq.Eq{"code": code})
 }
 
 func (d *DataStore) IsInviteable(ctx context.Context, email string) (bool, error) {
-	user, err := d.exists("users", sq.Eq{"email": email})
+	user, err := d.exists(ctx, "users", sq.Eq{"email": email})
 	if err != nil {
 		return false, err
 	}
 	if user {
 		return false, nil
 	}
-	invite, err := d.exists("user_invites", sq.And{sq.Eq{"email": email}, sq.Gt{"expires_at": time.Now().UTC()}})
+	invite, err := d.exists(
+		ctx,
+		"user_invites",
+		sq.And{sq.Eq{"email": email}, sq.Gt{"expires_at": time.Now().UTC()}},
+	)
 	if err != nil {
 		return false, err
 	}
@@ -98,7 +109,10 @@ func (d *DataStore) SetInviteSent(ctx context.Context, email string, code string
 	return err
 }
 
-func (d *DataStore) Invites(ctx context.Context, opts ListOptions) ([]*tables.UserInviteTable, int, error) {
+func (d *DataStore) Invites(
+	ctx context.Context,
+	opts ListOptions,
+) ([]*tables.UserInviteTable, int, error) {
 	if opts.Page <= 0 {
 		opts.Page = 1
 	}

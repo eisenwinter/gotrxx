@@ -16,7 +16,7 @@ import (
 	"go.uber.org/zap"
 )
 
-// habours the headless admin endpoints
+// ManagementRessource habours the headless admin endpoints
 type ManagementRessource struct {
 	log           *zap.Logger
 	cfg           config.Configuration
@@ -40,7 +40,11 @@ func (m *ManagementRessource) Router() *chi.Mux {
 	}))
 
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		m.log.Debug("Could not found", zap.String("method", r.Method), zap.String("path", r.URL.Path))
+		m.log.Debug(
+			"Could not found",
+			zap.String("method", r.Method),
+			zap.String("path", r.URL.Path),
+		)
 		w.WriteHeader(404)
 	})
 
@@ -73,7 +77,7 @@ func (m *ManagementRessource) Router() *chi.Mux {
 
 				pr.Route("/redirect-uri", func(r chi.Router) {
 					r.Put("/add", m.addRedirectUriToApplication)
-					r.Put("/remove", m.removeRedirectUriFromApplication)
+					r.Put("/remove", m.removeRedirectURIFromApplication)
 				})
 
 				pr.Route("/pkce", func(r chi.Router) {
@@ -93,7 +97,7 @@ func (m *ManagementRessource) Router() *chi.Mux {
 		})
 		gr.Route("/users", func(r chi.Router) {
 			r.With(pageinate).Get("/", m.listUsers)
-			r.Get("/by-id", m.userById)
+			r.Get("/by-id", m.userByID)
 			r.Route("/role", func(ri chi.Router) {
 				ri.Post("/add", m.addUserToRole)
 				ri.Put("/remove", m.removeUserFromRole)
@@ -208,8 +212,8 @@ func adminOnlyMiddleWare(rolesInToken bool, rc roleChecker) func(next http.Handl
 					return
 				}
 			} else {
-				tokenId := token.Subject()
-				id, err := uuid.Parse(tokenId)
+				tokenID := token.Subject()
+				id, err := uuid.Parse(tokenID)
 				if err != nil {
 					http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 					return

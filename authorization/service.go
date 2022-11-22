@@ -24,7 +24,7 @@ var (
 )
 
 type ApplicationSupplier interface {
-	ApplicationById(ctx context.Context, id int) (*application.Application, error)
+	ApplicationByID(ctx context.Context, id int) (*application.Application, error)
 	ApplicationByClientID(ctx context.Context, clientID string) (*application.Application, error)
 }
 
@@ -47,8 +47,11 @@ func NewAuthorizationService(log *zap.Logger,
 	}
 }
 
-func (s *Service) build(ctx context.Context, table *tables.AuthorizationTable) (*Authorization, error) {
-	app, err := s.supplier.ApplicationById(ctx, table.ApplicationID)
+func (s *Service) build(
+	ctx context.Context,
+	table *tables.AuthorizationTable,
+) (*Authorization, error) {
+	app, err := s.supplier.ApplicationByID(ctx, table.ApplicationID)
 	if err != nil {
 		return nil, err
 	}
@@ -61,7 +64,12 @@ func (s *Service) build(ctx context.Context, table *tables.AuthorizationTable) (
 	}
 	return a, nil
 }
-func (s *Service) AuthorizationByCommonToken(ctx context.Context, tokenType string, token string) (*Authorization, error) {
+
+func (s *Service) AuthorizationByCommonToken(
+	ctx context.Context,
+	tokenType string,
+	token string,
+) (*Authorization, error) {
 	//guranteed to be for a not revoked, not redeemed, not expired token with a not revoked auth and a not retired application
 	authTable, err := s.store.ActiveAuthorizationByCommonToken(ctx, tokenType, token)
 	if err != nil {
@@ -82,7 +90,11 @@ func (s *Service) AuthorizationByCommonToken(ctx context.Context, tokenType stri
 }
 
 // VerifyUserAuthorization returns a non-revoked authorization for a non-retired application
-func (s *Service) VerifyUserAuthorization(ctx context.Context, userID uuid.UUID, clientID string) (*Authorization, error) {
+func (s *Service) VerifyUserAuthorization(
+	ctx context.Context,
+	userID uuid.UUID,
+	clientID string,
+) (*Authorization, error) {
 	//guranteed to be non-revoked and application is non-retired
 	authTable, err := s.store.ActiveAuthorizationByUserAndClientID(ctx, clientID, userID)
 	if err != nil {
@@ -108,7 +120,12 @@ func (s *Service) VerifyUserAuthorization(ctx context.Context, userID uuid.UUID,
 	return auth, nil
 }
 
-func (s *Service) ImplicitAuthorization(ctx context.Context, userID uuid.UUID, clientID string, scopes string) (*Authorization, error) {
+func (s *Service) ImplicitAuthorization(
+	ctx context.Context,
+	userID uuid.UUID,
+	clientID string,
+	scopes string,
+) (*Authorization, error) {
 	//creates a authorization for the auto grant (done in signin now where it doesnt fit)
 	app, err := s.supplier.ApplicationByClientID(ctx, clientID)
 	if err != nil {

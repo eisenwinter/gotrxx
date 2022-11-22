@@ -15,8 +15,17 @@ type RoleService struct {
 	dispatcher *events.Dispatcher
 }
 
-func (r *RoleService) List(ctx context.Context, page int, pageSize int, q string, sort string) (*PaginationResponse, error) {
-	apps, total, err := r.store.Roles(ctx, db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort})
+func (r *RoleService) List(
+	ctx context.Context,
+	page int,
+	pageSize int,
+	q string,
+	sort string,
+) (*PaginationResponse, error) {
+	apps, total, err := r.store.Roles(
+		ctx,
+		db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort},
+	)
 	if err != nil {
 		return nil, err
 	}

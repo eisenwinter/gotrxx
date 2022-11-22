@@ -74,12 +74,12 @@ func connectAuthenticator(ba *BasicAuth, next http.Handler) http.Handler {
 				return
 			}
 			ctx = context.WithValue(ctx, ClientIDContextKey, clientID.(string))
-			autId, ok := token.Get(tokens.ClaimAuthorization)
+			autID, ok := token.Get(tokens.ClaimAuthorization)
 			if !ok {
 				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
 				return
 			}
-			ctx = context.WithValue(ctx, AuthorizationIDContextKey, autId.(string))
+			ctx = context.WithValue(ctx, AuthorizationIDContextKey, autID.(string))
 			sub := token.Subject()
 			ctx = context.WithValue(ctx, SubjectContextKey, sub)
 			ctx = context.WithValue(ctx, SourceContextKey, AuthorizationSourceBearer)
@@ -103,7 +103,7 @@ func ClientIDFromBasicAuth(r *http.Request, as ApplicationQuerySource) (string, 
 	if len(split) != 2 {
 		return "", "", ErrHeaderValueMalformed
 	}
-	clientId, err := url.QueryUnescape(split[0])
+	clientID, err := url.QueryUnescape(split[0])
 	if err != nil {
 		return "", "", ErrHeaderValueMalformed
 	}
@@ -111,7 +111,7 @@ func ClientIDFromBasicAuth(r *http.Request, as ApplicationQuerySource) (string, 
 	if err != nil {
 		return "", "", ErrHeaderValueMalformed
 	}
-	app, err := as.ApplicationByClientID(r.Context(), clientId)
+	app, err := as.ApplicationByClientID(r.Context(), clientID)
 	if err != nil {
 		return "", "", ErrUnknown
 	}

@@ -24,7 +24,9 @@ import (
 const maxIterationCycles = 100
 
 var (
-	ErrInviteOnly              = errors.New("behaivoural setting is set to only accept invited members")
+	ErrInviteOnly = errors.New(
+		"behaivoural setting is set to only accept invited members",
+	)
 	ErrTokenGenTimeout         = errors.New("could not generate a token within given cycles")
 	ErrEntityAlreadyExists     = errors.New("entity already exists in system")
 	ErrTokenExpired            = errors.New("supplied token has expired")
@@ -55,8 +57,17 @@ type UserService struct {
 	dispatcher *events.Dispatcher
 }
 
-func (g *UserService) List(ctx context.Context, page int, pageSize int, q string, sort string) (*PaginationResponse, error) {
-	apps, total, err := g.store.Users(ctx, db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort})
+func (g *UserService) List(
+	ctx context.Context,
+	page int,
+	pageSize int,
+	q string,
+	sort string,
+) (*PaginationResponse, error) {
+	apps, total, err := g.store.Users(
+		ctx,
+		db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -76,7 +87,7 @@ func (g *UserService) List(ctx context.Context, page int, pageSize int, q string
 	}, nil
 }
 
-func (g *UserService) ById(ctx context.Context, userID uuid.UUID) (*UserDTO, error) {
+func (g *UserService) ByID(ctx context.Context, userID uuid.UUID) (*UserDTO, error) {
 	user, err := g.store.User(ctx, userID)
 	if err != nil {
 		return nil, err
@@ -101,8 +112,8 @@ func (g *UserService) currentLocale(ctx context.Context) string {
 	return "en"
 }
 
-func (g *UserService) EmailToId(ctx context.Context, email string) (uuid.UUID, error) {
-	found, id, err := g.store.IdFromEmail(ctx, email)
+func (g *UserService) EmailToID(ctx context.Context, email string) (uuid.UUID, error) {
+	found, id, err := g.store.IDFromEmail(ctx, email)
 	if err != nil {
 		g.log.Error("Unable to get matching user from store", zap.Error(err))
 		return uuid.UUID{}, ErrNotFound
@@ -226,7 +237,12 @@ func (g *UserService) UnbanUser(ctx context.Context, id uuid.UUID) error {
 
 // InitialUserInvite used for docker container setup, it seeds a predefined a user invite for the admin user
 // so the admin user can signup with his wanted credentials
-func (g *UserService) InitialUserInvite(ctx context.Context, inviteCode string, roles []string, appIds []int) error {
+func (g *UserService) InitialUserInvite(
+	ctx context.Context,
+	inviteCode string,
+	roles []string,
+	appIds []int,
+) error {
 	exists, err := g.store.InviteCodeExists(ctx, string(inviteCode))
 	if err != nil {
 		return err
@@ -257,7 +273,12 @@ func (g *UserService) InitialUserInvite(ctx context.Context, inviteCode string, 
 	return nil
 }
 
-func (g *UserService) InviteUser(ctx context.Context, email *string, roles []string, appIds []int) (generator.RandomTokenType, error) {
+func (g *UserService) InviteUser(
+	ctx context.Context,
+	email *string,
+	roles []string,
+	appIds []int,
+) (generator.RandomTokenType, error) {
 	tokenGen := generator.New()
 	inviteCode := tokenGen.CreatePINLikeToken()
 	exists, err := g.store.InviteCodeExists(ctx, string(inviteCode))
@@ -309,7 +330,11 @@ func (g *UserService) InviteUser(ctx context.Context, email *string, roles []str
 		e = *email
 		err := g.mailer.SendInviteMail(e, string(inviteCode), g.currentLocale(ctx))
 		if err != nil {
-			g.log.Error("Could not send invite email to user", zap.String("email", e), zap.Error(err))
+			g.log.Error(
+				"Could not send invite email to user",
+				zap.String("email", e),
+				zap.Error(err),
+			)
 		} else {
 			err = g.store.SetInviteSent(ctx, e, string(inviteCode))
 			if err != nil {

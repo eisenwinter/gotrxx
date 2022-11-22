@@ -34,7 +34,7 @@ func (a *AccountRessource) triggerPasswordRecovery(w http.ResponseWriter, r *htt
 		}
 		return
 	}
-	id, found := a.userService.EmailToId(r.Context(), email)
+	id, found := a.userService.EmailToID(r.Context(), email)
 	if !found {
 		err := a.requestRecoverTmpl.Execute(w, map[string]interface{}{
 			"i18n":           a.getTranslatorFor(r.Context(), "request_password_recovery"),

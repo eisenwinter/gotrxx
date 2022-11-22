@@ -29,7 +29,13 @@ var seedInviteCommand = cobra.Command{
 		dispatcher := bootstrapDispatcher(dataStore.Auditor())
 
 		//setup base service
-		baseService := manage.NewUserService(dataStore, TopLevelLogger.Named("gotrxx"), LoadedConfig, mailer, dispatcher)
+		baseService := manage.NewUserService(
+			dataStore,
+			TopLevelLogger.Named("gotrxx"),
+			LoadedConfig,
+			mailer,
+			dispatcher,
+		)
 		inviteToken, err := baseService.InviteUser(context.Background(), nil, roles, []int{1})
 		if err != nil {
 			log.Fatal("could not generate invite", zap.Error(err))
@@ -39,5 +45,6 @@ var seedInviteCommand = cobra.Command{
 }
 
 func init() {
-	seedInviteCommand.Flags().StringSliceVar(&roles, "role", []string{}, "append --role for each role you want to add (for example --role admin --role inviter)")
+	seedInviteCommand.Flags().
+		StringSliceVar(&roles, "role", []string{}, "append --role for each role you want to add (for example --role admin --role inviter)")
 }

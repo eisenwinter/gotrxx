@@ -12,7 +12,10 @@ import (
 	"go.uber.org/zap"
 )
 
-func (d *DataStore) Authorizations(ctx context.Context, opts ListOptions) ([]*tables.AuthorizationTable, int, error) {
+func (d *DataStore) Authorizations(
+	ctx context.Context,
+	opts ListOptions,
+) ([]*tables.AuthorizationTable, int, error) {
 	if opts.Page <= 0 {
 		opts.Page = 1
 	}
@@ -29,7 +32,8 @@ func (d *DataStore) Authorizations(ctx context.Context, opts ListOptions) ([]*ta
 	var entities []*tables.AuthorizationTable
 	q := sq.
 		Select("id", "application_id", "user_id", "properties", "revoked_at", "created_at", "updated_at").
-		From("authorizations").OrderBy("id DESC").Offset(uint64(offset)).Limit(uint64(opts.PageSize))
+		From("authorizations").
+		OrderBy("id DESC").Offset(uint64(offset)).Limit(uint64(opts.PageSize))
 	err = d.selectStatement(ctx, &entities, q, nil)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -41,7 +45,10 @@ func (d *DataStore) Authorizations(ctx context.Context, opts ListOptions) ([]*ta
 	return entities, c, nil
 }
 
-func (d *DataStore) ActiveAuthorizationsByUserID(ctx context.Context, userID uuid.UUID) ([]*tables.AuthorizationTable, error) {
+func (d *DataStore) ActiveAuthorizationsByUserID(
+	ctx context.Context,
+	userID uuid.UUID,
+) ([]*tables.AuthorizationTable, error) {
 	q := sq.
 		Select("authorizations.id",
 			"authorizations.application_id",
@@ -70,9 +77,20 @@ func (d *DataStore) ActiveAuthorizationsByUserID(ctx context.Context, userID uui
 	return entities, nil
 }
 
-func (d *DataStore) AuthorizationByID(ctx context.Context, id uuid.UUID) (*tables.AuthorizationTable, error) {
+func (d *DataStore) AuthorizationByID(
+	ctx context.Context,
+	id uuid.UUID,
+) (*tables.AuthorizationTable, error) {
 	q := sq.
-		Select("id", "application_id", "user_id", "properties", "revoked_at", "created_at", "updated_at").
+		Select(
+			"id",
+			"application_id",
+			"user_id",
+			"properties",
+			"revoked_at",
+			"created_at",
+			"updated_at",
+		).
 		From("authorizations").
 		Where(sq.Eq{"id": id})
 	var table tables.AuthorizationTable
@@ -86,7 +104,11 @@ func (d *DataStore) AuthorizationByID(ctx context.Context, id uuid.UUID) (*table
 	return &table, nil
 }
 
-func (d *DataStore) ActiveAuthorizationByUserAndClientID(ctx context.Context, clientID string, userID uuid.UUID) (*tables.AuthorizationTable, error) {
+func (d *DataStore) ActiveAuthorizationByUserAndClientID(
+	ctx context.Context,
+	clientID string,
+	userID uuid.UUID,
+) (*tables.AuthorizationTable, error) {
 	q := sq.
 		Select("authorizations.id",
 			"authorizations.application_id",
@@ -115,7 +137,11 @@ func (d *DataStore) ActiveAuthorizationByUserAndClientID(ctx context.Context, cl
 	return &table, nil
 }
 
-func (d *DataStore) ActiveAuthorizationByCommonToken(ctx context.Context, tokenType string, token string) (*tables.AuthorizationTable, error) {
+func (d *DataStore) ActiveAuthorizationByCommonToken(
+	ctx context.Context,
+	tokenType string,
+	token string,
+) (*tables.AuthorizationTable, error) {
 	q := sq.
 		Select("authorizations.id",
 			"authorizations.application_id",
@@ -148,8 +174,18 @@ func (d *DataStore) ActiveAuthorizationByCommonToken(ctx context.Context, tokenT
 	return &table, nil
 }
 
-func (d *DataStore) GrantAuthorization(ctx context.Context, applicationId int, userId uuid.UUID, properties tables.MapStructure) (uuid.UUID, error) {
-	m := map[string]interface{}{"application_id": applicationId, "user_id": userId, "properties": properties, "created_at": time.Now().UTC()}
+func (d *DataStore) GrantAuthorization(
+	ctx context.Context,
+	applicationId int,
+	userID uuid.UUID,
+	properties tables.MapStructure,
+) (uuid.UUID, error) {
+	m := map[string]interface{}{
+		"application_id": applicationId,
+		"user_id":        userID,
+		"properties":     properties,
+		"created_at":     time.Now().UTC(),
+	}
 	m["id"] = uuid.New() //Todo: decide if db suports auto uuid
 	insert := sq.Insert("authorizations").SetMap(m)
 	insert = insert.Suffix("RETURNING id")
@@ -162,9 +198,11 @@ func (d *DataStore) GrantAuthorization(ctx context.Context, applicationId int, u
 func (d *DataStore) RevokeAuthorization(ctx context.Context, id uuid.UUID) (int64, error) {
 	tx, err := d.db.BeginTxx(ctx, nil)
 	if err != nil {
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
+		if tx != nil {
+			rerr := tx.Rollback()
+			if rerr != nil {
+				d.log.Error("couldnt rollback", zap.Error(rerr))
+			}
 		}
 		return 0, err
 	}

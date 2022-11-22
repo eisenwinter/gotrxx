@@ -22,7 +22,9 @@ import (
 const maxIterationCycles = 100
 
 var (
-	ErrInviteOnly              = errors.New("behaivoural setting is set to only accept invited members")
+	ErrInviteOnly = errors.New(
+		"behaivoural setting is set to only accept invited members",
+	)
 	ErrTokenGenTimeout         = errors.New("could not generate a token within given cycles")
 	ErrEntityAlreadyExists     = errors.New("entity already exists in system")
 	ErrTokenExpired            = errors.New("supplied token has expired")
@@ -66,9 +68,9 @@ func (g *Service) currentLocale(ctx context.Context) string {
 	return "en"
 }
 
-// GetUserById returns a !unvalidated! user data provider
-func (g *Service) getUserById(ctx context.Context, id uuid.UUID) (*db.UserData, error) {
-	provider, err := g.store.UserById(ctx, id)
+// GetUserByID returns a !unvalidated! user data provider
+func (g *Service) getUserByID(ctx context.Context, id uuid.UUID) (*db.UserData, error) {
+	provider, err := g.store.UserByID(ctx, id)
 	if err != nil {
 		if errors.Is(err, db.ErrNotFound) {
 			return nil, ErrEntityDoesNotExist
@@ -81,7 +83,13 @@ func (g *Service) getUserById(ctx context.Context, id uuid.UUID) (*db.UserData, 
 
 // RegisterFromInvite registers a user from an invite, which means the user
 // will automatically be granted roles and application permissions from the invite
-func (g *Service) RegisterFromInvite(ctx context.Context, email string, password string, phone *string, inviteCode string) (uuid.UUID, error) {
+func (g *Service) RegisterFromInvite(
+	ctx context.Context,
+	email string,
+	password string,
+	phone *string,
+	inviteCode string,
+) (uuid.UUID, error) {
 	invite, err := g.store.InviteData(ctx, inviteCode)
 	if err != nil {
 		g.log.Error("could not fetch invite data", zap.Error(err))
@@ -98,7 +106,12 @@ func (g *Service) RegisterFromInvite(ctx context.Context, email string, password
 	for _, v := range invite.Roles {
 		err = g.manager.AddUserToRole(ctx, id, v)
 		if err != nil {
-			g.log.Error("could not add user to role", zap.String("role", v), zap.String("user_id", id.String()), zap.Error(err))
+			g.log.Error(
+				"could not add user to role",
+				zap.String("role", v),
+				zap.String("user_id", id.String()),
+				zap.Error(err),
+			)
 		}
 	}
 
@@ -107,9 +120,23 @@ func (g *Service) RegisterFromInvite(ctx context.Context, email string, password
 		if v.Scopes != "" {
 			parsedScopes = strings.Split(v.Scopes, " ")
 		}
-		aid, err := g.store.GrantAuthorization(ctx, v.ApplicationID, id, map[string]interface{}{"auto_granted": true, "from_invite": true, "scopes": parsedScopes})
+		aid, err := g.store.GrantAuthorization(
+			ctx,
+			v.ApplicationID,
+			id,
+			map[string]interface{}{
+				"auto_granted": true,
+				"from_invite":  true,
+				"scopes":       parsedScopes,
+			},
+		)
 		if err != nil {
-			g.log.Error("could not auto grant user auth for invite application", zap.Int("app", v.ApplicationID), zap.String("user_id", id.String()), zap.Error(err))
+			g.log.Error(
+				"could not auto grant user auth for invite application",
+				zap.Int("app", v.ApplicationID),
+				zap.String("user_id", id.String()),
+				zap.Error(err),
+			)
 		} else {
 			g.dispatcher.Dispatch(ctx, &event.AuthorizationGranted{
 				AuthorizationID: aid,
@@ -123,7 +150,11 @@ func (g *Service) RegisterFromInvite(ctx context.Context, email string, password
 
 	err = g.store.ConsumeInvite(ctx, inviteCode)
 	if err != nil {
-		g.log.Warn("could not consume invite code", zap.String("invite_code", inviteCode), zap.Error(err))
+		g.log.Warn(
+			"could not consume invite code",
+			zap.String("invite_code", inviteCode),
+			zap.Error(err),
+		)
 	} else {
 		g.dispatcher.Dispatch(ctx, &event.UserInviteConsumed{
 			InviteCode: inviteCode,
@@ -135,7 +166,12 @@ func (g *Service) RegisterFromInvite(ctx context.Context, email string, password
 }
 
 // RegisterUser registers a user from user supplied data
-func (g *Service) RegisterUser(ctx context.Context, email string, password string, phone *string) (uuid.UUID, error) {
+func (g *Service) RegisterUser(
+	ctx context.Context,
+	email string,
+	password string,
+	phone *string,
+) (uuid.UUID, error) {
 	if g.cfg.Behaviour.InviteOnly {
 		return uuid.UUID{}, ErrInviteOnly
 	}
@@ -143,13 +179,22 @@ func (g *Service) RegisterUser(ctx context.Context, email string, password strin
 }
 
 // shared register boilerplate
-func (g *Service) register(ctx context.Context, email string, password string, phone *string) (uuid.UUID, error) {
+func (g *Service) register(
+	ctx context.Context,
+	email string,
+	password string,
+	phone *string,
+) (uuid.UUID, error) {
 	if len(password) < g.cfg.Behaviour.PasswordMinLength {
 		return uuid.UUID{}, ErrPasswordGuidelines
 	}
 	regis, err := g.store.IsRegistred(ctx, email)
 	if err != nil {
-		g.log.Error("Could not check registration in data store", zap.String("email", email), zap.Error(err))
+		g.log.Error(
+			"Could not check registration in data store",
+			zap.String("email", email),
+			zap.Error(err),
+		)
 		return uuid.UUID{}, err
 	}
 	if regis {
@@ -238,8 +283,8 @@ func (g *Service) ConfirmUser(ctx context.Context, token string) error {
 	return nil
 }
 
-func (g *Service) EmailToId(ctx context.Context, email string) (uuid.UUID, bool) {
-	found, id, err := g.store.IdFromEmail(ctx, email)
+func (g *Service) EmailToID(ctx context.Context, email string) (uuid.UUID, bool) {
+	found, id, err := g.store.IDFromEmail(ctx, email)
 	if err != nil {
 		g.log.Error("Unable to get matching user from store", zap.Error(err))
 		return uuid.UUID{}, false
@@ -249,7 +294,7 @@ func (g *Service) EmailToId(ctx context.Context, email string) (uuid.UUID, bool)
 
 // ProvisionMFA returns a new secret and  a otpauth:// url if success
 func (g *Service) ProvisionMFA(ctx context.Context, userID uuid.UUID) (string, string, error) {
-	ud, err := g.getUserById(ctx, userID)
+	ud, err := g.getUserByID(ctx, userID)
 	if err != nil {
 		return "", "", err
 	}
@@ -293,7 +338,7 @@ func (g *Service) DisableMFA(ctx context.Context, userID uuid.UUID) error {
 
 // IsMFAEnabled check if user has mfa enabled
 func (g *Service) IsMFAEnabled(ctx context.Context, userID uuid.UUID) bool {
-	ud, err := g.getUserById(ctx, userID)
+	ud, err := g.getUserByID(ctx, userID)
 	if err != nil {
 		return false
 	}
@@ -317,7 +362,7 @@ func (g *Service) TriggerPasswordRecovery(ctx context.Context, id uuid.UUID) err
 	g.dispatcher.Dispatch(ctx, &event.UserPasswordRecoveryRequested{
 		UserID: id,
 	})
-	ud, err := g.getUserById(ctx, id)
+	ud, err := g.getUserByID(ctx, id)
 	if err != nil {
 		return err
 	}
@@ -337,8 +382,12 @@ func (g *Service) TriggerPasswordRecovery(ctx context.Context, id uuid.UUID) err
 }
 
 // RecoverPassword is used to reset the password from the token obtained from the recovery mail
-func (g *Service) RecoverPassword(ctx context.Context, email string, token string) (uuid.UUID, error) {
-	id, found := g.EmailToId(ctx, email)
+func (g *Service) RecoverPassword(
+	ctx context.Context,
+	email string,
+	token string,
+) (uuid.UUID, error) {
+	id, found := g.EmailToID(ctx, email)
 	if !found {
 		return uuid.UUID{}, ErrEntityDoesNotExist
 	}

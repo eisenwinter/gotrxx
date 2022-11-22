@@ -20,11 +20,11 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	password := r.FormValue("password")
 	otp := r.FormValue("otp")
-	returnUrl := r.FormValue("return_url")
+	returnURL := r.FormValue("return_url")
 	rememberMe := r.FormValue("remember_me")
-	_, err = url.ParseRequestURI(returnUrl)
+	_, err = url.ParseRequestURI(returnURL)
 	if err != nil {
-		returnUrl = "/account/"
+		returnURL = "/account/"
 	}
 
 	res, err := a.userSignIn.SignInMFA(r.Context(), email, password, otp)
@@ -33,7 +33,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			//locked or unconfirmed
 			err := a.loginTmpl.Execute(w, map[string]interface{}{
 				"i18n":           a.getTranslatorFor(r.Context(), "signin"),
-				"returnUrl":      returnUrl,
+				"returnUrl":      returnURL,
 				"error":          "locked_user",
 				"otp":            false,
 				"email":          email,
@@ -52,7 +52,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			//mfa
 			err := a.loginTmpl.Execute(w, map[string]interface{}{
 				"i18n":           a.getTranslatorFor(r.Context(), "signin"),
-				"returnUrl":      returnUrl,
+				"returnUrl":      returnURL,
 				"error":          "mfa",
 				"otp":            true,
 				"email":          email,
@@ -72,7 +72,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			//mfa
 			err := a.loginTmpl.Execute(w, map[string]interface{}{
 				"i18n":           a.getTranslatorFor(r.Context(), "signin"),
-				"returnUrl":      returnUrl,
+				"returnUrl":      returnURL,
 				"error":          "invalid_otp",
 				"otp":            true,
 				"email":          email,
@@ -87,7 +87,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(user.ErrEntityDoesNotExist, err) {
 			err := a.loginTmpl.Execute(w, map[string]interface{}{
 				"i18n":           a.getTranslatorFor(r.Context(), "signin"),
-				"returnUrl":      returnUrl,
+				"returnUrl":      returnURL,
 				"otp":            false,
 				"error":          "unknown_or_invalid",
 				"email":          email,
@@ -101,7 +101,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(user.ErrInvalidCredentials, err) {
 			err := a.loginTmpl.Execute(w, map[string]interface{}{
 				"i18n":           a.getTranslatorFor(r.Context(), "signin"),
-				"returnUrl":      returnUrl,
+				"returnUrl":      returnURL,
 				"email":          email,
 				"otp":            false,
 				"error":          "unknown_or_invalid",
@@ -115,7 +115,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 
 		err := a.loginTmpl.Execute(w, map[string]interface{}{
 			"i18n":           a.getTranslatorFor(r.Context(), "signin"),
-			"returnUrl":      returnUrl,
+			"returnUrl":      returnURL,
 			"email":          email,
 			"otp":            false,
 			"error":          "unknown",
@@ -148,29 +148,29 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 		render.Respond(w, r, http.StatusInternalServerError)
 		return
 	}
-	http.Redirect(w, r, returnUrl, http.StatusFound)
+	http.Redirect(w, r, returnURL, http.StatusFound)
 
 }
 
 func (a *AccountRessource) signinPage(w http.ResponseWriter, r *http.Request) {
 	urls, ok := r.URL.Query()["return_url"]
-	returnUrl := "/account/"
+	returnURL := "/account/"
 	if ok && len(urls) > 0 {
 		_, err := url.ParseRequestURI(urls[0])
 		if err != nil {
 			a.log.Warn("unacceptable redirect_url", zap.String("redirect_url", urls[0]))
 		} else {
-			returnUrl = urls[0]
+			returnURL = urls[0]
 		}
 	}
 	if ok, _ := a.signedInUser(w, r); ok {
-		http.Redirect(w, r, returnUrl, http.StatusFound)
+		http.Redirect(w, r, returnURL, http.StatusFound)
 		return
 	}
 
 	err := a.loginTmpl.Execute(w, map[string]interface{}{
 		"i18n":           a.getTranslatorFor(r.Context(), "signin"),
-		"returnUrl":      returnUrl,
+		"returnUrl":      returnURL,
 		"otp":            false,
 		csrf.TemplateTag: csrf.TemplateField(r),
 	})

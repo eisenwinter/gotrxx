@@ -16,8 +16,17 @@ type InviteService struct {
 }
 
 // List lists all invitations in a paginated response
-func (i *InviteService) List(ctx context.Context, page int, pageSize int, q string, sort string) (*PaginationResponse, error) {
-	invites, total, err := i.store.Invites(ctx, db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort})
+func (i *InviteService) List(
+	ctx context.Context,
+	page int,
+	pageSize int,
+	q string,
+	sort string,
+) (*PaginationResponse, error) {
+	invites, total, err := i.store.Invites(
+		ctx,
+		db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort},
+	)
 	if err != nil {
 		return nil, err
 	}

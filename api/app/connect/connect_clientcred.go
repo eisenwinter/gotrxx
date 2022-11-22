@@ -10,22 +10,42 @@ import (
 	"go.uber.org/zap"
 )
 
-func (c *ConnnectRessource) clientCredentialsGrant(req *clientCredentialsTokenRequest, w http.ResponseWriter, r *http.Request) {
+func (c *ConnnectRessource) clientCredentialsGrant(
+	req *clientCredentialsTokenRequest,
+	w http.ResponseWriter,
+	r *http.Request,
+) {
 	if req.clientID == "" {
-		render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "client_id missing."))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInvalidRequest, http.StatusBadRequest, "client_id missing."),
+		)
 		return
 	}
 	if req.clientSecret == "" {
-		render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "client_secret missing."))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInvalidRequest, http.StatusBadRequest, "client_secret missing."),
+		)
 		return
 	}
 	app, err := c.appService.ApplicationByClientID(r.Context(), req.clientID)
 	if err != nil {
 		c.logger.Error("client credentials flow: failed to get application", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 	}
 	if app.IsRetired() {
-		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, "Application does not exist."))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInvalidClient, http.StatusBadRequest, "Application does not exist."),
+		)
 		return
 	}
 	if !app.IsFlowAllowed(application.ClientCredentialsFlow) {
@@ -41,7 +61,10 @@ func (c *ConnnectRessource) clientCredentialsGrant(req *clientCredentialsTokenRe
 		return
 	}
 	if app.IsFlowAllowed(application.RefreshTokenFlow) {
-		c.logger.Info("client_credentials flow does not support refresh tokens", zap.String("client_id", app.ClientID()))
+		c.logger.Info(
+			"client_credentials flow does not support refresh tokens",
+			zap.String("client_id", app.ClientID()),
+		)
 	}
 	scopes := []string{}
 	if req.scope != "" {
@@ -49,14 +72,25 @@ func (c *ConnnectRessource) clientCredentialsGrant(req *clientCredentialsTokenRe
 	}
 	t, err := c.issuer.IssueAccessTokenForMachineClient(app.ClientID(), scopes)
 	if err != nil {
-		c.logger.Error("client credentials flow: failed to issue a new access token", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		c.logger.Error(
+			"client credentials flow: failed to issue a new access token",
+			zap.Error(err),
+		)
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
 	signed, err := c.issuer.Sign(t)
 	if err != nil {
 		c.logger.Error("client credentials flow: failed to sign a access token", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
 	expires := int(t.Expiration().Sub(time.Now().UTC()).Seconds())

@@ -52,12 +52,22 @@ func (d *Dispatcher) Register(listener ...EventListener) {
 func (d *Dispatcher) executeEvent(ctx context.Context, el EventListener, ev Event) {
 	defer func() {
 		if r := recover(); r != nil {
-			d.log.Error("recovered from panicing event listener", zap.Any("recoverer", r), zap.String("event", string(ev.Name())), zap.String("event_listener", fmt.Sprintf("%T", el)))
+			d.log.Error(
+				"recovered from panicing event listener",
+				zap.Any("recoverer", r),
+				zap.String("event", string(ev.Name())),
+				zap.String("event_listener", fmt.Sprintf("%T", el)),
+			)
 		}
 	}()
 	err := el.Handle(ctx, ev)
 	if err != nil {
-		d.log.Error("Event listener returned error", zap.String("event_listener", fmt.Sprintf("%T", el)), zap.Error(err), zap.String("event", string(ev.Name())))
+		d.log.Error(
+			"Event listener returned error",
+			zap.String("event_listener", fmt.Sprintf("%T", el)),
+			zap.Error(err),
+			zap.String("event", string(ev.Name())),
+		)
 	}
 
 }

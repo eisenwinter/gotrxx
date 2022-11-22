@@ -12,7 +12,6 @@ require (
 	github.com/go-chi/render v1.0.2
 	github.com/go-mail/mail v2.3.1+incompatible
 	github.com/go-playground/validator/v10 v10.11.1
-	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/google/uuid v1.3.0
 	github.com/gorilla/csrf v1.7.1
 	github.com/jackc/pgx v3.6.2+incompatible

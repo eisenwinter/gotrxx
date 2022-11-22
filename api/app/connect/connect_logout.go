@@ -23,7 +23,7 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 		c.logger.Error("errors getting jwt in logout endpoint")
 		return
 	}
-	autId, ok := suppliedJwt.Get(tokens.ClaimAuthorization)
+	autID, ok := suppliedJwt.Get(tokens.ClaimAuthorization)
 	if !ok {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
@@ -32,7 +32,7 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 		c.logger.Error("no authorization id in JWT")
 		return
 	}
-	id, err := uuid.Parse(autId.(string))
+	id, err := uuid.Parse(autID.(string))
 	if err != nil {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
@@ -48,34 +48,58 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 	}
 	clientID := r.FormValue("client_id")
 	if clientID == "" {
-		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "client_id field not supplied"))
+		err = render.Render(
+			w,
+			r,
+			createStdError(
+				stdInvalidRequest,
+				http.StatusBadRequest,
+				"client_id field not supplied",
+			),
+		)
 		if err != nil {
 			c.logger.Error("unable to render response", zap.Error(err))
 		}
 		return
 	}
-	logoutUri := r.FormValue("logout_uri")
+	logoutURI := r.FormValue("logout_uri")
 	app, err := c.appService.ApplicationByClientID(r.Context(), clientID)
 	if err != nil {
 		if errors.Is(application.ErrNotFound, err) {
-			render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, "invalid client_id"))
+			render.Respond(
+				w,
+				r,
+				createStdError(stdInvalidClient, http.StatusBadRequest, "invalid client_id"),
+			)
 			return
 		}
 		c.logger.Error("logout: unexpected error getting application", zap.Error(err))
-		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
+		)
 		return
 	}
-	if logoutUri != "" {
-		if !app.IsAllowedRedirectURI(logoutUri) {
-			render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid logout_uri"))
+	if logoutURI != "" {
+		if !app.IsAllowedRedirectURI(logoutURI) {
+			render.Respond(
+				w,
+				r,
+				createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid logout_uri"),
+			)
 			return
 		}
 	} else {
-		logoutUri = "/account/signin"
+		logoutURI = "/account/signin"
 	}
 	err = c.rotator.RevokeCommonTokensForAuthorization(r.Context(), id)
 	if err != nil {
-		c.logger.Error("Could not revoked all common tokens for authorization", zap.Error(err), zap.String("authorization_id", id.String()))
+		c.logger.Error(
+			"Could not revoked all common tokens for authorization",
+			zap.Error(err),
+			zap.String("authorization_id", id.String()),
+		)
 	}
 	co := &http.Cookie{
 		Name:     "__gotrxx",
@@ -83,6 +107,7 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
+		Secure:   true,
 	}
 	http.SetCookie(w, co)
 
@@ -92,8 +117,9 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
+		Secure:   true,
 	}
 	http.SetCookie(w, rc)
 
-	http.Redirect(w, r, logoutUri, http.StatusFound)
+	http.Redirect(w, r, logoutURI, http.StatusFound)
 }

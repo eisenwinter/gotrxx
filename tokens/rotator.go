@@ -18,7 +18,11 @@ import (
 
 type CommonTokenUpdater interface {
 	RevokeCommonTokensForAuthorization(ctx context.Context, authorizationID uuid.UUID) (int, error)
-	CommonTokenDetails(ctx context.Context, tokenType string, token string) (*db.CommonTokenDetails, error)
+	CommonTokenDetails(
+		ctx context.Context,
+		tokenType string,
+		token string,
+	) (*db.CommonTokenDetails, error)
 	RedeemCommonToken(ctx context.Context, tokenType string, token string) error
 	RevokeCommonToken(ctx context.Context, tokenType string, token string) error
 }
@@ -51,9 +55,17 @@ var ErrTokenExpired = errors.New("token has expired")
 var ErrTokenInvalidClientId = errors.New("token has been issued for different client id")
 var ErrTokenNotFound = errors.New("unknown token")
 
-// needed to be done before rotating
-func (t *TokenRotator) PreRotationChallenge(ctx context.Context, authorizationCode string, codeVerifier string) error {
-	token, err := t.updater.CommonTokenDetails(ctx, string(AuthorizationCodeType), authorizationCode)
+// PreRotationChallenge needed to be done before rotating
+func (t *TokenRotator) PreRotationChallenge(
+	ctx context.Context,
+	authorizationCode string,
+	codeVerifier string,
+) error {
+	token, err := t.updater.CommonTokenDetails(
+		ctx,
+		string(AuthorizationCodeType),
+		authorizationCode,
+	)
 	if err != nil {
 		if errors.Is(db.ErrNotFound, err) {
 			return ErrTokenNotFound
@@ -77,12 +89,20 @@ func (t *TokenRotator) PreRotationChallenge(ctx context.Context, authorizationCo
 	return nil
 }
 
-func (t *TokenRotator) RevokeCommonTokensForAuthorization(ctx context.Context, autID uuid.UUID) error {
+func (t *TokenRotator) RevokeCommonTokensForAuthorization(
+	ctx context.Context,
+	autID uuid.UUID,
+) error {
 	_, err := t.updater.RevokeCommonTokensForAuthorization(ctx, autID)
 	return err
 }
 
-func (t *TokenRotator) RevokeCommonToken(ctx context.Context, tokenType CommonTokenType, token string, autID uuid.UUID) error {
+func (t *TokenRotator) RevokeCommonToken(
+	ctx context.Context,
+	tokenType CommonTokenType,
+	token string,
+	autID uuid.UUID,
+) error {
 	details, err := t.updater.CommonTokenDetails(ctx, string(tokenType), token)
 	if err != nil {
 		if errors.Is(db.ErrNotFound, err) {
@@ -108,7 +128,10 @@ func (t *TokenRotator) RevokeCommonToken(ctx context.Context, tokenType CommonTo
 			TokenType:       string(details.TokenType)})
 		total, err := t.updater.RevokeCommonTokensForAuthorization(ctx, details.AuthorizationId)
 		if err != nil {
-			t.log.Error("could not revoke tokens for authorization", zap.Any("AuthorizationId", details.AuthorizationId))
+			t.log.Error(
+				"could not revoke tokens for authorization",
+				zap.Any("AuthorizationId", details.AuthorizationId),
+			)
 			return err
 		}
 		t.log.Warn("revoked all tokens for authorization", zap.Int("revoked_count", total))
@@ -126,7 +149,12 @@ func (t *TokenRotator) RevokeCommonToken(ctx context.Context, tokenType CommonTo
 	return nil
 }
 
-func (t *TokenRotator) RotateCommonToken(ctx context.Context, tokenType CommonTokenType, token string, clientID string) error {
+func (t *TokenRotator) RotateCommonToken(
+	ctx context.Context,
+	tokenType CommonTokenType,
+	token string,
+	clientID string,
+) error {
 	details, err := t.updater.CommonTokenDetails(ctx, string(tokenType), token)
 	if err != nil {
 		t.log.Error("could not load common token details", zap.Error(err))
@@ -149,7 +177,10 @@ func (t *TokenRotator) RotateCommonToken(ctx context.Context, tokenType CommonTo
 			TokenType:       string(details.TokenType)})
 		total, err := t.updater.RevokeCommonTokensForAuthorization(ctx, details.AuthorizationId)
 		if err != nil {
-			t.log.Error("could not revoke tokens for authorization", zap.Any("AuthorizationId", details.AuthorizationId))
+			t.log.Error(
+				"could not revoke tokens for authorization",
+				zap.Any("AuthorizationId", details.AuthorizationId),
+			)
 			return err
 		}
 		t.log.Warn("revoked all tokens for authorization", zap.Int("revoked_count", total))

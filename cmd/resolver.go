@@ -34,7 +34,10 @@ func mustResolveUsableDataStore() *db.DataStore {
 }
 
 func mustResolveTranslationRegistry() *i18n.TranslationRegistry {
-	registry, err := i18n.NewTranslationRegistry(FileSystemsConfig.Templates, TopLevelLogger.Named("i18n"))
+	registry, err := i18n.NewTranslationRegistry(
+		FileSystemsConfig.Templates,
+		TopLevelLogger.Named("i18n"),
+	)
 	if err != nil {
 		TopLevelLogger.Fatal("Failed to load translation files", zap.Error(err))
 	}
@@ -50,7 +53,12 @@ func bootstrapDispatcher(auditor db.Auditor) *events.Dispatcher {
 }
 
 func mustResolveMailer(registry *i18n.TranslationRegistry) *mailing.Mailer {
-	mailer, err := mailing.NewMailer(TopLevelLogger.Named("mailer"), LoadedConfig, registry, FileSystemsConfig.Templates)
+	mailer, err := mailing.NewMailer(
+		TopLevelLogger.Named("mailer"),
+		LoadedConfig,
+		registry,
+		FileSystemsConfig.Templates,
+	)
 	if err != nil {
 		TopLevelLogger.Fatal("Failed to create mailer", zap.Error(err))
 	}

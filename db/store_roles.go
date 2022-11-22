@@ -48,7 +48,7 @@ func (d *DataStore) Roles(ctx context.Context, opts ListOptions) ([]*tables.Role
 }
 
 func (d *DataStore) AddRole(ctx context.Context, role string) (int, error) {
-	exists, err := d.exists("roles", sq.Eq{"name": role})
+	exists, err := d.exists(ctx, "roles", sq.Eq{"name": role})
 	if err != nil {
 		return 0, err
 	}
@@ -56,23 +56,23 @@ func (d *DataStore) AddRole(ctx context.Context, role string) (int, error) {
 		return 0, ErrAlreadyExists
 	}
 
-	var roleId int
+	var roleID int
 	ins := sq.
 		Insert("roles").
 		Columns("name", "created_at").
 		Values(role, time.Now().UTC()).
 		Suffix("RETURNING id")
-	err = d.returningInsertStatement(ctx, &roleId, ins, nil)
+	err = d.returningInsertStatement(ctx, &roleID, ins, nil)
 	if err != nil {
-		return roleId, err
+		return roleID, err
 	}
-	return roleId, nil
+	return roleID, nil
 }
 
 func (d *DataStore) DeleteRole(ctx context.Context, role string) error {
 	roleQuery := sq.Select("id").From("roles").Where(sq.Eq{"role": role})
-	var roleId int
-	err := roleQuery.RunWith(d.db).QueryRow().Scan(&roleId)
+	var roleID int
+	err := roleQuery.RunWith(d.db).QueryRow().Scan(&roleID)
 	if err != nil {
 		if errors.Is(sql.ErrNoRows, err) {
 			return ErrNotFound
@@ -80,21 +80,21 @@ func (d *DataStore) DeleteRole(ctx context.Context, role string) error {
 		return err
 	}
 
-	exists, err := d.exists("user_invite_roles", sq.Eq{"role_id": roleId})
+	exists, err := d.exists(ctx, "user_invite_roles", sq.Eq{"role_id": roleID})
 	if err != nil {
 		return err
 	}
 	if exists {
 		return ErrInUse
 	}
-	exists, err = d.exists("user_roles", sq.Eq{"role_id": roleId})
+	exists, err = d.exists(ctx, "user_roles", sq.Eq{"role_id": roleID})
 	if err != nil {
 		return err
 	}
 	if exists {
 		return ErrInUse
 	}
-	del := sq.Delete("roles").Where(sq.Eq{"id": roleId})
+	del := sq.Delete("roles").Where(sq.Eq{"id": roleID})
 	_, err = d.deleteStatement(ctx, del, nil)
 	return err
 }

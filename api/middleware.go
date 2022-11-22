@@ -12,7 +12,10 @@ import (
 	"golang.org/x/text/language"
 )
 
-func languageMiddleware(defaultLang string, registry *i18n.TranslationRegistry) func(next http.Handler) http.Handler {
+func languageMiddleware(
+	defaultLang string,
+	registry *i18n.TranslationRegistry,
+) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			lang := defaultLang
@@ -26,7 +29,10 @@ func languageMiddleware(defaultLang string, registry *i18n.TranslationRegistry) 
 				l, _ := tag.Base()
 				lang = l.String()
 			}
-			next.ServeHTTP(w, r.WithContext(context.WithValue(r.Context(), i18n.ContextLangKey, lang)))
+			next.ServeHTTP(
+				w,
+				r.WithContext(context.WithValue(r.Context(), i18n.ContextLangKey, lang)),
+			)
 		}
 		return http.HandlerFunc(fn)
 	}

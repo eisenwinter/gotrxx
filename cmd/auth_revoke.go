@@ -15,7 +15,9 @@ var revokeAuthorizationCommand = cobra.Command{
 	Long:  `This command will revoke an authorization for a user to use an application.`,
 	Args: func(cmd *cobra.Command, args []string) error {
 		if len(args) < 2 || args[0] == "" {
-			return errors.New("auth revoke (client_id) (email) - requires an application client_id and email")
+			return errors.New(
+				"auth revoke (client_id) (email) - requires an application client_id and email",
+			)
 		}
 		return nil
 	},
@@ -34,6 +36,11 @@ var revokeAuthorizationCommand = cobra.Command{
 			os.Exit(1)
 			return
 		}
-		fmt.Printf("Authorization revoekd for user %s to use application %s with scope %s", args[1], args[0], authorizationGrantScope)
+		fmt.Printf(
+			"Authorization revoekd for user %s to use application %s with scope %s",
+			args[1],
+			args[0],
+			authorizationGrantScope,
+		)
 	},
 }

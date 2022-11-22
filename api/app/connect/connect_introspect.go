@@ -25,7 +25,11 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 
 	ai, err := auth.FromContext(r.Context())
 	if err != nil {
-		err = render.Render(w, r, createStdError(stdUnauthorziedClient, http.StatusUnauthorized, ""))
+		err = render.Render(
+			w,
+			r,
+			createStdError(stdUnauthorziedClient, http.StatusUnauthorized, ""),
+		)
 		if err != nil {
 			c.logger.Error("unable to render response", zap.Error(err))
 		}
@@ -59,13 +63,20 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			jwtoken, err := c.verifier.ValidateAccessTokenDetails(r.Context(), token)
 			if err != nil {
-				render.Render(w, r, &introspectionResposne{
+				err = render.Render(w, r, &introspectionResponse{
 					Active: false,
 				})
+				if err != nil {
+					c.logger.Error("unable to render introspectionResponse", zap.Error(err))
+				}
 				return
 			}
 			if !isEligble(jwtoken) {
-				err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
+				err = render.Render(
+					w,
+					r,
+					createStdError(stdInvalidRequest, http.StatusBadRequest, ""),
+				)
 				if err != nil {
 					c.logger.Error("unable to render response", zap.Error(err))
 				}
@@ -88,9 +99,12 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		refreshToken, err := c.verifier.ValidateRefreshTokenDetails(r.Context(), token)
 		if err != nil {
-			render.Render(w, r, &introspectionResposne{
+			err = render.Render(w, r, &introspectionResponse{
 				Active: false,
 			})
+			if err != nil {
+				c.logger.Error("unable to render introspectionResponse", zap.Error(err))
+			}
 			return
 		}
 		if !isEligble(refreshToken) {
@@ -113,7 +127,12 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 	c.renderIntrospectResult(w, r, "access_token", jwtoken)
 }
 
-func (c *ConnnectRessource) renderIntrospectResult(w http.ResponseWriter, r *http.Request, tokentype string, jwtoken *tokens.CommonToken) {
+func (c *ConnnectRessource) renderIntrospectResult(
+	w http.ResponseWriter,
+	r *http.Request,
+	tokentype string,
+	jwtoken *tokens.CommonToken,
+) {
 
 	nilTime := func(t time.Time) *int64 {
 		x := t.Unix()
@@ -123,7 +142,7 @@ func (c *ConnnectRessource) renderIntrospectResult(w http.ResponseWriter, r *htt
 		return &x
 	}
 
-	render.Render(w, r, &introspectionResposne{
+	err := render.Render(w, r, &introspectionResponse{
 		Active:          true,
 		IssuedAt:        nilTime(jwtoken.IssuedAt()),
 		Subject:         jwtoken.Subject(),
@@ -136,5 +155,8 @@ func (c *ConnnectRessource) renderIntrospectResult(w http.ResponseWriter, r *htt
 		Roles:           jwtoken.Roles(),
 		AuthorizationID: jwtoken.AuthorizationID(),
 	})
+	if err != nil {
+		c.logger.Error("unable to render introspectionResponse", zap.Error(err))
+	}
 
 }

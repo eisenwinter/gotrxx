@@ -167,6 +167,7 @@ func (a *AccountRessource) signedInUser(w http.ResponseWriter, r *http.Request) 
 			Path:     "/",
 			Expires:  time.Unix(0, 0),
 			HttpOnly: true,
+			Secure:   true,
 		}
 		http.SetCookie(w, c)
 
@@ -176,6 +177,7 @@ func (a *AccountRessource) signedInUser(w http.ResponseWriter, r *http.Request) 
 			Path:     "/",
 			Expires:  time.Unix(0, 0),
 			HttpOnly: true,
+			Secure:   true,
 		}
 		http.SetCookie(w, r)
 	}
@@ -213,24 +215,47 @@ func (a *AccountRessource) fourOFour(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-func (a *AccountRessource) exchangeRememberMeToken(ctx context.Context, token string, w http.ResponseWriter) (jwt.Token, error) {
+func (a *AccountRessource) exchangeRememberMeToken(
+	ctx context.Context,
+	token string,
+	w http.ResponseWriter,
+) (jwt.Token, error) {
 	err := a.rotator.RotateCommonToken(ctx, tokens.RememberMeTokenType, token, gotrxxClientID)
 	if err != nil {
 		return nil, err
 	}
-	auth, err := a.autService.AuthorizationByCommonToken(ctx, string(tokens.RememberMeTokenType), token)
+	auth, err := a.autService.AuthorizationByCommonToken(
+		ctx,
+		string(tokens.RememberMeTokenType),
+		token,
+	)
 	if err != nil {
 		return nil, err
 	}
-	user, err := a.userSignIn.SignInByIDFromToken(ctx, auth.UserID(), string(tokens.RememberMeTokenType))
+	user, err := a.userSignIn.SignInByIDFromToken(
+		ctx,
+		auth.UserID(),
+		string(tokens.RememberMeTokenType),
+	)
 	if err != nil {
 		return nil, err
 	}
 	return a.issueUserCookie(ctx, user, auth, true, w)
 }
 
-func (a *AccountRessource) issueUserCookie(ctx context.Context, user *user.SignedInUser, auth *authorization.Authorization, rememberMe bool, w http.ResponseWriter) (jwt.Token, error) {
-	t, err := a.issuer.IssueAccessTokenForUser(user, auth.ID(), auth.Application().ClientID(), auth.Scopes())
+func (a *AccountRessource) issueUserCookie(
+	ctx context.Context,
+	user *user.SignedInUser,
+	auth *authorization.Authorization,
+	rememberMe bool,
+	w http.ResponseWriter,
+) (jwt.Token, error) {
+	t, err := a.issuer.IssueAccessTokenForUser(
+		user,
+		auth.ID(),
+		auth.Application().ClientID(),
+		auth.Scopes(),
+	)
 	if err != nil {
 		a.log.Error("user login page: failed to issue a new access token", zap.Error(err))
 		return nil, err
@@ -246,7 +271,8 @@ func (a *AccountRessource) issueUserCookie(ctx context.Context, user *user.Signe
 		Path:     "/",
 		Expires:  t.Expiration(),
 		MaxAge:   expires,
-		HttpOnly: true}
+		HttpOnly: true,
+		Secure:   true}
 	http.SetCookie(w, &cookie)
 
 	if rememberMe && a.issuer.RememberMeDuration() > 0 {
@@ -261,7 +287,8 @@ func (a *AccountRessource) issueUserCookie(ctx context.Context, user *user.Signe
 			Path:     "/",
 			Expires:  expiry,
 			MaxAge:   duration,
-			HttpOnly: true}
+			HttpOnly: true,
+			Secure:   true}
 		http.SetCookie(w, &rem)
 	}
 	return t, nil
@@ -290,22 +317,23 @@ func (a *AccountRessource) changeLanguage(w http.ResponseWriter, r *http.Request
 	if err != nil {
 		a.log.Error("change lang: ParseForm failed", zap.Error(err))
 	}
-	returnUrl := r.FormValue("return_url")
+	returnURL := r.FormValue("return_url")
 	lang := strings.ToLower(r.FormValue("lang"))
 	if a.registry.ContainsLanguage(lang) {
 
 		cookie := &http.Cookie{
-			Name:    string(i18n.ContextLangKey),
-			Value:   lang,
-			Expires: time.Now().Add(356 * 24 * time.Hour),
+			Name:     string(i18n.ContextLangKey),
+			Value:    lang,
+			Expires:  time.Now().Add(356 * 24 * time.Hour),
+			HttpOnly: true,
 		}
 		http.SetCookie(w, cookie)
 	}
-	_, err = url.ParseRequestURI(returnUrl)
+	_, err = url.ParseRequestURI(returnURL)
 	if err != nil {
-		returnUrl = "/account/"
+		returnURL = "/account/"
 	}
-	http.Redirect(w, r, returnUrl, http.StatusFound)
+	http.Redirect(w, r, returnURL, http.StatusFound)
 }
 
 func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
@@ -313,11 +341,11 @@ func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.log.Error("signin: ParseForm failed", zap.Error(err))
 	}
-	returnUrl := r.FormValue("return_url")
+	returnURL := r.FormValue("return_url")
 
-	_, err = url.ParseRequestURI(returnUrl)
+	_, err = url.ParseRequestURI(returnURL)
 	if err != nil {
-		returnUrl = "/account/signin"
+		returnURL = "/account/signin"
 	}
 
 	jwtc, err := r.Cookie(jwtCookie)
@@ -337,6 +365,7 @@ func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
+		Secure:   true,
 	}
 	http.SetCookie(w, c)
 	if err != nil {
@@ -351,6 +380,7 @@ func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 		Path:     "/",
 		Expires:  time.Unix(0, 0),
 		HttpOnly: true,
+		Secure:   true,
 	}
 	http.SetCookie(w, rc)
 
@@ -383,7 +413,7 @@ func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	http.Redirect(w, r, returnUrl, http.StatusFound)
+	http.Redirect(w, r, returnURL, http.StatusFound)
 
 }
 
@@ -401,59 +431,131 @@ func NewAccountRessource(log *zap.Logger,
 
 	loginTmpl, err := mustLoadTemplate(fsConfig.Templates, "templates/signin.html", log)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "signin.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "signin.html"),
+			zap.Error(err),
+		)
 	}
 	signUpTmpl, err := mustLoadTemplate(fsConfig.Templates, "templates/signup.html", log)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "signup.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "signup.html"),
+			zap.Error(err),
+		)
 	}
 	userPageTmpl, err := mustLoadTemplate(fsConfig.Templates, "templates/user.html", log)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "user.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "user.html"),
+			zap.Error(err),
+		)
 	}
 	confirmTemplate, err := mustLoadTemplate(fsConfig.Templates, "templates/confirm.html", log)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "confirm.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "confirm.html"),
+			zap.Error(err),
+		)
 	}
-	recoverTemplate, err := mustLoadTemplate(fsConfig.Templates, "templates/recover_password.html", log)
+	recoverTemplate, err := mustLoadTemplate(
+		fsConfig.Templates,
+		"templates/recover_password.html",
+		log,
+	)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "recover_password.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "recover_password.html"),
+			zap.Error(err),
+		)
 	}
-	requestRecoverTmpl, err := mustLoadTemplate(fsConfig.Templates, "templates/request_password_recovery.html", log)
+	requestRecoverTmpl, err := mustLoadTemplate(
+		fsConfig.Templates,
+		"templates/request_password_recovery.html",
+		log,
+	)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "request_password_recovery.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "request_password_recovery.html"),
+			zap.Error(err),
+		)
 	}
 	errorTemplate, err := mustLoadTemplate(fsConfig.Templates, "templates/error.html", log)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "error.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "error.html"),
+			zap.Error(err),
+		)
 	}
-	changePasswordTemplate, err := mustLoadTemplate(fsConfig.Templates, "templates/change_password.html", log)
+	changePasswordTemplate, err := mustLoadTemplate(
+		fsConfig.Templates,
+		"templates/change_password.html",
+		log,
+	)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "change_password.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "change_password.html"),
+			zap.Error(err),
+		)
 	}
-	changeEmailTemplate, err := mustLoadTemplate(fsConfig.Templates, "templates/change_email.html", log)
+	changeEmailTemplate, err := mustLoadTemplate(
+		fsConfig.Templates,
+		"templates/change_email.html",
+		log,
+	)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "change_email.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "change_email.html"),
+			zap.Error(err),
+		)
 	}
 
 	changeMfaTemplate, err := mustLoadTemplate(fsConfig.Templates, "templates/change_mfa.html", log)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "change_mfa.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "change_mfa.html"),
+			zap.Error(err),
+		)
 	}
 
-	provisionMfaTemplate, err := mustLoadTemplate(fsConfig.Templates, "templates/provision_mfa.html", log)
+	provisionMfaTemplate, err := mustLoadTemplate(
+		fsConfig.Templates,
+		"templates/provision_mfa.html",
+		log,
+	)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "provision_mfa.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "provision_mfa.html"),
+			zap.Error(err),
+		)
 	}
 
 	inviteTemplate, err := mustLoadTemplate(fsConfig.Templates, "templates/invite.html", log)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "invite.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "invite.html"),
+			zap.Error(err),
+		)
 	}
 
 	fourOFour, err := mustLoadTemplate(fsConfig.Templates, "templates/404.html", log)
 	if err != nil {
-		log.Fatal("unable to load required template file", zap.String("file", "404.html"), zap.Error(err))
+		log.Fatal(
+			"unable to load required template file",
+			zap.String("file", "404.html"),
+			zap.Error(err),
+		)
 	}
 
 	return &AccountRessource{

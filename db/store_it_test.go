@@ -61,7 +61,10 @@ func (s *DatabaseIntegrationTestSuite) SetupTest() {
 // Applications part
 
 func (s *DatabaseIntegrationTestSuite) TestSeededApplications() {
-	tables, total, err := s.dataStore.Applications(context.Background(), ListOptions{Page: 1, PageSize: 2})
+	tables, total, err := s.dataStore.Applications(
+		context.Background(),
+		ListOptions{Page: 1, PageSize: 2},
+	)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), 2, total)
 	assert.Equal(s.T(), 2, total)
@@ -87,7 +90,10 @@ func (s *DatabaseIntegrationTestSuite) TestSeededApplications() {
 }
 
 func (s *DatabaseIntegrationTestSuite) TestSeededApplicationsQuery() {
-	tables, total, err := s.dataStore.Applications(context.Background(), ListOptions{Page: 1, PageSize: 2, Query: "client_id==netlify-gotrue"})
+	tables, total, err := s.dataStore.Applications(
+		context.Background(),
+		ListOptions{Page: 1, PageSize: 2, Query: "client_id==netlify-gotrue"},
+	)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), 1, total)
 	assert.Equal(s.T(), 1, total)
@@ -135,7 +141,15 @@ func (s *DatabaseIntegrationTestSuite) TestApplicationCreateRetireDelete() {
 	props["logout_uris"] = []string{"https://gotrxx.local/lg"}
 	props["redirect_uris"] = []string{"https://gotrxx.local/rdr"}
 	secret := "secret"
-	id, err := s.dataStore.CreateApplication(context.Background(), 1, "testeroni", &secret, "Testeroni", "public", props)
+	id, err := s.dataStore.CreateApplication(
+		context.Background(),
+		1,
+		"testeroni",
+		&secret,
+		"Testeroni",
+		"public",
+		props,
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), 0, id)
 
@@ -200,7 +214,12 @@ func (s *DatabaseIntegrationTestSuite) TestAuthAuthorizationByIDPositive() {
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	aid, err := s.dataStore.GrantAuthorization(context.Background(), 1, id, make(tables.MapStructure))
+	aid, err := s.dataStore.GrantAuthorization(
+		context.Background(),
+		1,
+		id,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), aid, uuid.Nil)
 
@@ -219,11 +238,20 @@ func (s *DatabaseIntegrationTestSuite) TestAuthActiveAuthorizationByUserAndClien
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	aid, err := s.dataStore.GrantAuthorization(context.Background(), 1, id, make(tables.MapStructure))
+	aid, err := s.dataStore.GrantAuthorization(
+		context.Background(),
+		1,
+		id,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), aid, uuid.Nil)
 
-	table, err := s.dataStore.ActiveAuthorizationByUserAndClientID(context.Background(), "$.gotrxx", id)
+	table, err := s.dataStore.ActiveAuthorizationByUserAndClientID(
+		context.Background(),
+		"$.gotrxx",
+		id,
+	)
 	assert.NoError(s.T(), err)
 	assert.Equal(s.T(), id, table.UserID)
 
@@ -237,7 +265,12 @@ func (s *DatabaseIntegrationTestSuite) TestAuthRevokeAuthorization() {
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	aid, err := s.dataStore.GrantAuthorization(context.Background(), 1, id, make(tables.MapStructure))
+	aid, err := s.dataStore.GrantAuthorization(
+		context.Background(),
+		1,
+		id,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), aid, uuid.Nil)
 
@@ -426,18 +459,34 @@ func (s *DatabaseIntegrationTestSuite) TestAuthActiveAuthorizationByCommonToken(
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	aid, err := s.dataStore.GrantAuthorization(context.Background(), 1, id, make(tables.MapStructure))
+	aid, err := s.dataStore.GrantAuthorization(
+		context.Background(),
+		1,
+		id,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), aid, uuid.Nil)
 
 	tokenType := "dream.token"
 	token := "i.am.something.else"
 	expires := time.Now().Add(time.Hour * 5)
-	tid, err := s.dataStore.InsertCommonToken(context.Background(), aid, tokenType, token, expires, make(tables.MapStructure))
+	tid, err := s.dataStore.InsertCommonToken(
+		context.Background(),
+		aid,
+		tokenType,
+		token,
+		expires,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), 0, tid)
 
-	table, err := s.dataStore.ActiveAuthorizationByCommonToken(context.Background(), tokenType, token)
+	table, err := s.dataStore.ActiveAuthorizationByCommonToken(
+		context.Background(),
+		tokenType,
+		token,
+	)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), table)
 	assert.Equal(s.T(), 1, table.ApplicationID)
@@ -453,14 +502,26 @@ func (s *DatabaseIntegrationTestSuite) TestTokenInsertCommonTokenPositive() {
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	aid, err := s.dataStore.GrantAuthorization(context.Background(), 1, id, make(tables.MapStructure))
+	aid, err := s.dataStore.GrantAuthorization(
+		context.Background(),
+		1,
+		id,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), aid, uuid.Nil)
 
 	tokenType := "dream.token"
 	token := "i.am.something.else"
 	expires := time.Now().Add(time.Hour * 5)
-	tid, err := s.dataStore.InsertCommonToken(context.Background(), aid, tokenType, token, expires, make(tables.MapStructure))
+	tid, err := s.dataStore.InsertCommonToken(
+		context.Background(),
+		aid,
+		tokenType,
+		token,
+		expires,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), 0, tid)
 }
@@ -473,18 +534,37 @@ func (s *DatabaseIntegrationTestSuite) TestTokenInsertCommonTokenNegativeDuplica
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	aid, err := s.dataStore.GrantAuthorization(context.Background(), 1, id, make(tables.MapStructure))
+	aid, err := s.dataStore.GrantAuthorization(
+		context.Background(),
+		1,
+		id,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), aid, uuid.Nil)
 
 	tokenType := "dream.token"
 	token := "i.am.something.else"
 	expires := time.Now().Add(time.Hour * 5)
-	tid, err := s.dataStore.InsertCommonToken(context.Background(), aid, tokenType, token, expires, make(tables.MapStructure))
+	tid, err := s.dataStore.InsertCommonToken(
+		context.Background(),
+		aid,
+		tokenType,
+		token,
+		expires,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), 0, tid)
 
-	tid, err = s.dataStore.InsertCommonToken(context.Background(), aid, tokenType, token, expires, make(tables.MapStructure))
+	tid, err = s.dataStore.InsertCommonToken(
+		context.Background(),
+		aid,
+		tokenType,
+		token,
+		expires,
+		make(tables.MapStructure),
+	)
 	assert.Error(s.T(), err)
 	assert.ErrorIs(s.T(), ErrAlreadyExists, err)
 	assert.Equal(s.T(), 0, tid)
@@ -498,14 +578,26 @@ func (s *DatabaseIntegrationTestSuite) TestTokenRevokeCommonTokensForAuthorizati
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	aid, err := s.dataStore.GrantAuthorization(context.Background(), 1, id, make(tables.MapStructure))
+	aid, err := s.dataStore.GrantAuthorization(
+		context.Background(),
+		1,
+		id,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), aid, uuid.Nil)
 
 	tokenType := "dream.token"
 	token := "i.am.something.else"
 	expires := time.Now().Add(time.Hour * 5)
-	tid, err := s.dataStore.InsertCommonToken(context.Background(), aid, tokenType, token, expires, make(tables.MapStructure))
+	tid, err := s.dataStore.InsertCommonToken(
+		context.Background(),
+		aid,
+		tokenType,
+		token,
+		expires,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), 0, tid)
 
@@ -534,14 +626,26 @@ func (s *DatabaseIntegrationTestSuite) TestTokenRevokeCommonToken() {
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	aid, err := s.dataStore.GrantAuthorization(context.Background(), 1, id, make(tables.MapStructure))
+	aid, err := s.dataStore.GrantAuthorization(
+		context.Background(),
+		1,
+		id,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), aid, uuid.Nil)
 
 	tokenType := "dream.token"
 	token := "i.am.something.else"
 	expires := time.Now().Add(time.Hour * 5)
-	tid, err := s.dataStore.InsertCommonToken(context.Background(), aid, tokenType, token, expires, make(tables.MapStructure))
+	tid, err := s.dataStore.InsertCommonToken(
+		context.Background(),
+		aid,
+		tokenType,
+		token,
+		expires,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), 0, tid)
 
@@ -569,7 +673,12 @@ func (s *DatabaseIntegrationTestSuite) TestTokenCommonTokenDetails() {
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	aid, err := s.dataStore.GrantAuthorization(context.Background(), 1, id, make(tables.MapStructure))
+	aid, err := s.dataStore.GrantAuthorization(
+		context.Background(),
+		1,
+		id,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), aid, uuid.Nil)
 
@@ -579,7 +688,14 @@ func (s *DatabaseIntegrationTestSuite) TestTokenCommonTokenDetails() {
 	m := make(tables.MapStructure)
 	m["property"] = "value"
 
-	tid, err := s.dataStore.InsertCommonToken(context.Background(), aid, tokenType, token, expires, m)
+	tid, err := s.dataStore.InsertCommonToken(
+		context.Background(),
+		aid,
+		tokenType,
+		token,
+		expires,
+		m,
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), 0, tid)
 
@@ -606,14 +722,26 @@ func (s *DatabaseIntegrationTestSuite) TestTokenRedeemCommonToken() {
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	aid, err := s.dataStore.GrantAuthorization(context.Background(), 1, id, make(tables.MapStructure))
+	aid, err := s.dataStore.GrantAuthorization(
+		context.Background(),
+		1,
+		id,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), aid, uuid.Nil)
 
 	tokenType := "dream.token"
 	token := "i.am.something.else"
 	expires := time.Now().Add(time.Hour * 5)
-	tid, err := s.dataStore.InsertCommonToken(context.Background(), aid, tokenType, token, expires, make(tables.MapStructure))
+	tid, err := s.dataStore.InsertCommonToken(
+		context.Background(),
+		aid,
+		tokenType,
+		token,
+		expires,
+		make(tables.MapStructure),
+	)
 	assert.NoError(s.T(), err)
 	assert.NotEqual(s.T(), 0, tid)
 
@@ -643,7 +771,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreation() {
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.Nil(s.T(), data.EmailConfirmed)
 	assert.Equal(s.T(), email, data.Email)
@@ -660,7 +788,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationWithPhone() {
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.Nil(s.T(), data.EmailConfirmed)
 	assert.Equal(s.T(), email, data.Email)
@@ -683,7 +811,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationAndConfirm() {
 	assert.Equal(s.T(), id, uid)
 	assert.True(s.T(), y)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data.EmailConfirmed)
 }
@@ -708,7 +836,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationAndDoubleConfirm() {
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.Nil(s.T(), data.EmailConfirmed)
 
@@ -717,7 +845,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationAndDoubleConfirm() {
 	assert.Equal(s.T(), id, uid)
 	assert.True(s.T(), y)
 
-	data, err = s.dataStore.UserById(context.Background(), id)
+	data, err = s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data.EmailConfirmed)
 
@@ -736,7 +864,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationAndManualConfirm() {
 	err = s.dataStore.ManualConfirmUser(context.Background(), id)
 	assert.NoError(s.T(), err)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data.EmailConfirmed)
 }
@@ -752,7 +880,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationAndBanUnban() {
 	err = s.dataStore.BanUser(context.Background(), id)
 	assert.NoError(s.T(), err)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.NotNil(s.T(), data.BannedOn)
@@ -760,7 +888,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationAndBanUnban() {
 	err = s.dataStore.UnbanUser(context.Background(), id)
 	assert.NoError(s.T(), err)
 
-	data, err = s.dataStore.UserById(context.Background(), id)
+	data, err = s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Nil(s.T(), data.BannedOn)
@@ -780,7 +908,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationEnableMFADisableMFA() {
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), b)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.True(s.T(), data.TwoFactor)
@@ -790,7 +918,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationEnableMFADisableMFA() {
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), b)
 
-	data, err = s.dataStore.UserById(context.Background(), id)
+	data, err = s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.False(s.T(), data.TwoFactor)
@@ -808,7 +936,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationRoles() {
 	err = s.dataStore.AddUserToRole(context.Background(), id, "inviter")
 	assert.NoError(s.T(), err)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Contains(s.T(), data.Roles, "inviter")
@@ -816,7 +944,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserCreationRoles() {
 	err = s.dataStore.RemoveUserFromRole(context.Background(), id, "inviter")
 	assert.NoError(s.T(), err)
 
-	data, err = s.dataStore.UserById(context.Background(), id)
+	data, err = s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.NotContains(s.T(), data.Roles, "inviter")
@@ -845,7 +973,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserLockUserUnlockUser() {
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), id)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Nil(s.T(), data.LockoutTill)
@@ -859,7 +987,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserLockUserUnlockUser() {
 	assert.NoError(s.T(), err)
 	assert.False(s.T(), b)
 
-	data, err = s.dataStore.UserById(context.Background(), id)
+	data, err = s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Equal(s.T(), lockTime.Local(), (*data.LockoutTill).Local())
@@ -868,7 +996,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserLockUserUnlockUser() {
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), b)
 
-	data, err = s.dataStore.UserById(context.Background(), id)
+	data, err = s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Nil(s.T(), data.LockoutTill)
@@ -879,19 +1007,19 @@ func (s *DatabaseIntegrationTestSuite) TestUserLockUserUnlockUser() {
 
 }
 
-func (s *DatabaseIntegrationTestSuite) TestUserIdFromEmailNegative() {
-	b, id, err := s.dataStore.IdFromEmail(context.Background(), "nope@gotrxx.local")
+func (s *DatabaseIntegrationTestSuite) TestUserIDFromEmailNegative() {
+	b, id, err := s.dataStore.IDFromEmail(context.Background(), "nope@gotrxx.local")
 	assert.NoError(s.T(), err)
 	assert.False(s.T(), b)
 	assert.Equal(s.T(), id, uuid.Nil)
 }
 
-func (s *DatabaseIntegrationTestSuite) TestUserIdFromEmailPositive() {
+func (s *DatabaseIntegrationTestSuite) TestUserIDFromEmailPositive() {
 	email := "blub@gotrxx.local"
 	pwd := "wolo"
 	id, err := s.dataStore.InsertUser(context.Background(), email, pwd, nil, nil)
 	assert.NoError(s.T(), err)
-	b, uid, err := s.dataStore.IdFromEmail(context.Background(), email)
+	b, uid, err := s.dataStore.IDFromEmail(context.Background(), email)
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), b)
 	assert.Equal(s.T(), id, uid)
@@ -906,7 +1034,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserSetPassword() {
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), b)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Equal(s.T(), []byte("wala"), data.PasswordHash)
@@ -936,7 +1064,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserSetEmail() {
 	assert.NoError(s.T(), err)
 	assert.True(s.T(), b)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Equal(s.T(), "blah@gotrxx.local", data.Email)
@@ -966,7 +1094,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserSetFailureCount() {
 	id, err := s.dataStore.InsertUser(context.Background(), email, pwd, nil, &confirm)
 	assert.NoError(s.T(), err)
 
-	data, err := s.dataStore.UserById(context.Background(), id)
+	data, err := s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Equal(s.T(), 0, data.CurrentFailureCount)
@@ -974,7 +1102,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserSetFailureCount() {
 	err = s.dataStore.SetFailureCount(context.Background(), id, 1)
 	assert.NoError(s.T(), err)
 
-	data, err = s.dataStore.UserById(context.Background(), id)
+	data, err = s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Equal(s.T(), 1, data.CurrentFailureCount)
@@ -982,7 +1110,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserSetFailureCount() {
 	err = s.dataStore.SetFailureCount(context.Background(), id, 99)
 	assert.NoError(s.T(), err)
 
-	data, err = s.dataStore.UserById(context.Background(), id)
+	data, err = s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Equal(s.T(), 99, data.CurrentFailureCount)
@@ -990,7 +1118,7 @@ func (s *DatabaseIntegrationTestSuite) TestUserSetFailureCount() {
 	err = s.dataStore.SetFailureCount(context.Background(), id, 0)
 	assert.NoError(s.T(), err)
 
-	data, err = s.dataStore.UserById(context.Background(), id)
+	data, err = s.dataStore.UserByID(context.Background(), id)
 	assert.NoError(s.T(), err)
 	assert.NotNil(s.T(), data)
 	assert.Equal(s.T(), 0, data.CurrentFailureCount)
@@ -1019,8 +1147,8 @@ func (s *DatabaseIntegrationTestSuite) TestUserByEmailNotFound() {
 	assert.ErrorIs(s.T(), ErrNotFound, err)
 }
 
-func (s *DatabaseIntegrationTestSuite) TestUserByIdNotFound() {
-	_, err := s.dataStore.UserById(context.Background(), uuid.New())
+func (s *DatabaseIntegrationTestSuite) TestUserByIDNotFound() {
+	_, err := s.dataStore.UserByID(context.Background(), uuid.New())
 	assert.ErrorIs(s.T(), ErrNotFound, err)
 }
 

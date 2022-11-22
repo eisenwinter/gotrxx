@@ -11,7 +11,7 @@ import (
 type ServerConfiguration struct {
 	Port               int
 	Address            string
-	CSRFToken          string `mapstructure:"csrf-token" json:"-"`
+	CSRFToken          string `mapstructure:"csrf-token"     json:"-"`
 	LoadTemplateFolder bool   `mapstructure:"load-templates"`
 }
 
@@ -23,7 +23,7 @@ type SMTPConfiguration struct {
 	Username string
 	Password string `json:"-"`
 	//DisplayName will be displayed as email sender
-	DisplayName string `mapstructure:"display-name"`
+	DisplayName string `         mapstructure:"display-name"`
 	//Address is the sender address
 	Address string
 }
@@ -57,11 +57,11 @@ type JWTConfiguration struct {
 	Audience           []string      `mapstructure:"aud"`
 	Expiry             time.Duration `mapstructure:"exp"`
 	NoRolesClaim       bool          `mapstructure:"no-roles-claim"`
-	HMACSigningKey     string        `mapstructure:"hmac-signing-key" json:"-"`
+	HMACSigningKey     string        `mapstructure:"hmac-signing-key"      json:"-"`
 	HMACSigningKeyFile string        `mapstructure:"hmac-signing-key-file"`
 
 	RSAPrivateKey string `mapstructure:"rsa-private-key" json:"-"`
-	RSAPublicKey  string `mapstructure:"rsa-public-key" json:"-"`
+	RSAPublicKey  string `mapstructure:"rsa-public-key"  json:"-"`
 
 	RSAPRivateKeyFile string `mapstructure:"rsa-private-key-file"`
 	RSAPublicKeyFile  string `mapstructure:"rsa-public-key-file"`
@@ -116,15 +116,21 @@ func (c *Configuration) Validate() error {
 	switch c.JWT.Algorithm {
 	case "HS256", "HS384", "HS512":
 		if c.JWT.HMACSigningKey == "" && c.JWT.HMACSigningKeyFile == "" {
-			return errors.New("when using jwt.alg HS256, HS384, HS512 you need to define either hmac-signing-key or hmac-signing-key-file")
+			return errors.New(
+				"when using jwt.alg HS256, HS384, HS512 you need to define either hmac-signing-key or hmac-signing-key-file",
+			)
 		}
 
 	case "RS256", "RS384", "RS512":
 		if c.JWT.RSAPublicKey == "" && c.JWT.RSAPublicKeyFile == "" {
-			return errors.New("when using jwt.alg RS256, RS384, RS512 you need to define either rsa-public-key or rsa-public-key-file")
+			return errors.New(
+				"when using jwt.alg RS256, RS384, RS512 you need to define either rsa-public-key or rsa-public-key-file",
+			)
 		}
 		if c.JWT.RSAPrivateKey == "" && c.JWT.RSAPRivateKeyFile == "" {
-			return errors.New("when using jwt.alg RS256, RS384, RS512 you need to define either rsa-private-key or rsa-private-key-file")
+			return errors.New(
+				"when using jwt.alg RS256, RS384, RS512 you need to define either rsa-private-key or rsa-private-key-file",
+			)
 		}
 
 	}
@@ -138,7 +144,9 @@ func (c *Configuration) Validate() error {
 	}
 	if c.Server.LoadTemplateFolder {
 		if _, err := os.Stat("templates"); os.IsNotExist(err) {
-			return errors.New("you enabled server.load-template-folder, you need to put the templates folder into your current working directory")
+			return errors.New(
+				"you enabled server.load-template-folder, you need to put the templates folder into your current working directory",
+			)
 		}
 	}
 	return nil

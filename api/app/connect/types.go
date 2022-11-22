@@ -164,7 +164,7 @@ func (e *userInfoResponse) Render(w http.ResponseWriter, r *http.Request) error 
 }
 
 // https://datatracker.ietf.org/doc/html/rfc7662#section-2.2
-type introspectionResposne struct {
+type introspectionResponse struct {
 	Active          bool     `json:"active"`
 	Scope           string   `json:"scope,omitempty"`
 	ClientID        string   `json:"client_id,omitempty"`
@@ -180,6 +180,6 @@ type introspectionResposne struct {
 	AuthorizationID string   `json:"aut,omitempty"`
 }
 
-func (e *introspectionResposne) Render(w http.ResponseWriter, r *http.Request) error {
+func (e *introspectionResponse) Render(w http.ResponseWriter, r *http.Request) error {
 	return nil
 }

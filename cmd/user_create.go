@@ -22,7 +22,13 @@ var userCreateCommand = cobra.Command{
 		dispatcher := bootstrapDispatcher(dataStore.Auditor())
 		registry := mustResolveTranslationRegistry()
 		mailer := mustResolveMailer(registry)
-		userManager := manage.NewUserService(dataStore, TopLevelLogger.Named("user_manager"), LoadedConfig, mailer, dispatcher)
+		userManager := manage.NewUserService(
+			dataStore,
+			TopLevelLogger.Named("user_manager"),
+			LoadedConfig,
+			mailer,
+			dispatcher,
+		)
 		reader := bufio.NewReader(os.Stdin)
 
 		trimmed := ""
@@ -45,7 +51,10 @@ var userCreateCommand = cobra.Command{
 			return
 		}
 		for len(string(pwd)) < LoadedConfig.Behaviour.PasswordMinLength {
-			fmt.Printf("password needs to be at least %d long.\r\n", LoadedConfig.Behaviour.PasswordMinLength)
+			fmt.Printf(
+				"password needs to be at least %d long.\r\n",
+				LoadedConfig.Behaviour.PasswordMinLength,
+			)
 			fmt.Println("password?")
 			pwd, err = term.ReadPassword(int(syscall.Stdin))
 			if err != nil {
@@ -58,7 +67,14 @@ var userCreateCommand = cobra.Command{
 		LoadedConfig.Behaviour.InviteOnly = false
 		//auto confirm CLI users
 		LoadedConfig.Behaviour.AutoConfirmUsers = true
-		us := user.New(dataStore, TopLevelLogger.Named("user_service"), LoadedConfig, mailer, dispatcher, userManager)
+		us := user.New(
+			dataStore,
+			TopLevelLogger.Named("user_service"),
+			LoadedConfig,
+			mailer,
+			dispatcher,
+			userManager,
+		)
 		id, err := us.RegisterUser(cmd.Context(), trimmed, string(pwd), nil)
 		if err != nil {
 			fmt.Printf("Unable to create user: %s \r\n", err)

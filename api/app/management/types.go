@@ -43,7 +43,7 @@ type userIDRequest struct {
 	ID uuid.UUID `json:"id"`
 }
 
-type clientIdAndUserIdRequest struct {
+type clientIDAndUserIDRequest struct {
 	ClientID string    `json:"client_id"`
 	UserID   uuid.UUID `json:"user_id"`
 }
@@ -72,12 +72,12 @@ type createApplicationRequest struct {
 	Flows           []string `json:"flows"`
 }
 
-type clientIdAndUriRequest struct {
+type clientIDAndURIRequest struct {
 	ID  string `json:"client_id"`
 	URI string `json:"uri"`
 }
 
-type clientIdAndFlowRequest struct {
+type clientIDAndFlowRequest struct {
 	ID   string `json:"client_id"`
 	Flow string `json:"flow"`
 }

@@ -18,6 +18,15 @@ tasks:
       - task: test:misc:certificates
       - task: templates:restore
   
+  dev:install-linters:
+    desc: "sets up the linters"
+    cmds:
+      - go install github.com/psampaz/go-mod-outdated@v0.8.0
+      - go install github.com/segmentio/golines@v0.9.0 
+      - go install honnef.co/go/tools/cmd/staticcheck@latest
+      - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
+      - go install github.com/tomarrell/wrapcheck/v2/cmd/wrapcheck@v2
+
   build:
     desc: "build the compiled binary"
     cmds:
@@ -62,6 +71,12 @@ tasks:
     desc: "Run staticcheck"
     cmds:
       - staticcheck ./...
+    silent: true
+
+  lint:golines:
+    desc: "Run golines"
+    cmds:
+      - golines -w -m 200 . 
     silent: true
 
   templates:dev:

@@ -44,7 +44,11 @@ func (m *Mailer) SendInviteMail(email string, code string, language string) erro
 	}
 	base := m.baseModel(t.T("title"), t.T("message"))
 	base["link_text"] = t.T("link_text")
-	base["link"] = fmt.Sprintf("%s/account/signup?invite_code=%s", m.cfg.Behaviour.ServiceDomain, code)
+	base["link"] = fmt.Sprintf(
+		"%s/account/signup?invite_code=%s",
+		m.cfg.Behaviour.ServiceDomain,
+		code,
+	)
 	base["token_text"] = t.T("token_text")
 	base["token"] = code
 	base["subject"] = t.T("subject")
@@ -58,12 +62,20 @@ func (m *Mailer) SendConfirmMail(email string, code string, language string) err
 	}
 	t, err := m.registry.TranslatorFor(language, "email.confirm")
 	if err != nil {
-		m.log.Error("[i18n] unable to load translation for `email.confirm`", zap.String("ressource", "email.confirm"), zap.String("language", language))
+		m.log.Error(
+			"[i18n] unable to load translation for `email.confirm`",
+			zap.String("ressource", "email.confirm"),
+			zap.String("language", language),
+		)
 		t = m.registry.CreateVoidTranslator(language, "email.confirm")
 	}
 	base := m.baseModel(t.T("title"), t.T("message"))
 	base["link_text"] = t.T("link_text")
-	base["link"] = fmt.Sprintf("%s/account/confirm?confirm_token=%s", m.cfg.Behaviour.ServiceDomain, code)
+	base["link"] = fmt.Sprintf(
+		"%s/account/confirm?confirm_token=%s",
+		m.cfg.Behaviour.ServiceDomain,
+		code,
+	)
 	base["token_text"] = t.T("token_text")
 	base["token"] = code
 	base["subject"] = t.T("subject")
@@ -72,7 +84,10 @@ func (m *Mailer) SendConfirmMail(email string, code string, language string) err
 
 func (m *Mailer) SendPasswordRecoverMail(email string, code string, language string) error {
 	if m.noop {
-		m.log.Info("Skipping email `PasswordRecovery` because noop is configured", zap.String("code", code))
+		m.log.Info(
+			"Skipping email `PasswordRecovery` because noop is configured",
+			zap.String("code", code),
+		)
 		return nil
 	}
 	t, err := m.registry.TranslatorFor(language, "email.reset_password")
@@ -81,7 +96,11 @@ func (m *Mailer) SendPasswordRecoverMail(email string, code string, language str
 	}
 	base := m.baseModel(t.T("title"), t.T("message"))
 	base["link_text"] = t.T("link_text")
-	base["link"] = fmt.Sprintf("%s/account/recover?recovery_code=%s", m.cfg.Behaviour.ServiceDomain, code)
+	base["link"] = fmt.Sprintf(
+		"%s/account/recover?recovery_code=%s",
+		m.cfg.Behaviour.ServiceDomain,
+		code,
+	)
 	base["token_text"] = t.T("token_text")
 	base["token"] = code
 	base["subject"] = t.T("subject")
@@ -118,7 +137,12 @@ func (m *Mailer) send(email string, subject string, viewModel map[string]interfa
 	return m.client.DialAndSend(msg)
 }
 
-func NewMailer(log *zap.Logger, cfg *config.Configuration, registry *i18n.TranslationRegistry, files fs.FS) (*Mailer, error) {
+func NewMailer(
+	log *zap.Logger,
+	cfg *config.Configuration,
+	registry *i18n.TranslationRegistry,
+	files fs.FS,
+) (*Mailer, error) {
 	c, err := fs.ReadFile(files, "templates/email/template.html")
 	if err != nil {
 		return nil, err
@@ -135,7 +159,12 @@ func NewMailer(log *zap.Logger, cfg *config.Configuration, registry *i18n.Transl
 		cfg:           cfg,
 	}
 	if !s.noop {
-		s.client = mail.NewDialer(cfg.SMTP.Host, cfg.SMTP.Port, cfg.SMTP.Username, cfg.SMTP.Password)
+		s.client = mail.NewDialer(
+			cfg.SMTP.Host,
+			cfg.SMTP.Port,
+			cfg.SMTP.Username,
+			cfg.SMTP.Password,
+		)
 	}
 	return s, nil
 }

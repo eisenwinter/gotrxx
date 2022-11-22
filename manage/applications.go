@@ -34,7 +34,7 @@ func (a *ApplicationService) CreateApplication(
 	name string,
 	flows []string,
 	redirectUris []string,
-	logoutUris []string,
+	logoutURIs []string,
 	confidentiality string,
 	scope string,
 	appType int,
@@ -55,10 +55,10 @@ func (a *ApplicationService) CreateApplication(
 	if redirectUris == nil {
 		redirectUris = []string{}
 	}
-	if logoutUris == nil {
-		logoutUris = []string{}
+	if logoutURIs == nil {
+		logoutURIs = []string{}
 	}
-	props["logout_uris"] = logoutUris
+	props["logout_uris"] = logoutURIs
 	props["redirect_uris"] = redirectUris
 	var secret *string
 	if clientSecret != "" {
@@ -69,7 +69,15 @@ func (a *ApplicationService) CreateApplication(
 		p := string(pw)
 		secret = &p
 	}
-	id, err := a.store.CreateApplication(ctx, appType, clientID, secret, name, confidentiality, props)
+	id, err := a.store.CreateApplication(
+		ctx,
+		appType,
+		clientID,
+		secret,
+		name,
+		confidentiality,
+		props,
+	)
 	if err != nil {
 		if errors.Is(db.ErrAlreadyExists, err) {
 			return 0, ErrApplicationClientIDExists
@@ -135,7 +143,11 @@ func (a *ApplicationService) TogglePKCE(ctx context.Context, clientID string, en
 	return nil
 }
 
-func (a *ApplicationService) AddRedirectURI(ctx context.Context, clientID string, redirectURI string) error {
+func (a *ApplicationService) AddRedirectURI(
+	ctx context.Context,
+	clientID string,
+	redirectURI string,
+) error {
 	app, err := a.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
 		return err
@@ -145,7 +157,10 @@ func (a *ApplicationService) AddRedirectURI(ctx context.Context, clientID string
 			return nil
 		}
 	}
-	app.Properties["redirect_uris"] = append(app.Properties["redirect_uris"].([]interface{}), redirectURI)
+	app.Properties["redirect_uris"] = append(
+		app.Properties["redirect_uris"].([]interface{}),
+		redirectURI,
+	)
 	err = a.store.UpdateApplicationProperties(ctx, clientID, app.Properties)
 	if err != nil {
 		return err
@@ -160,7 +175,11 @@ func (a *ApplicationService) AddRedirectURI(ctx context.Context, clientID string
 	return nil
 }
 
-func (a *ApplicationService) RemoveRedirectURI(ctx context.Context, clientID string, redirectURI string) error {
+func (a *ApplicationService) RemoveRedirectURI(
+	ctx context.Context,
+	clientID string,
+	redirectURI string,
+) error {
 	app, err := a.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
 		return err
@@ -195,7 +214,11 @@ func (a *ApplicationService) RemoveRedirectURI(ctx context.Context, clientID str
 	return nil
 }
 
-func (a *ApplicationService) AddLogoutURI(ctx context.Context, clientID string, logoutURI string) error {
+func (a *ApplicationService) AddLogoutURI(
+	ctx context.Context,
+	clientID string,
+	logoutURI string,
+) error {
 	app, err := a.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
 		return err
@@ -220,7 +243,11 @@ func (a *ApplicationService) AddLogoutURI(ctx context.Context, clientID string, 
 	return nil
 }
 
-func (a *ApplicationService) RemoveLogoutURI(ctx context.Context, clientID string, logoutURI string) error {
+func (a *ApplicationService) RemoveLogoutURI(
+	ctx context.Context,
+	clientID string,
+	logoutURI string,
+) error {
 	app, err := a.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
 		return err
@@ -255,7 +282,11 @@ func (a *ApplicationService) RemoveLogoutURI(ctx context.Context, clientID strin
 	return nil
 }
 
-func (a *ApplicationService) AddFlow(ctx context.Context, clientID string, flow application.FlowType) error {
+func (a *ApplicationService) AddFlow(
+	ctx context.Context,
+	clientID string,
+	flow application.FlowType,
+) error {
 	app, err := a.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
 		return err
@@ -280,7 +311,11 @@ func (a *ApplicationService) AddFlow(ctx context.Context, clientID string, flow 
 	return nil
 }
 
-func (a *ApplicationService) RemoveFlow(ctx context.Context, clientID string, flow application.FlowType) error {
+func (a *ApplicationService) RemoveFlow(
+	ctx context.Context,
+	clientID string,
+	flow application.FlowType,
+) error {
 	app, err := a.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
 		return err
@@ -342,8 +377,17 @@ func (a *ApplicationService) SetSecret(ctx context.Context, clientID string, sec
 	return nil
 }
 
-func (a *ApplicationService) List(ctx context.Context, page int, pageSize int, q string, sort string) (*PaginationResponse, error) {
-	apps, total, err := a.store.Applications(ctx, db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort})
+func (a *ApplicationService) List(
+	ctx context.Context,
+	page int,
+	pageSize int,
+	q string,
+	sort string,
+) (*PaginationResponse, error) {
+	apps, total, err := a.store.Applications(
+		ctx,
+		db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -357,8 +401,11 @@ func (a *ApplicationService) List(ctx context.Context, page int, pageSize int, q
 	}, nil
 }
 
-func (a *ApplicationService) WithActiveUserAuthorizations(ctx context.Context, userId uuid.UUID) ([]*ApplicationDTO, error) {
-	apps, err := a.store.ActiveApplicationsWithUserAuthorizations(ctx, userId)
+func (a *ApplicationService) WithActiveUserAuthorizations(
+	ctx context.Context,
+	userID uuid.UUID,
+) ([]*ApplicationDTO, error) {
+	apps, err := a.store.ActiveApplicationsWithUserAuthorizations(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -369,7 +416,10 @@ func (a *ApplicationService) WithActiveUserAuthorizations(ctx context.Context, u
 	return dtos, nil
 }
 
-func (a *ApplicationService) ByClientID(ctx context.Context, clientID string) (*ApplicationDTO, error) {
+func (a *ApplicationService) ByClientID(
+	ctx context.Context,
+	clientID string,
+) (*ApplicationDTO, error) {
 	app, err := a.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
 		return nil, err

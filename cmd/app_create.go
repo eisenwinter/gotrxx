@@ -74,16 +74,27 @@ var createApplicationCommand = cobra.Command{
 }
 
 func init() {
-	createApplicationCommand.Flags().StringVarP(&applicationCreateClientSecret, "secret", "s", "", "the client secret for the application")
-	createApplicationCommand.Flags().StringSliceVarP(&applicationCreateFlows, "flow", "f", []string{}, "the allowed grant flows for the application (authorization_code,password,client_credentials,refresh_token)")
-	createApplicationCommand.Flags().StringVarP(&applicationCreateName, "name", "n", "", "the name of the application")
-	createApplicationCommand.Flags().StringVarP(&applicationCreateType, "type", "t", "implicit_granted", "application type,may be either implicit_granted or explicit_granted")
-	createApplicationCommand.Flags().StringVarP(&applicationCreateConfidentiality, "con", "c", "public", "application confidentiality may be public or private depending on the kind of application")
-	createApplicationCommand.Flags().StringVarP(&applicationCreateScopes, "scope", "o", "", "application scopes separated by spaces")
+	createApplicationCommand.Flags().
+		StringVarP(&applicationCreateClientSecret, "secret", "s", "", "the client secret for the application")
+	createApplicationCommand.Flags().
+		StringSliceVarP(&applicationCreateFlows, "flow", "f", []string{}, "the allowed grant flows for the application (authorization_code,password,client_credentials,refresh_token)")
+	createApplicationCommand.Flags().
+		StringVarP(&applicationCreateName, "name", "n", "", "the name of the application")
+	createApplicationCommand.Flags().
+		StringVarP(&applicationCreateType, "type", "t", "implicit_granted", "application type,may be either implicit_granted or explicit_granted")
+	createApplicationCommand.Flags().
+		StringVarP(&applicationCreateConfidentiality, "con", "c", "public", "application confidentiality may be public or private depending on the kind of application")
+	createApplicationCommand.Flags().
+		StringVarP(&applicationCreateScopes, "scope", "o", "", "application scopes separated by spaces")
 
-	createApplicationCommand.Flags().StringSliceVarP(&applicationCreateRedirectUris, "redirect-url", "r", []string{}, "allowed redirect uris")
-	createApplicationCommand.Flags().StringSliceVarP(&applicationCreateLogoutUris, "logout-url", "l", []string{}, "allowed logout uris")
-	createApplicationCommand.Flags().BoolVarP(&applicationCreatePKCE, "pkce", "p", false, "enables proof key of exchange")
-	createApplicationCommand.Flags().BoolVarP(&applicationCrateSkipIfExists, "skip-if-exists", "k", false, "skips creation if client_id already exists and returns no error code")
+	createApplicationCommand.Flags().
+		StringSliceVarP(&applicationCreateRedirectUris, "redirect-url", "r", []string{}, "allowed redirect uris")
+	createApplicationCommand.Flags().
+		StringSliceVarP(&applicationCreateLogoutUris, "logout-url", "l", []string{}, "allowed logout uris")
+	createApplicationCommand.Flags().
+		BoolVarP(&applicationCreatePKCE, "pkce", "p", false, "enables proof key of exchange")
+	createApplicationCommand.Flags().
+		BoolVarP(&applicationCrateSkipIfExists, "skip-if-exists", "k", false, "skips creation if client_id already exists and returns no error code")
+
 	//createApplicationCommand.MarkFlagRequired("type")
 }

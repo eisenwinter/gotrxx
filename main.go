@@ -37,14 +37,18 @@ import (
 var templates embed.FS
 
 var (
-	Version   = "?"
+	// Version holds the version injected by ldflags
+	Version = "?"
+	// BuildTime is the build time injected by ldflags
 	BuildTime = "?"
+	// GitCommit is the commit sha injected by ldflags
 	GitCommit = "-"
-	GitRef    = "-"
+	// GitRef is the git reference injected by ldflags
+	GitRef = "-"
 )
 
 func main() {
-	//version info
+	// version info - do not bootstrap whole application
 	if len(os.Args) > 1 && os.Args[1] == "version" {
 		fmt.Printf("gotrxx %s, built %s from %s (%s)", Version, BuildTime, GitCommit, GitRef)
 		return
@@ -99,7 +103,12 @@ func initConfig(logger *zap.Logger) {
 	bind := func(from string, to string) {
 		err := viper.BindEnv(to, from)
 		if err != nil {
-			logger.Error("unable to bindenv", zap.String("from", from), zap.String(to, to), zap.Error(err))
+			logger.Error(
+				"unable to bindenv",
+				zap.String("from", from),
+				zap.String(to, to),
+				zap.Error(err),
+			)
 		}
 
 	}
@@ -161,7 +170,10 @@ func initConfig(logger *zap.Logger) {
 	bind("TRXX_MANAGE_ENDPOINT_CORS_ALLOW_CREDENTIALS", "manage-endpoint.cors.allow-credentials")
 
 	if cmd.ConfigFileLocation != "" {
-		logger.Debug("Using supplied config file", zap.String("file", string(cmd.ConfigFileLocation)))
+		logger.Debug(
+			"Using supplied config file",
+			zap.String("file", string(cmd.ConfigFileLocation)),
+		)
 		viper.SetConfigFile(string(cmd.ConfigFileLocation))
 	} else {
 		path, err := os.Getwd()
@@ -197,7 +209,9 @@ func initConfig(logger *zap.Logger) {
 
 	if cmd.LoadedConfig.Server.LoadTemplateFolder {
 		if _, err := os.Stat("/templates"); os.IsNotExist(err) {
-			logger.Fatal("You need to add the templates folder when using  `server.load-template-folder:true`")
+			logger.Fatal(
+				"You need to add the templates folder when using  `server.load-template-folder:true`",
+			)
 		}
 		templates := os.DirFS("templates")
 		statics, err := fs.Sub(templates, "static")

@@ -25,7 +25,10 @@ func (m *ManagementRessource) listApplications(w http.ResponseWriter, r *http.Re
 	render.Respond(w, r, apps)
 }
 
-func (m *ManagementRessource) applicationsWithActiveAuthorizationsByUserID(w http.ResponseWriter, r *http.Request) {
+func (m *ManagementRessource) applicationsWithActiveAuthorizationsByUserID(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
 	var req *userIDRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -76,7 +79,19 @@ func (m *ManagementRessource) createApplication(w http.ResponseWriter, r *http.R
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
-	id, err := m.appService.CreateApplication(r.Context(), req.ClientID, req.ClientSecret, req.Name, req.Flows, req.RedirectURIs, req.LogoutURIs, req.Confidentiality, req.Scopes, t, req.PKCE)
+	id, err := m.appService.CreateApplication(
+		r.Context(),
+		req.ClientID,
+		req.ClientSecret,
+		req.Name,
+		req.Flows,
+		req.RedirectURIs,
+		req.LogoutURIs,
+		req.Confidentiality,
+		req.Scopes,
+		t,
+		req.PKCE,
+	)
 	success := true
 	message := "Successfully created application"
 	var i *string
@@ -140,7 +155,7 @@ func (m *ManagementRessource) purgeRetiredApllications(w http.ResponseWriter, r 
 }
 
 func (m *ManagementRessource) addRedirectUriToApplication(w http.ResponseWriter, r *http.Request) {
-	var req *clientIdAndUriRequest
+	var req *clientIDAndURIRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		m.log.Info("invalid payload data", zap.Error(err))
@@ -163,8 +178,12 @@ func (m *ManagementRessource) addRedirectUriToApplication(w http.ResponseWriter,
 		m.log.Error("unable to render response", zap.Error(err))
 	}
 }
-func (m *ManagementRessource) removeRedirectUriFromApplication(w http.ResponseWriter, r *http.Request) {
-	var req *clientIdAndUriRequest
+
+func (m *ManagementRessource) removeRedirectURIFromApplication(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	var req *clientIDAndURIRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		m.log.Info("invalid payload data", zap.Error(err))
@@ -189,7 +208,7 @@ func (m *ManagementRessource) removeRedirectUriFromApplication(w http.ResponseWr
 
 }
 func (m *ManagementRessource) addLogoutUriToApplication(w http.ResponseWriter, r *http.Request) {
-	var req *clientIdAndUriRequest
+	var req *clientIDAndURIRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		m.log.Info("invalid payload data", zap.Error(err))
@@ -212,8 +231,12 @@ func (m *ManagementRessource) addLogoutUriToApplication(w http.ResponseWriter, r
 		m.log.Error("unable to render response", zap.Error(err))
 	}
 }
-func (m *ManagementRessource) removeLogoutUriFromApplication(w http.ResponseWriter, r *http.Request) {
-	var req *clientIdAndUriRequest
+
+func (m *ManagementRessource) removeLogoutUriFromApplication(
+	w http.ResponseWriter,
+	r *http.Request,
+) {
+	var req *clientIDAndURIRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		m.log.Info("invalid payload data", zap.Error(err))
@@ -237,7 +260,7 @@ func (m *ManagementRessource) removeLogoutUriFromApplication(w http.ResponseWrit
 }
 
 func (m *ManagementRessource) addFlowToApplication(w http.ResponseWriter, r *http.Request) {
-	var req *clientIdAndFlowRequest
+	var req *clientIDAndFlowRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		m.log.Info("invalid payload data", zap.Error(err))
@@ -263,7 +286,7 @@ func (m *ManagementRessource) addFlowToApplication(w http.ResponseWriter, r *htt
 }
 
 func (m *ManagementRessource) removeFlowFromApplication(w http.ResponseWriter, r *http.Request) {
-	var req *clientIdAndFlowRequest
+	var req *clientIDAndFlowRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		m.log.Info("invalid payload data", zap.Error(err))

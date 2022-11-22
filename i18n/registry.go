@@ -90,7 +90,10 @@ func (t *TranslationRegistry) CreateVoidTranslator(language string, ressource st
 	}
 }
 
-func (t *TranslationRegistry) TranslatorFor(language string, ressource string) (*Translator, error) {
+func (t *TranslationRegistry) TranslatorFor(
+	language string,
+	ressource string,
+) (*Translator, error) {
 	if _, ok := t.registry[language]; !ok {
 		return nil, ErrLanguageDoesntExist
 	}
@@ -115,15 +118,13 @@ func (t *TranslationRegistry) autoLoad() error {
 	return t.process(matches)
 }
 
+var jsonRegex = regexp.MustCompile(`[a-zA-Z]{2}\.json$`)
+
 func (t *TranslationRegistry) process(files []string) error {
-	r, err := regexp.Compile(`[a-zA-Z]{2}\.json$`)
-	if err != nil {
-		return err
-	}
 	for _, v := range files {
 		t.log.Debug("processing language file", zap.String("file", v))
 		_, file := filepath.Split(v)
-		locale := r.FindString(v)
+		locale := jsonRegex.FindString(v)
 		if locale != "" {
 			name := strings.TrimSuffix(file, "."+locale)
 			locale = strings.TrimSuffix(locale, ".json")
@@ -135,19 +136,32 @@ func (t *TranslationRegistry) process(files []string) error {
 			file, err := fs.ReadFile(t.dir, v)
 
 			if err != nil {
-				t.log.Error("could not read translation file", zap.Error(err), zap.String("file", v))
+				t.log.Error(
+					"could not read translation file",
+					zap.Error(err),
+					zap.String("file", v),
+				)
 				return err
 			}
 
 			flat, err := flatten.FlattenString(string(file), "", flatten.DotStyle)
 			if err != nil {
-				t.log.Error("skipping unparseable translation file", zap.Error(err), zap.String("content", string(file)), zap.String("file", v))
+				t.log.Error(
+					"skipping unparseable translation file",
+					zap.Error(err),
+					zap.String("content", string(file)),
+					zap.String("file", v),
+				)
 				return err
 			}
 			tr := make(map[string]string)
 			err = json.Unmarshal([]byte(flat), &tr)
 			if err != nil {
-				t.log.Error("could not unmarshall translation file", zap.Error(err), zap.String("file", v))
+				t.log.Error(
+					"could not unmarshall translation file",
+					zap.Error(err),
+					zap.String("file", v),
+				)
 				return err
 			}
 			final := make(translation)
@@ -160,7 +174,11 @@ func (t *TranslationRegistry) process(files []string) error {
 				final[k] = parsed
 			}
 			res[name] = final
-			t.log.Debug("added translations", zap.String("ressource", name), zap.String("lang", locale))
+			t.log.Debug(
+				"added translations",
+				zap.String("ressource", name),
+				zap.String("lang", locale),
+			)
 		}
 	}
 	return nil

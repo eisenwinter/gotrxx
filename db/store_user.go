@@ -35,7 +35,23 @@ func (d *DataStore) Users(ctx context.Context, opts ListOptions) ([]*tables.User
 
 	var entities []*tables.UserTable
 	q := sq.
-		Select("id", "email", "email_confirmed", "phone", "phone_confirmed", "mfa", "pending_otp", "lockout_till", "banned_on", "current_failure_count", "recovery_token_created", "confirm_token", "confirm_token_created", "created_at", "updated_at").
+		Select(
+			"id",
+			"email",
+			"email_confirmed",
+			"phone",
+			"phone_confirmed",
+			"mfa",
+			"pending_otp",
+			"lockout_till",
+			"banned_on",
+			"current_failure_count",
+			"recovery_token_created",
+			"confirm_token",
+			"confirm_token_created",
+			"created_at",
+			"updated_at",
+		).
 		From("users")
 	q = applyWhere(q)
 	q = d.orderByFromAdapater(q, "users", "id DESC", opts)
@@ -75,10 +91,10 @@ func (d *DataStore) UserByEmail(ctx context.Context, email string) (*UserData, e
 		}
 		return nil, err
 	}
-	return d.UserById(ctx, id)
+	return d.UserByID(ctx, id)
 }
 
-func (d *DataStore) UserById(ctx context.Context, id uuid.UUID) (*UserData, error) {
+func (d *DataStore) UserByID(ctx context.Context, id uuid.UUID) (*UserData, error) {
 
 	var userEntity tables.UserTable
 	userQuery := sq.Select("*").From("users").Where(sq.Eq{"id": id})
@@ -107,7 +123,12 @@ func (d *DataStore) UserById(ctx context.Context, id uuid.UUID) (*UserData, erro
 	provider.OtpPending = userEntity.PendingOTP
 	var authorizations []*userAuthorization
 	auts := sq.
-		Select("authorizations.id, applications.client_id", "authorizations.revoked_at", "authorizations.properties", "applications.type").
+		Select(
+			"authorizations.id, applications.client_id",
+			"authorizations.revoked_at",
+			"authorizations.properties",
+			"applications.type",
+		).
 		From("authorizations").
 		Join("applications ON authorizations.application_id = applications.id").
 		Where("authorizations.user_id = ?", id)
@@ -149,9 +170,12 @@ func (d *DataStore) UserById(ctx context.Context, id uuid.UUID) (*UserData, erro
 }
 
 func (d *DataStore) IsUserInRole(ctx context.Context, id uuid.UUID, role string) (bool, error) {
-	sel := sq.Select("id").From("roles").InnerJoin("user_roles ON roles.id = user_roles.role_id").Where(sq.Eq{"name": role, "user_roles.user_id": id})
-	var roleId int32
-	err := d.getStatement(ctx, &roleId, sel, nil)
+	sel := sq.Select("id").
+		From("roles").
+		InnerJoin("user_roles ON roles.id = user_roles.role_id").
+		Where(sq.Eq{"name": role, "user_roles.user_id": id})
+	var roleID int32
+	err := d.getStatement(ctx, &roleID, sel, nil)
 	if err != nil && err != sql.ErrNoRows {
 		return false, err
 	}
@@ -164,7 +188,10 @@ func (d *DataStore) IsUserInRole(ctx context.Context, id uuid.UUID, role string)
 func (d *DataStore) UserRoles(ctx context.Context, id uuid.UUID) ([]*tables.RoleTable, error) {
 
 	var roles []*tables.RoleTable
-	sel := sq.Select("roles.id", "roles.name").From("roles").InnerJoin("user_roles ON roles.id = user_roles.role_id").Where(sq.Eq{"user_roles.user_id": id})
+	sel := sq.Select("roles.id", "roles.name").
+		From("roles").
+		InnerJoin("user_roles ON roles.id = user_roles.role_id").
+		Where(sq.Eq{"user_roles.user_id": id})
 	err := d.selectStatement(ctx, &roles, sel, nil)
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -177,8 +204,8 @@ func (d *DataStore) UserRoles(ctx context.Context, id uuid.UUID) ([]*tables.Role
 
 func (d *DataStore) AddUserToRole(ctx context.Context, id uuid.UUID, role string) error {
 	sel := sq.Select("id").From("roles").Where(sq.Eq{"name": role})
-	var roleId int32
-	err := d.getStatement(ctx, &roleId, sel, nil)
+	var roleID int32
+	err := d.getStatement(ctx, &roleID, sel, nil)
 	if err != nil && err != sql.ErrNoRows {
 		return err
 	}
@@ -188,36 +215,36 @@ func (d *DataStore) AddUserToRole(ctx context.Context, id uuid.UUID, role string
 			Columns("name", "created_at").
 			Values(role, time.Now().UTC()).
 			Suffix("RETURNING id")
-		err := d.returningInsertStatement(ctx, &roleId, ins, nil)
+		err := d.returningInsertStatement(ctx, &roleID, ins, nil)
 		if err != nil {
 			return err
 		}
 	}
 	ins := sq.Insert("user_roles").
 		Columns("role_id", "user_id").
-		Values(roleId, id)
+		Values(roleID, id)
 	_, err = d.insertStatement(ctx, ins, nil)
 	return err
 }
 
 func (d *DataStore) RemoveUserFromRole(ctx context.Context, id uuid.UUID, role string) error {
 	sel := sq.Select("id").From("roles").Where(sq.Eq{"name": role})
-	var roleId int32
-	err := d.getStatement(ctx, &roleId, sel, nil)
+	var roleID int32
+	err := d.getStatement(ctx, &roleID, sel, nil)
 	if err != nil {
 		return err
 	}
-	del := sq.Delete("user_roles").Where(sq.And{sq.Eq{"user_id": id}, sq.Eq{"role_id": roleId}})
+	del := sq.Delete("user_roles").Where(sq.And{sq.Eq{"user_id": id}, sq.Eq{"role_id": roleID}})
 	_, err = d.deleteStatement(ctx, del, nil)
 	return err
 }
 
 func (d *DataStore) ConfirmTokenExists(ctx context.Context, token string) (bool, error) {
-	return d.exists("users", sq.Eq{"confirm_token": token})
+	return d.exists(ctx, "users", sq.Eq{"confirm_token": token})
 }
 
 func (d *DataStore) IsRegistred(ctx context.Context, email string) (bool, error) {
-	user, err := d.exists("users", sq.Eq{"email": email})
+	user, err := d.exists(ctx, "users", sq.Eq{"email": email})
 	if err != nil {
 		return false, err
 	}
@@ -240,7 +267,12 @@ func (d *DataStore) LockUser(ctx context.Context, id uuid.UUID, lockTime time.Ti
 	return affected > 0, err
 }
 
-func (d *DataStore) EnableMFA(ctx context.Context, id uuid.UUID, userSecret string, userRecoveryKey string) (bool, error) {
+func (d *DataStore) EnableMFA(
+	ctx context.Context,
+	id uuid.UUID,
+	userSecret string,
+	userRecoveryKey string,
+) (bool, error) {
 	ts := time.Now().UTC()
 	q := sq.
 		Update("users").
@@ -336,7 +368,7 @@ func (d *DataStore) UnlockUser(ctx context.Context, id uuid.UUID) (bool, error) 
 	return affected > 0, err
 }
 
-func (d *DataStore) IdFromEmail(ctx context.Context, email string) (bool, uuid.UUID, error) {
+func (d *DataStore) IDFromEmail(ctx context.Context, email string) (bool, uuid.UUID, error) {
 	q := sq.Select("id").From("users").Where(sq.Eq{"email": email})
 	var id uuid.UUID
 	err := d.getStatement(ctx, &id, q, nil)
@@ -348,7 +380,11 @@ func (d *DataStore) IdFromEmail(ctx context.Context, email string) (bool, uuid.U
 	return true, id, nil
 }
 
-func (d *DataStore) SetPassword(ctx context.Context, id uuid.UUID, passwordHash string) (bool, error) {
+func (d *DataStore) SetPassword(
+	ctx context.Context,
+	id uuid.UUID,
+	passwordHash string,
+) (bool, error) {
 	q := sq.
 		Update("users").
 		Set("password", passwordHash).
@@ -362,7 +398,11 @@ func (d *DataStore) SetPassword(ctx context.Context, id uuid.UUID, passwordHash 
 	return affected > 0, err
 }
 
-func (d *DataStore) SetRecoveryToken(ctx context.Context, id uuid.UUID, recoveryToken string) (bool, error) {
+func (d *DataStore) SetRecoveryToken(
+	ctx context.Context,
+	id uuid.UUID,
+	recoveryToken string,
+) (bool, error) {
 	q := sq.
 		Update("users").
 		Set("recovery_token", recoveryToken).
@@ -377,7 +417,11 @@ func (d *DataStore) SetRecoveryToken(ctx context.Context, id uuid.UUID, recovery
 	return affected > 0, err
 }
 
-func (d *DataStore) ConsumeRecoveryToken(ctx context.Context, id uuid.UUID, recoveryToken string) (bool, error) {
+func (d *DataStore) ConsumeRecoveryToken(
+	ctx context.Context,
+	id uuid.UUID,
+	recoveryToken string,
+) (bool, error) {
 	q := sq.
 		Update("users").
 		Set("lockout_till", nil).
@@ -407,9 +451,20 @@ func (d *DataStore) SetEmail(ctx context.Context, id uuid.UUID, email string) (b
 	return affected > 0, err
 }
 
-func (d *DataStore) InsertUser(ctx context.Context, email string, passwordHash string, phone *string, confirmToken *string) (uuid.UUID, error) {
+func (d *DataStore) InsertUser(
+	ctx context.Context,
+	email string,
+	passwordHash string,
+	phone *string,
+	confirmToken *string,
+) (uuid.UUID, error) {
 	timestamp := time.Now().UTC()
-	m := map[string]interface{}{"email": email, "password": passwordHash, "phone": phone, "created_at": timestamp}
+	m := map[string]interface{}{
+		"email":      email,
+		"password":   passwordHash,
+		"phone":      phone,
+		"created_at": timestamp,
+	}
 	m["id"] = uuid.New()
 	if confirmToken != nil {
 		m["confirm_token"] = confirmToken

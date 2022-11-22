@@ -49,7 +49,11 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if app.IsRetired() {
-		render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, "invalid application"))
+		render.Respond(
+			w,
+			r,
+			createStdError(stdInvalidClient, http.StatusBadRequest, "invalid application"),
+		)
 		return
 	}
 	if app.HasSecret() {
@@ -61,7 +65,15 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 	}
 	token := r.FormValue("token")
 	if token == "" {
-		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "client_id field not supplied"))
+		err = render.Render(
+			w,
+			r,
+			createStdError(
+				stdInvalidRequest,
+				http.StatusBadRequest,
+				"client_id field not supplied",
+			),
+		)
 		if err != nil {
 			c.logger.Error("unable to render response", zap.Error(err))
 		}
@@ -76,7 +88,7 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	autId, ok := j.Get(tokens.ClaimAuthorization)
+	autID, ok := j.Get(tokens.ClaimAuthorization)
 	if !ok {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
@@ -85,7 +97,7 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 		c.logger.Error("no authorization id in JWT")
 		return
 	}
-	id, err := uuid.Parse(autId.(string))
+	id, err := uuid.Parse(autID.(string))
 	if err != nil {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
@@ -96,7 +108,11 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 	}
 	err = c.rotator.RevokeCommonToken(r.Context(), tokens.RefreshTokenType, token, id)
 	if err != nil {
-		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid revocation"))
+		err = render.Render(
+			w,
+			r,
+			createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid revocation"),
+		)
 		if err != nil {
 			c.logger.Error("unable to render response", zap.Error(err))
 		}

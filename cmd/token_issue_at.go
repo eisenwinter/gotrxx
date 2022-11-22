@@ -35,12 +35,32 @@ var tokenIssueAccessTokenCommand = cobra.Command{
 		}
 
 		dispatcher := bootstrapDispatcher(dataStore.Auditor())
-		appService := application.NewApplicationSevice(TopLevelLogger.Named("application_service"), dataStore)
-		service := authorization.NewAuthorizationService(TopLevelLogger.Named("authorization_service"), dataStore, dispatcher, appService)
+		appService := application.NewApplicationSevice(
+			TopLevelLogger.Named("application_service"),
+			dataStore,
+		)
+		service := authorization.NewAuthorizationService(
+			TopLevelLogger.Named("authorization_service"),
+			dataStore,
+			dispatcher,
+			appService,
+		)
 		registry := mustResolveTranslationRegistry()
 		mailer := mustResolveMailer(registry)
-		userManager := manage.NewUserService(dataStore, TopLevelLogger.Named("user_manager"), LoadedConfig, mailer, dispatcher)
-		signInService := user.NewSignInService(dataStore, TopLevelLogger.Named("signin_service"), LoadedConfig.Behaviour, dispatcher, userManager)
+		userManager := manage.NewUserService(
+			dataStore,
+			TopLevelLogger.Named("user_manager"),
+			LoadedConfig,
+			mailer,
+			dispatcher,
+		)
+		signInService := user.NewSignInService(
+			dataStore,
+			TopLevelLogger.Named("signin_service"),
+			LoadedConfig.Behaviour,
+			dispatcher,
+			userManager,
+		)
 
 		pwd := []byte{}
 		for len(pwd) == 0 {
@@ -73,7 +93,11 @@ var tokenIssueAccessTokenCommand = cobra.Command{
 			}
 		}
 
-		issuer := tokens.NewIssuer(TopLevelLogger.Named("token_issuer"), LoadedConfig.JWT, dataStore)
+		issuer := tokens.NewIssuer(
+			TopLevelLogger.Named("token_issuer"),
+			LoadedConfig.JWT,
+			dataStore,
+		)
 		token, err := issuer.IssueAccessTokenForUser(&user.SignedInUser{
 			UserID: ud.ID,
 			Email:  ud.Email,

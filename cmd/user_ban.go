@@ -24,8 +24,14 @@ var banUserCommand = cobra.Command{
 		dispatcher := bootstrapDispatcher(dataStore.Auditor())
 		registry := mustResolveTranslationRegistry()
 		mailer := mustResolveMailer(registry)
-		userManager := manage.NewUserService(dataStore, TopLevelLogger.Named("user_manager"), LoadedConfig, mailer, dispatcher)
-		id, err := userManager.EmailToId(cmd.Context(), args[0])
+		userManager := manage.NewUserService(
+			dataStore,
+			TopLevelLogger.Named("user_manager"),
+			LoadedConfig,
+			mailer,
+			dispatcher,
+		)
+		id, err := userManager.EmailToID(cmd.Context(), args[0])
 		if err != nil {
 			fmt.Printf("Unable to ban user: %s", err)
 			os.Exit(1)

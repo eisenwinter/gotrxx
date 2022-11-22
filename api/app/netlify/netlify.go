@@ -84,7 +84,15 @@ func newSettingsResponse() *settingsResponse {
 func (n *NetlifyRessource) token(w http.ResponseWriter, r *http.Request) {
 	grant := r.FormValue("grant_type")
 	if grant != "password" {
-		err := render.Render(w, r, &errorResponse{Error: "invalid_grant", StatusCode: http.StatusBadRequest, ErrorDescription: "invalid grant_type for .netlify endpoint"})
+		err := render.Render(
+			w,
+			r,
+			&errorResponse{
+				Error:            "invalid_grant",
+				StatusCode:       http.StatusBadRequest,
+				ErrorDescription: "invalid grant_type for .netlify endpoint",
+			},
+		)
 		if err != nil {
 			n.logger.Error("unable to render response", zap.Error(err))
 		}
@@ -93,7 +101,15 @@ func (n *NetlifyRessource) token(w http.ResponseWriter, r *http.Request) {
 
 	username := r.FormValue("username")
 	if username == "" {
-		err := render.Render(w, r, &errorResponse{Error: "invalid_request", StatusCode: http.StatusBadRequest, ErrorDescription: "username field not supplied"})
+		err := render.Render(
+			w,
+			r,
+			&errorResponse{
+				Error:            "invalid_request",
+				StatusCode:       http.StatusBadRequest,
+				ErrorDescription: "username field not supplied",
+			},
+		)
 		if err != nil {
 			n.logger.Error("unable to render response", zap.Error(err))
 		}
@@ -101,7 +117,15 @@ func (n *NetlifyRessource) token(w http.ResponseWriter, r *http.Request) {
 	}
 	password := r.FormValue("password")
 	if password == "" {
-		err := render.Render(w, r, &errorResponse{Error: "invalid_request", StatusCode: http.StatusBadRequest, ErrorDescription: "password field not supplied"})
+		err := render.Render(
+			w,
+			r,
+			&errorResponse{
+				Error:            "invalid_request",
+				StatusCode:       http.StatusBadRequest,
+				ErrorDescription: "password field not supplied",
+			},
+		)
 		if err != nil {
 			n.logger.Error("unable to render response", zap.Error(err))
 		}
@@ -150,13 +174,13 @@ func (n *NetlifyRessource) logout(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(500)
 		return
 	}
-	autId, ok := j.Get(tokens.ClaimAuthorization)
+	autID, ok := j.Get(tokens.ClaimAuthorization)
 	if !ok {
 		w.WriteHeader(http.StatusBadRequest)
 		n.logger.Error("no authorization id in JWT")
 		return
 	}
-	id, err := uuid.Parse(autId.(string))
+	id, err := uuid.Parse(autID.(string))
 	if err != nil {
 		w.WriteHeader(http.StatusBadRequest)
 		n.logger.Error("malformed authorization id in JWT")
@@ -164,7 +188,11 @@ func (n *NetlifyRessource) logout(w http.ResponseWriter, r *http.Request) {
 	}
 	err = n.rotator.RevokeCommonTokensForAuthorization(r.Context(), id)
 	if err != nil {
-		n.logger.Error("Could not revoked all common tokens for authorization", zap.Error(err), zap.String("authorization_id", id.String()))
+		n.logger.Error(
+			"Could not revoked all common tokens for authorization",
+			zap.Error(err),
+			zap.String("authorization_id", id.String()),
+		)
 	}
 	w.WriteHeader(http.StatusNoContent)
 }
@@ -174,7 +202,11 @@ func (n *NetlifyRessource) settings(w http.ResponseWriter, r *http.Request) {
 	render.Respond(w, r, newSettingsResponse())
 }
 
-func NewNetlifyRessource(logger *zap.Logger, c *connect.ConnnectRessource, rotator *tokens.TokenRotator) *NetlifyRessource {
+func NewNetlifyRessource(
+	logger *zap.Logger,
+	c *connect.ConnnectRessource,
+	rotator *tokens.TokenRotator,
+) *NetlifyRessource {
 	return &NetlifyRessource{logger: logger, uc: c, rotator: rotator}
 }
 

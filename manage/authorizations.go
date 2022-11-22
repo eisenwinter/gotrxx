@@ -20,8 +20,11 @@ type AuthorizationService struct {
 	dispatcher *events.Dispatcher
 }
 
-func (a *AuthorizationService) ActiveByUser(ctx context.Context, userId uuid.UUID) ([]*AuthorizationDTO, error) {
-	auths, err := a.store.ActiveAuthorizationsByUserID(ctx, userId)
+func (a *AuthorizationService) ActiveByUser(
+	ctx context.Context,
+	userID uuid.UUID,
+) ([]*AuthorizationDTO, error) {
+	auths, err := a.store.ActiveAuthorizationsByUserID(ctx, userID)
 	if err != nil {
 		return nil, err
 	}
@@ -32,8 +35,17 @@ func (a *AuthorizationService) ActiveByUser(ctx context.Context, userId uuid.UUI
 	return dtos, nil
 }
 
-func (a *AuthorizationService) List(ctx context.Context, page int, pageSize int, q string, sort string) (*PaginationResponse, error) {
-	auths, total, err := a.store.Authorizations(ctx, db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort})
+func (a *AuthorizationService) List(
+	ctx context.Context,
+	page int,
+	pageSize int,
+	q string,
+	sort string,
+) (*PaginationResponse, error) {
+	auths, total, err := a.store.Authorizations(
+		ctx,
+		db.ListOptions{Page: page, PageSize: pageSize, Query: q, Sort: sort},
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +59,12 @@ func (a *AuthorizationService) List(ctx context.Context, page int, pageSize int,
 	}, nil
 }
 
-func (a *AuthorizationService) GrantAuthorization(ctx context.Context, userID uuid.UUID, clientID string, scope string) error {
+func (a *AuthorizationService) GrantAuthorization(
+	ctx context.Context,
+	userID uuid.UUID,
+	clientID string,
+	scope string,
+) error {
 	app, err := a.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
 		if errors.Is(db.ErrNotFound, err) {
@@ -59,7 +76,12 @@ func (a *AuthorizationService) GrantAuthorization(ctx context.Context, userID uu
 	if scope != "" {
 		parsedScopes = strings.Split(scope, " ")
 	}
-	aid, err := a.store.GrantAuthorization(ctx, app.ID, userID, map[string]interface{}{"auto_granted": false, "from_invite": false, "scopes": parsedScopes})
+	aid, err := a.store.GrantAuthorization(
+		ctx,
+		app.ID,
+		userID,
+		map[string]interface{}{"auto_granted": false, "from_invite": false, "scopes": parsedScopes},
+	)
 	if err != nil {
 		return err
 	}
@@ -72,7 +94,11 @@ func (a *AuthorizationService) GrantAuthorization(ctx context.Context, userID uu
 	return nil
 }
 
-func (a *AuthorizationService) RevokeAuthorizationByClientIDAndUserID(ctx context.Context, clientID string, userID uuid.UUID) error {
+func (a *AuthorizationService) RevokeAuthorizationByClientIDAndUserID(
+	ctx context.Context,
+	clientID string,
+	userID uuid.UUID,
+) error {
 	auth, err := a.store.ActiveAuthorizationByUserAndClientID(ctx, clientID, userID)
 	if err != nil {
 		if errors.Is(db.ErrNotFound, err) {
@@ -96,8 +122,12 @@ func (a *AuthorizationService) RevokeAuthorizationByClientIDAndUserID(ctx contex
 	return nil
 }
 
-func (a *AuthorizationService) RevokeAuthorizationClientIDAndEmail(ctx context.Context, clientID string, email string) error {
-	found, userID, err := a.store.IdFromEmail(ctx, email)
+func (a *AuthorizationService) RevokeAuthorizationClientIDAndEmail(
+	ctx context.Context,
+	clientID string,
+	email string,
+) error {
+	found, userID, err := a.store.IDFromEmail(ctx, email)
 	if err != nil {
 		if errors.Is(db.ErrNotFound, err) {
 			return ErrNotFound

@@ -29,7 +29,7 @@ func (s *Service) build(table *tables.ApplicationTable) *Application {
 	return ApplicationFromDbType(table)
 }
 
-func (s *Service) ApplicationById(ctx context.Context, id int) (*Application, error) {
+func (s *Service) ApplicationByID(ctx context.Context, id int) (*Application, error) {
 	entry, err := s.store.ApplicationByID(ctx, id)
 	if err != nil {
 		return nil, err
@@ -37,7 +37,10 @@ func (s *Service) ApplicationById(ctx context.Context, id int) (*Application, er
 	return s.build(entry), nil
 }
 
-func (s *Service) ApplicationByClientID(ctx context.Context, clientID string) (*Application, error) {
+func (s *Service) ApplicationByClientID(
+	ctx context.Context,
+	clientID string,
+) (*Application, error) {
 	entry, err := s.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
 		if errors.Is(db.ErrNotFound, err) {

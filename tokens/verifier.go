@@ -15,8 +15,12 @@ import (
 )
 
 type Fetcher interface {
-	CommonTokenDetails(ctx context.Context, tokenType string, token string) (*db.CommonTokenDetails, error)
-	UserById(ctx context.Context, id uuid.UUID) (*db.UserData, error)
+	CommonTokenDetails(
+		ctx context.Context,
+		tokenType string,
+		token string,
+	) (*db.CommonTokenDetails, error)
+	UserByID(ctx context.Context, id uuid.UUID) (*db.UserData, error)
 	ApplicationByClientID(ctx context.Context, clientID string) (*tables.ApplicationTable, error)
 }
 
@@ -61,7 +65,10 @@ func (t *TokenVerifier) ParseAndValidateAccessToken(accessToken string) (jwt.Tok
 
 // ValidateAccessTokenDetails validates an access token and all underlying entities from the data store
 // returns a common token wrapper if the token is still usable otherwise it will return a error
-func (t *TokenVerifier) ValidateAccessTokenDetails(ctx context.Context, accessToken string) (*CommonToken, error) {
+func (t *TokenVerifier) ValidateAccessTokenDetails(
+	ctx context.Context,
+	accessToken string,
+) (*CommonToken, error) {
 	if len(t.issuer.parseOptions) == 0 {
 		return nil, errors.New("no valid JWT parsing options")
 	}
@@ -89,7 +96,7 @@ func (t *TokenVerifier) ValidateAccessTokenDetails(ctx context.Context, accessTo
 		if err != nil {
 			return nil, err
 		}
-		user, err := t.loader.UserById(ctx, auth.UserID())
+		user, err := t.loader.UserByID(ctx, auth.UserID())
 		if err != nil {
 			return nil, ErrInvalidToken
 		}
@@ -115,7 +122,10 @@ func (t *TokenVerifier) ValidateAccessTokenDetails(ctx context.Context, accessTo
 
 // ValidateRefreshTokenDetails validates an refresh against all stored entities
 // returns a common token wrapper if the token is still usable
-func (t *TokenVerifier) ValidateRefreshTokenDetails(ctx context.Context, refreshToken string) (*CommonToken, error) {
+func (t *TokenVerifier) ValidateRefreshTokenDetails(
+	ctx context.Context,
+	refreshToken string,
+) (*CommonToken, error) {
 	d, err := t.loader.CommonTokenDetails(ctx, string(RefreshTokenType), refreshToken)
 	if err != nil {
 		if errors.Is(db.ErrNotFound, err) {
@@ -140,7 +150,7 @@ func (t *TokenVerifier) ValidateRefreshTokenDetails(ctx context.Context, refresh
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
-	user, err := t.loader.UserById(ctx, d.UserID)
+	user, err := t.loader.UserByID(ctx, d.UserID)
 	if err != nil {
 		return nil, ErrInvalidToken
 	}
