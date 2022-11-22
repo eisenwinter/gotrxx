@@ -83,7 +83,14 @@ func newSettingsResponse() *settingsResponse {
 
 func (n *NetlifyRessource) token(w http.ResponseWriter, r *http.Request) {
 	grant := r.FormValue("grant_type")
-	if grant != "password" {
+	switch grant {
+	case "password":
+		n.passwordGrant(r, w)
+		return
+	case "refresh_token":
+		n.refreshTokenGrant(r, w)
+		return
+	default:
 		err := render.Render(
 			w,
 			r,
@@ -96,9 +103,40 @@ func (n *NetlifyRessource) token(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			n.logger.Error("unable to render response", zap.Error(err))
 		}
+	}
+}
+
+func (n *NetlifyRessource) refreshTokenGrant(r *http.Request, w http.ResponseWriter) {
+	refreshToken := r.FormValue("refresh_token")
+	if refreshToken == "" {
+		err := render.Render(
+			w,
+			r,
+			&errorResponse{
+				Error:            "invalid_request",
+				StatusCode:       http.StatusBadRequest,
+				ErrorDescription: "refresh_token field not supplied",
+			},
+		)
+		if err != nil {
+			n.logger.Error("unable to render response", zap.Error(err))
+		}
 		return
 	}
+	clientSecret := r.FormValue("client_secret")
+	//we dont do scopes here - at all, but for the sake of completeness
+	scope := r.FormValue("scope")
+	req := &connect.RefreshTokenTokenRequest{
+		RefreshToken:      refreshToken,
+		ClientID:          NetlifyClientID,
+		ClientSecret:      clientSecret,
+		Scope:             scope,
+		IssueNetlifyToken: true,
+	}
+	n.uc.RefreshTokenGrant(req, w, r)
+}
 
+func (n *NetlifyRessource) passwordGrant(r *http.Request, w http.ResponseWriter) {
 	username := r.FormValue("username")
 	if username == "" {
 		err := render.Render(

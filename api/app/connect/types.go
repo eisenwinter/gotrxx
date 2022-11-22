@@ -109,11 +109,13 @@ type PasswordGrantTokenRequest struct {
 	IssueNetlifyToken bool
 }
 
-type refreshTokenTokenRequest struct {
-	refreshToken string
-	clientID     string
-	clientSecret string
-	scope        string
+type RefreshTokenTokenRequest struct {
+	RefreshToken string
+	ClientID     string
+	ClientSecret string
+	Scope        string
+
+	IssueNetlifyToken bool
 }
 
 type clientCredentialsTokenRequest struct {

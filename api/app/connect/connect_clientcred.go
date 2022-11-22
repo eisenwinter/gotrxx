@@ -65,6 +65,7 @@ func (c *ConnnectRessource) clientCredentialsGrant(
 			"client_credentials flow does not support refresh tokens",
 			zap.String("client_id", app.ClientID()),
 		)
+		return
 	}
 	scopes := []string{}
 	if req.scope != "" {

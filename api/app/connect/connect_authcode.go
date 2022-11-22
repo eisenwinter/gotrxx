@@ -101,6 +101,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 				r,
 				createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid redirect_uri"),
 			)
+			return
 		}
 		redirectToUse = req.redirectURI
 	} else if len(app.Properties().RedirectURIs()) > 0 {
@@ -178,6 +179,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 			r,
 			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
 		)
+		return
 	}
 	auth, err := c.autService.VerifyUserAuthorization(r.Context(), userID, req.clientID)
 	if err != nil && errors.Is(authorization.ErrUngrantedImplicitAutoGrant, err) {

@@ -45,6 +45,11 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 	err = r.ParseForm()
 	if err != nil {
 		c.logger.Error("error on parsing form in logout endpoint", zap.Error(err))
+		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
+		if err != nil {
+			c.logger.Error("unable to render response", zap.Error(err))
+		}
+		return
 	}
 	clientID := r.FormValue("client_id")
 	if clientID == "" {

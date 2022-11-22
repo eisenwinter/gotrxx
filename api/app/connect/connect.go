@@ -168,14 +168,13 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 		clientSecret := r.FormValue("client_secret")
 		//we dont do scopes here - at all, but for the sake of completeness
 		scope := r.FormValue("scope")
-		req := &refreshTokenTokenRequest{
-			refreshToken: refreshToken,
-			clientID:     clientID,
-			clientSecret: clientSecret,
-			scope:        scope,
+		req := &RefreshTokenTokenRequest{
+			RefreshToken: refreshToken,
+			ClientID:     clientID,
+			ClientSecret: clientSecret,
+			Scope:        scope,
 		}
-		c.logger.Debug("refreshtoken_grant", zap.Any("req", req))
-		c.refreshTokenGrant(req, w, r)
+		c.RefreshTokenGrant(req, w, r)
 		return
 	case clientCredentialsGrant:
 		c.logger.Debug("client credentials")
@@ -242,7 +241,6 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 			clientSecret: clientSecret,
 			scope:        scope,
 		}
-		c.logger.Debug("client_credentials_grant", zap.Any("req", req))
 		c.clientCredentialsGrant(req, w, r)
 		return
 	case authorizationCodeGrant:
@@ -309,7 +307,6 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 			clientSecret: clientSecret,
 			codeVerifier: codeVerifier,
 		}
-		c.logger.Debug("authorization_code", zap.Any("req", req))
 		c.authorizationCodeGrant(req, w, r)
 		return
 	default:
