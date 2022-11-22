@@ -36,7 +36,7 @@ func (m *MetaRessource) Router() *chi.Mux {
 	return r
 }
 
-func (m *MetaRessource) jwks(w http.ResponseWriter, r *http.Request) {
+func (m *MetaRessource) jwks(w http.ResponseWriter, _ *http.Request) {
 	switch m.issuer.Alg() {
 	case "HS256", "HS384", "HS512", "RS256", "RS384", "RS512":
 		jwk, err := m.issuer.AsPublicOnlyJWKSet()

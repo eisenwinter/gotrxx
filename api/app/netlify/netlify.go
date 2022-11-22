@@ -29,8 +29,8 @@ func (n *NetlifyRessource) Router() *chi.Mux {
 	r.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
-		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type"},
-		AllowCredentials: false,
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-Use-Cookie"},
+		AllowCredentials: true,
 		MaxAge:           300,
 	}))
 
@@ -197,7 +197,7 @@ func (n *NetlifyRessource) logout(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNoContent)
 }
 
-func (n *NetlifyRessource) settings(w http.ResponseWriter, r *http.Request) {
+func (*NetlifyRessource) settings(w http.ResponseWriter, r *http.Request) {
 	//we just gonna abuse the full blown implementation here and wrap it in here
 	render.Respond(w, r, newSettingsResponse())
 }
