@@ -1,12 +1,17 @@
 <html>
 
 <body>
+  <% if (site.environment === 'development') { %> 
   <strong>generated:</strong>
   <ul>
     <% collections.all.forEach((post,index) => { %>
     <li><a href="<%- post.url %>"><%- post.url %></a></li>
     <% }); %>
   </ul>
+  <% } %>
+  <% if (site.environment === 'production') { %> 
+    <!-- this file is not used -->
+  <% } %>
 </body>
 
 </html>

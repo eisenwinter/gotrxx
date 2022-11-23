@@ -4,11 +4,13 @@
   "main": "index.js",
   "license": "MIT",
   "scripts": {
-    "build": "eleventy",
+    "build-skip-min": "eleventy",
+    "build": "env GTX_ENVIRONMENT=production eleventy",
     "dev": "eleventy --serve --port 8000"
   },
   "devDependencies": {
     "@11ty/eleventy": "^1.0.0",
-    "eleventy-plugin-dart-sass": "^1.0.3"
+    "eleventy-plugin-dart-sass": "^1.0.3",
+    "html-minifier": "^4.0.0"
   }
 }

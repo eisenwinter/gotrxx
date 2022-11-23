@@ -96,7 +96,7 @@ func (a *AccountRessource) Router() *chi.Mux {
 	r.Get("/invite", a.invitePage)
 	r.Post("/invite", a.sendInvite)
 
-	fs := http.FileServer(http.FS(a.statics))
+	fs := http.FileServer(noDirectoryListingFs{http.FS(a.statics)})
 	r.Handle("/static/*", http.StripPrefix("/account/static/", fs))
 
 	r.NotFound(a.fourOFour)

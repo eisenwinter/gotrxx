@@ -1,6 +1,7 @@
 package api
 
 import (
+	"html/template"
 	"net/http"
 	"time"
 
@@ -156,5 +157,15 @@ func compose(logger *zap.Logger,
 		logger.Warn("No favicon found", zap.Error(err))
 	})
 
+	r.Get("/robots.txt", func(w http.ResponseWriter, r *http.Request) {
+		var robotsTemplate, err = template.New("robots.txt").Parse(
+			`User-agent: *
+Disallow: /
+		`)
+		if err != nil {
+			return
+		}
+		robotsTemplate.Execute(w, nil)
+	})
 	return r, nil
 }

@@ -1,4 +1,6 @@
 const pluginSass = require("eleventy-plugin-dart-sass");
+const htmlmin = require("html-minifier");
+
 module.exports = function (eleventyConfig) {
     eleventyConfig.addPassthroughCopy({ "langs/*": "static/language" });
     eleventyConfig.addPassthroughCopy({ "src/_fonts/*": "static/fonts" });
@@ -9,8 +11,24 @@ module.exports = function (eleventyConfig) {
         outDir: 'templates',
         outPath: '/static/css',
         outFileName: 'main',
+        outputStyle: "compressed",
         sourceMap:  { sourceMap: false }
     });
+    eleventyConfig.addTransform("htmlmin", function(content, outputPath) {
+        if(process.env.GTX_ENVIRONMENT !== 'production') {
+            return content;
+        }
+        if( outputPath && outputPath.endsWith(".html") ) {
+          let minified = htmlmin.minify(content, {
+            useShortDoctype: true,
+            removeComments: true,
+            collapseWhitespace: true
+          });
+          return minified;
+        }
+    
+        return content;
+      });
     return {
         passthroughFileCopy: true,
         dir: {
