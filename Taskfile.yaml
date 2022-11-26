@@ -27,6 +27,12 @@ tasks:
       - go install github.com/golangci/golangci-lint/cmd/golangci-lint@v1.50.1
       - go install github.com/tomarrell/wrapcheck/v2/cmd/wrapcheck@v2
 
+  dev:git-tooling:
+    desc: "sets up git tooling"
+    cmds:
+      - go install github.com/evilmartians/lefthook@latest
+      - go install github.com/siderolabs/conform/cmd/conform@latest
+
   build:
     desc: "build the compiled binary"
     cmds:
