@@ -1,6 +1,7 @@
 package connect
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/eisenwinter/gotrxx/api/auth"
@@ -63,6 +64,30 @@ func (c *ConnnectRessource) Router() *chi.Mux {
 	return r
 }
 
+func (c *ConnnectRessource) fieldValidationNotEmpty(
+	w http.ResponseWriter,
+	r *http.Request,
+	name string,
+	value string,
+) bool {
+	if value == "" {
+		err := render.Render(
+			w,
+			r,
+			createStdError(
+				stdInvalidRequest,
+				http.StatusBadRequest,
+				fmt.Sprintf("field not supplied: %s", name),
+			),
+		)
+		if err != nil {
+			c.logger.Error("unable to render response", zap.Error(err))
+		}
+		return false
+	}
+	return true
+}
+
 func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 	//issues accessTokenResponse
 	err := r.ParseForm()
@@ -78,51 +103,16 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 	switch grantType(grant) {
 	case passwordGrant:
 		username := r.FormValue("username")
-		if username == "" {
-			err = render.Render(
-				w,
-				r,
-				createStdError(
-					stdInvalidRequest,
-					http.StatusBadRequest,
-					"username field not supplied",
-				),
-			)
-			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
-			}
+		if !c.fieldValidationNotEmpty(w, r, "username", username) {
 			return
 		}
 		password := r.FormValue("password")
-		if password == "" {
-			err = render.Render(
-				w,
-				r,
-				createStdError(
-					stdInvalidRequest,
-					http.StatusBadRequest,
-					"password field not supplied",
-				),
-			)
-			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
-			}
+		if !c.fieldValidationNotEmpty(w, r, "password", password) {
 			return
 		}
 		clientID := r.FormValue("client_id")
-		if clientID == "" {
-			err = render.Render(
-				w,
-				r,
-				createStdError(
-					stdInvalidRequest,
-					http.StatusBadRequest,
-					"client_id field not supplied",
-				),
-			)
-			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
-			}
+
+		if !c.fieldValidationNotEmpty(w, r, "client_id", clientID) {
 			return
 		}
 		clientSecret := r.FormValue("client_secret")
@@ -140,19 +130,7 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 		return
 	case refreshTokenGrant:
 		refreshToken := r.FormValue("refresh_token")
-		if refreshToken == "" {
-			err = render.Render(
-				w,
-				r,
-				createStdError(
-					stdInvalidRequest,
-					http.StatusBadRequest,
-					"refresh_token field not supplied",
-				),
-			)
-			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
-			}
+		if !c.fieldValidationNotEmpty(w, r, "refresh_token", refreshToken) {
 			return
 		}
 		// client id is NOT required for a refresh_token grant see
@@ -205,36 +183,14 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 			clientID = id
 			clientSecret = suppliedSecret
 		}
-		if clientID == "" {
-			err = render.Render(
-				w,
-				r,
-				createStdError(
-					stdInvalidRequest,
-					http.StatusBadRequest,
-					"client_id field not supplied",
-				),
-			)
-			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
-			}
+		if !c.fieldValidationNotEmpty(w, r, "client_id", clientID) {
 			return
 		}
-		if clientSecret == "" {
-			err = render.Render(
-				w,
-				r,
-				createStdError(
-					stdInvalidRequest,
-					http.StatusBadRequest,
-					"client_secret field not supplied",
-				),
-			)
-			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
-			}
+
+		if !c.fieldValidationNotEmpty(w, r, "client_secret", clientSecret) {
 			return
 		}
+
 		scope := r.FormValue("scope")
 		req := &clientCredentialsTokenRequest{
 			clientID:     clientID,
@@ -247,49 +203,21 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 		//https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
 		c.logger.Debug("auth code")
 		code := r.FormValue("code")
-		if code == "" {
-			err = render.Render(
-				w,
-				r,
-				createStdError(stdInvalidRequest, http.StatusBadRequest, "code field not supplied"),
-			)
-			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
-			}
+
+		if !c.fieldValidationNotEmpty(w, r, "code", code) {
 			return
 		}
+
 		redirectURI := r.FormValue("redirect_uri")
-		if redirectURI == "" {
-			err = render.Render(
-				w,
-				r,
-				createStdError(
-					stdInvalidRequest,
-					http.StatusBadRequest,
-					"redirect_uri field not supplied",
-				),
-			)
-			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
-			}
+		if !c.fieldValidationNotEmpty(w, r, "redirect_uri", redirectURI) {
 			return
 		}
+
 		clientID := r.FormValue("client_id")
-		if clientID == "" {
-			err = render.Render(
-				w,
-				r,
-				createStdError(
-					stdInvalidRequest,
-					http.StatusBadRequest,
-					"client_id field not supplied",
-				),
-			)
-			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
-			}
+		if !c.fieldValidationNotEmpty(w, r, "client_id", clientID) {
 			return
 		}
+
 		clientSecret := r.FormValue("client_secret")
 		codeVerifier := r.FormValue("code_verifier")
 		if codeVerifier == "" && clientSecret == "" {

@@ -1,10 +1,12 @@
 pre-commit:
   parallel: true
   commands:
-    conform:
-      run: conform enforce --commit-msg-file
     govet:
       tags: backend style
       files: git ls-files -m
       glob: "*.go"
       run: go vet {files}
+commit-msg:
+  commands:
+    conform:
+      run: conform enforce --commit-msg-file {0}

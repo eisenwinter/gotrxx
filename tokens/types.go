@@ -8,7 +8,7 @@ import (
 
 type CommonTokenType string
 
-// RefreshTokenType is a refresh token wich can be traded for a new set
+// RefreshTokenType is a refresh token which can be traded for a new set
 const RefreshTokenType CommonTokenType = "refresh_token"
 
 // AuthorizationCodeType is a authorization code token

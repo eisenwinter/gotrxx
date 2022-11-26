@@ -3,16 +3,18 @@ policies:
     spec:
       header:
         length: 89
-        imperative: true
         case: lower
         invalidLastCharacters: .
-      body:
-        required: true
       spellcheck:
         locale: US
       conventional:
         types:
-          - "type"
-        scopes:
-          - "scope"
+          - "ci"
+          - "docs"
+          - "refactor"
+          - "perf"
+          - "feat"
+          - "fix"
+          - "chore"
+          - "test"
         descriptionLength: 72

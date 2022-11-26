@@ -12,7 +12,6 @@ import (
 
 // https://datatracker.ietf.org/doc/html/rfc7662
 func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
-
 	err := r.ParseForm()
 	if err != nil {
 		c.logger.Error("error on parsing form in retrospection endpoint", zap.Error(err))
@@ -22,7 +21,6 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-
 	ai, err := auth.FromContext(r.Context())
 	if err != nil {
 		err = render.Render(

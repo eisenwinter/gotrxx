@@ -161,68 +161,11 @@ func NewIssuer(
 	//okay this is probably the only reason and place to panic...
 	switch cfg.Algorithm {
 	case "HS256", "HS384", "HS512":
-		//direct key takes precende
-		if len(cfg.HMACSigningKey) > 0 {
-			checkForWeakHMAC(log, cfg.Algorithm, cfg.HMACSigningKey)
-			privateKey = []byte(cfg.HMACSigningKey)
-		} else if len(cfg.HMACSigningKeyFile) > 0 {
-			content, err := os.ReadFile(cfg.HMACSigningKeyFile)
-			if err != nil {
-				log.Fatal("Could not load key file", zap.String("file", cfg.HMACSigningKeyFile), zap.Error(err))
-			}
-			checkForWeakHMAC(log, cfg.Algorithm, string(content))
-
-		} else {
-			log.Fatal("No HMAC key defined, either set jwt.hmac-signing-key or jwt.hmac-signing-key-file")
-		}
-		if len(privateKey.([]byte)) > 0 {
-			var err error
-			privateKeyJwk, err = jwk.FromRaw(privateKey)
-			if err != nil {
-				log.Fatal("Unable to process symetric key")
-			}
-			options = append(
-				options,
-				jwt.WithKey(jwa.SignatureAlgorithm(cfg.Algorithm), privateKeyJwk),
-			)
-		}
+		options = loadHMACKey(cfg, log, privateKey, privateKeyJwk, options)
 	case "RS256", "RS384", "RS512":
-		if len(cfg.RSAPrivateKey) > 0 {
-			privateKey = []byte(cfg.RSAPrivateKey)
-		} else if len(cfg.RSAPRivateKeyFile) > 0 {
-			content, err := os.ReadFile(cfg.RSAPRivateKeyFile)
-			if err != nil {
-				log.Fatal("Could not load key file", zap.String("file", cfg.RSAPRivateKeyFile), zap.Error(err))
-			}
-			if len(content) == 0 {
-				log.Fatal("Read empty private key file", zap.String("file", cfg.RSAPRivateKeyFile), zap.Error(err))
-			}
-			privateKey = content
-		} else {
-			log.Fatal("No RSA private key defined, either set jwt.rsa-private-key or jwt.rsa-private-key-file")
-		}
 		var err error
-		privateKey, err = parseRSAPrivateKey(privateKey.([]byte))
-		if err != nil {
-			log.Fatal("Unable to process suplied private key", zap.Error(err))
-		}
-		if len(cfg.RSAPublicKey) > 0 {
-			publicKey = []byte(cfg.RSAPublicKey)
-		} else if len(cfg.RSAPRivateKeyFile) > 0 {
-			content, err := os.ReadFile(cfg.RSAPublicKeyFile)
-			if err != nil {
-				log.Fatal("Could not load key file", zap.String("file", cfg.RSAPublicKeyFile), zap.Error(err))
-			}
-			publicKey = content
-		} else {
-			log.Fatal("No RSA private key defined, either set jwt.rsa-public-key or jwt.rsa-public-key-file")
-		}
-		kid = fmt.Sprintf("%x", crc32.Checksum(publicKey.([]byte), crc32.IEEETable))
-		pubParsed, err := parseRSAPublicKey(publicKey.([]byte))
-		if err != nil {
-			log.Fatal("Unable to process supllied public key", zap.Error(err))
-		}
-		privateKey.(*rsa.PrivateKey).PublicKey = *pubParsed
+		var pubParsed *rsa.PublicKey
+		kid, privateKey, pubParsed = loadRSAKeys(cfg, privateKey, log, publicKey, kid)
 		privateKeyJwk, err = jwk.FromRaw(privateKey)
 		if err != nil {
 			log.Fatal("Unable to process private key")
@@ -266,6 +209,86 @@ func NewIssuer(
 		publicKey:          publicKeyJwk,
 		kid:                kid,
 	}
+}
+
+func loadRSAKeys(
+	cfg *config.JWTConfiguration,
+	privateKey interface{},
+	log *zap.Logger,
+	publicKey interface{},
+	kid string,
+) (string, *rsa.PrivateKey, *rsa.PublicKey) {
+	if len(cfg.RSAPrivateKey) > 0 {
+		privateKey = []byte(cfg.RSAPrivateKey)
+	} else if len(cfg.RSAPRivateKeyFile) > 0 {
+		content, err := os.ReadFile(cfg.RSAPRivateKeyFile)
+		if err != nil {
+			log.Fatal("Could not load key file", zap.String("file", cfg.RSAPRivateKeyFile), zap.Error(err))
+		}
+		if len(content) == 0 {
+			log.Fatal("Read empty private key file", zap.String("file", cfg.RSAPRivateKeyFile), zap.Error(err))
+		}
+		privateKey = content
+	} else {
+		log.Fatal("No RSA private key defined, either set jwt.rsa-private-key or jwt.rsa-private-key-file")
+	}
+	var err error
+	privateKey, err = parseRSAPrivateKey(privateKey.([]byte))
+	if err != nil {
+		log.Fatal("Unable to process suplied private key", zap.Error(err))
+	}
+	if len(cfg.RSAPublicKey) > 0 {
+		publicKey = []byte(cfg.RSAPublicKey)
+	} else if len(cfg.RSAPRivateKeyFile) > 0 {
+		content, err := os.ReadFile(cfg.RSAPublicKeyFile)
+		if err != nil {
+			log.Fatal("Could not load key file", zap.String("file", cfg.RSAPublicKeyFile), zap.Error(err))
+		}
+		publicKey = content
+	} else {
+		log.Fatal("No RSA private key defined, either set jwt.rsa-public-key or jwt.rsa-public-key-file")
+	}
+	kid = fmt.Sprintf("%x", crc32.Checksum(publicKey.([]byte), crc32.IEEETable))
+	pubParsed, err := parseRSAPublicKey(publicKey.([]byte))
+	if err != nil {
+		log.Fatal("Unable to process supllied public key", zap.Error(err))
+	}
+	priv := privateKey.(*rsa.PrivateKey)
+	priv.PublicKey = *pubParsed
+	return kid, priv, pubParsed
+}
+
+func loadHMACKey(
+	cfg *config.JWTConfiguration,
+	log *zap.Logger, privateKey interface{},
+	privateKeyJwk jwk.Key,
+	options []jwt.ParseOption) []jwt.ParseOption {
+	//direct key takes precende
+	if len(cfg.HMACSigningKey) > 0 {
+		checkForWeakHMAC(log, cfg.Algorithm, cfg.HMACSigningKey)
+		privateKey = []byte(cfg.HMACSigningKey)
+	} else if len(cfg.HMACSigningKeyFile) > 0 {
+		content, err := os.ReadFile(cfg.HMACSigningKeyFile)
+		if err != nil {
+			log.Fatal("Could not load key file", zap.String("file", cfg.HMACSigningKeyFile), zap.Error(err))
+		}
+		checkForWeakHMAC(log, cfg.Algorithm, string(content))
+
+	} else {
+		log.Fatal("No HMAC key defined, either set jwt.hmac-signing-key or jwt.hmac-signing-key-file")
+	}
+	if len(privateKey.([]byte)) > 0 {
+		var err error
+		privateKeyJwk, err = jwk.FromRaw(privateKey)
+		if err != nil {
+			log.Fatal("Unable to process symetric key")
+		}
+		options = append(
+			options,
+			jwt.WithKey(jwa.SignatureAlgorithm(cfg.Algorithm), privateKeyJwk),
+		)
+	}
+	return options
 }
 
 func (t *TokenIssuer) Audience() []string {

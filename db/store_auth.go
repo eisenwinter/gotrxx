@@ -31,7 +31,15 @@ func (d *DataStore) Authorizations(
 
 	var entities []*tables.AuthorizationTable
 	q := sq.
-		Select("id", "application_id", "user_id", "properties", "revoked_at", "created_at", "updated_at").
+		Select(
+			"id",
+			"application_id",
+			"user_id",
+			"properties",
+			"revoked_at",
+			"created_at",
+			"updated_at",
+		).
 		From("authorizations").
 		OrderBy("id DESC").Offset(uint64(offset)).Limit(uint64(opts.PageSize))
 	err = d.selectStatement(ctx, &entities, q, nil)

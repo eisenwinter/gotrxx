@@ -311,12 +311,10 @@ func (g *UserService) InviteUser(
 		}
 	}
 	for _, r := range roles {
-		if r != "" {
-			_, err = g.store.AddRole(ctx, r)
-			if err != nil && !errors.Is(err, db.ErrAlreadyExists) {
-				g.log.Error("Could not create role for user invite", zap.Error(err))
-				return "", err
-			}
+		_, err = g.store.AddRole(ctx, r)
+		if err != nil && !errors.Is(err, db.ErrAlreadyExists) {
+			g.log.Error("Could not create role for user invite", zap.Error(err))
+			return "", err
 		}
 	}
 	expiryDate := time.Now().Add(g.cfg.Behaviour.InviteExpiry).UTC()
@@ -327,25 +325,7 @@ func (g *UserService) InviteUser(
 	}
 	e := ""
 	if email != nil {
-		e = *email
-		err := g.mailer.SendInviteMail(e, string(inviteCode), g.currentLocale(ctx))
-		if err != nil {
-			g.log.Error(
-				"Could not send invite email to user",
-				zap.String("email", e),
-				zap.Error(err),
-			)
-		} else {
-			err = g.store.SetInviteSent(ctx, e, string(inviteCode))
-			if err != nil {
-				g.log.Error("Could not persist sent date for invite email to user", zap.String("email", e), zap.Error(err))
-			}
-			g.dispatcher.Dispatch(&event.EmailInviteSent{
-				InviteCode: string(inviteCode),
-				Email:      e,
-				Sent:       time.Now(),
-			})
-		}
+		e = g.sendInviteMail(ctx, *email, inviteCode)
 	}
 	g.dispatcher.Dispatch(&event.UserInvited{
 		ExpiryDate: expiryDate,
@@ -353,6 +333,32 @@ func (g *UserService) InviteUser(
 		InviteCode: string(inviteCode),
 	})
 	return inviteCode, nil
+}
+
+func (g *UserService) sendInviteMail(
+	ctx context.Context,
+	email string,
+	inviteCode generator.RandomTokenType,
+) string {
+	err := g.mailer.SendInviteMail(email, string(inviteCode), g.currentLocale(ctx))
+	if err != nil {
+		g.log.Error(
+			"Could not send invite email to user",
+			zap.String("email", email),
+			zap.Error(err),
+		)
+	} else {
+		err = g.store.SetInviteSent(ctx, email, string(inviteCode))
+		if err != nil {
+			g.log.Error("Could not persist sent date for invite email to user", zap.String("email", email), zap.Error(err))
+		}
+		g.dispatcher.Dispatch(&event.EmailInviteSent{
+			InviteCode: string(inviteCode),
+			Email:      email,
+			Sent:       time.Now(),
+		})
+	}
+	return email
 }
 
 func (g *UserService) InsertUser(ctx context.Context,

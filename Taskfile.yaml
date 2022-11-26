@@ -82,7 +82,7 @@ tasks:
   lint:golines:
     desc: "Run golines"
     cmds:
-      - golines -w -m 200 . 
+      - golines -w -m 100 . 
     silent: true
 
   templates:dev:
