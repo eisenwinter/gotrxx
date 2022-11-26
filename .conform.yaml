@@ -2,7 +2,7 @@ policies:
   - type: commit
     spec:
       header:
-        length: 89
+        length: 140
         case: lower
         invalidLastCharacters: .
       spellcheck:
@@ -17,4 +17,4 @@ policies:
           - "fix"
           - "chore"
           - "test"
-        descriptionLength: 72
+        descriptionLength: 140

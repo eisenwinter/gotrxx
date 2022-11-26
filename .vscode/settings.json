@@ -6,7 +6,6 @@
     "gopls": {
         "buildFlags": ["-tags=integration"]
     },
-    "nuxt.isNuxtApp": false,
     "go.buildFlags": [
         "-tags=integration"
     ],
