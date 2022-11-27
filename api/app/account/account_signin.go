@@ -31,7 +31,13 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(user.ErrEntityOperationForbidden, err) {
 			//locked or unconfirmed
-			a.renderLoginErrorView(w, r, returnURL, email, "locked_user", false)
+			a.view(r.Context(), a.loginTmpl, map[string]interface{}{
+				csrf.TemplateTag: csrf.TemplateField(r),
+				"returnUrl":      returnURL,
+				"error":          "locked_user",
+				"otp":            false,
+				"email":          email,
+			}, w)
 			return
 		}
 		if errors.Is(user.ErrMFARequired, err) {
@@ -40,7 +46,13 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 				a.log.Error("unable prepare MFA", zap.Error(err))
 			}
 			//mfa
-			a.renderLoginErrorView(w, r, returnURL, email, "mfa", true)
+			a.view(r.Context(), a.loginTmpl, map[string]interface{}{
+				csrf.TemplateTag: csrf.TemplateField(r),
+				"returnUrl":      returnURL,
+				"error":          "mfa",
+				"otp":            true,
+				"email":          email,
+			}, w)
 			return
 		}
 		if errors.Is(user.ErrInvalidOTP, err) {
@@ -48,19 +60,42 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				a.log.Error("unable prepare MFA", zap.Error(err))
 			}
-			a.renderLoginErrorView(w, r, returnURL, email, "invalid_otp", true)
-
+			a.view(r.Context(), a.loginTmpl, map[string]interface{}{
+				csrf.TemplateTag: csrf.TemplateField(r),
+				"returnUrl":      returnURL,
+				"error":          "invalid_otp",
+				"otp":            true,
+				"email":          email,
+			}, w)
 			return
 		}
 		if errors.Is(user.ErrEntityDoesNotExist, err) {
-			a.renderLoginErrorView(w, r, returnURL, email, "unknown_or_invalid", false)
+			a.view(r.Context(), a.loginTmpl, map[string]interface{}{
+				csrf.TemplateTag: csrf.TemplateField(r),
+				"returnUrl":      returnURL,
+				"error":          "unknown_or_invalid",
+				"otp":            false,
+				"email":          email,
+			}, w)
 			return
 		}
 		if errors.Is(user.ErrInvalidCredentials, err) {
-			a.renderLoginErrorView(w, r, returnURL, email, "unknown_or_invalid", false)
+			a.view(r.Context(), a.loginTmpl, map[string]interface{}{
+				csrf.TemplateTag: csrf.TemplateField(r),
+				"returnUrl":      returnURL,
+				"error":          "unknown_or_invalid",
+				"otp":            false,
+				"email":          email,
+			}, w)
 			return
 		}
-		a.renderLoginErrorView(w, r, returnURL, email, "unknown", false)
+		a.view(r.Context(), a.loginTmpl, map[string]interface{}{
+			csrf.TemplateTag: csrf.TemplateField(r),
+			"returnUrl":      returnURL,
+			"error":          "unknown",
+			"otp":            false,
+			"email":          email,
+		}, w)
 		//everything below here is unexepcted
 		a.log.Info("failed signin due to unexpected error", zap.Error(err))
 		return
@@ -89,27 +124,6 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (a *AccountRessource) renderLoginErrorView(
-	w http.ResponseWriter,
-	r *http.Request,
-	returnURL string,
-	email string,
-	errorString string,
-	otp bool,
-) {
-	err := a.loginTmpl.Execute(w, map[string]interface{}{
-		"i18n":           a.getTranslatorFor(r.Context(), "signin"),
-		"returnUrl":      returnURL,
-		"error":          errorString,
-		"otp":            otp,
-		"email":          email,
-		csrf.TemplateTag: csrf.TemplateField(r),
-	})
-	if err != nil {
-		a.log.Error("unable to render template for login page", zap.Error(err))
-	}
-}
-
 func (a *AccountRessource) signinPage(w http.ResponseWriter, r *http.Request) {
 	urls, ok := r.URL.Query()["return_url"]
 	returnURL := "/account/"
@@ -126,13 +140,9 @@ func (a *AccountRessource) signinPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err := a.loginTmpl.Execute(w, map[string]interface{}{
-		"i18n":           a.getTranslatorFor(r.Context(), "signin"),
+	a.view(r.Context(), a.loginTmpl, map[string]interface{}{
 		"returnUrl":      returnURL,
 		"otp":            false,
 		csrf.TemplateTag: csrf.TemplateField(r),
-	})
-	if err != nil {
-		a.log.Error("unable to render template for login page", zap.Error(err))
-	}
+	}, w)
 }

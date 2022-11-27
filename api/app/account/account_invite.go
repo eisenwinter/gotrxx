@@ -20,41 +20,30 @@ func (a *AccountRessource) sendInvite(w http.ResponseWriter, r *http.Request) {
 
 	email := r.FormValue("email")
 	if email == "" || !emailRegex.MatchString(email) {
-		err := a.inviteTmpl.Execute(w, map[string]interface{}{
-			"i18n":           a.getTranslatorFor(r.Context(), "invite"),
+		a.view(r.Context(), a.inviteTmpl, map[string]interface{}{
 			csrf.TemplateTag: csrf.TemplateField(r),
 			"email":          email,
 			"error":          "invalid_email",
-		})
-		if err != nil {
-			a.log.Error("unable to render template for page", zap.Error(err))
-		}
+		}, w)
 		return
 	}
 	err := a.userService.InviteUser(r.Context(), email)
 	if err != nil {
 		a.log.Error("could not invite user", zap.Error(err))
-		err = a.mfaSetupTmpl.Execute(w, map[string]interface{}{
-			"i18n":           a.getTranslatorFor(r.Context(), "invite"),
+		a.view(r.Context(), a.inviteTmpl, map[string]interface{}{
 			csrf.TemplateTag: csrf.TemplateField(r),
 			"error":          "unknown",
-		})
-		if err != nil {
-			a.log.Error("unable to render template page", zap.Error(err))
-		}
+		}, w)
+
 		return
 	}
 
 	//successfull
-	err = a.inviteTmpl.Execute(w, map[string]interface{}{
-		"i18n":            a.getTranslatorFor(r.Context(), "invite"),
+	a.view(r.Context(), a.inviteTmpl, map[string]interface{}{
 		csrf.TemplateTag:  csrf.TemplateField(r),
 		"successful":      true,
 		"success_message": "invite_sent",
-	})
-	if err != nil {
-		a.log.Error("unable to render template page", zap.Error(err))
-	}
+	}, w)
 }
 
 func (a *AccountRessource) invitePage(w http.ResponseWriter, r *http.Request) {
@@ -67,11 +56,8 @@ func (a *AccountRessource) invitePage(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/account", http.StatusFound)
 		return
 	}
-	err := a.inviteTmpl.Execute(w, map[string]interface{}{
-		"i18n":           a.getTranslatorFor(r.Context(), "invite"),
+
+	a.view(r.Context(), a.inviteTmpl, map[string]interface{}{
 		csrf.TemplateTag: csrf.TemplateField(r),
-	})
-	if err != nil {
-		a.log.Error("unable to render template for invite page", zap.Error(err))
-	}
+	}, w)
 }

@@ -8,6 +8,7 @@ import (
 	"io/fs"
 	"net/http"
 	"net/url"
+	"path"
 	"strings"
 	"time"
 
@@ -207,12 +208,8 @@ func (a *AccountRessource) signedInUser(w http.ResponseWriter, r *http.Request) 
 
 func (a *AccountRessource) fourOFour(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusNotFound)
-	err := a.fourOFourTemplate.Execute(w, map[string]interface{}{
-		"i18n": a.getTranslatorFor(r.Context(), "404"),
-	})
-	if err != nil {
-		a.log.Error("unable to render template for 404 page", zap.Error(err))
-	}
+
+	a.view(r.Context(), a.fourOFourTemplate, map[string]interface{}{}, w)
 }
 
 func (a *AccountRessource) exchangeRememberMeToken(
@@ -301,14 +298,19 @@ func (a *AccountRessource) userPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	email, _ := token.Get(tokens.ClaimEmail)
-	err := a.userPageTmpl.Execute(w, map[string]interface{}{
-		"i18n":           a.getTranslatorFor(r.Context(), "user"),
+
+	a.view(r.Context(), a.userPageTmpl, map[string]interface{}{
 		"email":          email,
 		"canInvite":      a.canUserInvite(r.Context(), token),
-		csrf.TemplateTag: csrf.TemplateField(r),
-	})
+		csrf.TemplateTag: csrf.TemplateField(r)}, w)
+}
+
+func (a *AccountRessource) view(ctx context.Context, tmpl *template.Template, viewData map[string]interface{}, w http.ResponseWriter) {
+	name := strings.TrimSuffix(path.Base(tmpl.Name()), ".html")
+	viewData["i18n"] = a.getTranslatorFor(ctx, name)
+	err := tmpl.Execute(w, viewData)
 	if err != nil {
-		a.log.Error("unable to render template for user page", zap.Error(err))
+		a.log.Error("unable to render template for page", zap.String("template", name), zap.Error(err))
 	}
 }
 

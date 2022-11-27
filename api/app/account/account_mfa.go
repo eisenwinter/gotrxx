@@ -24,14 +24,11 @@ func (a *AccountRessource) mfa(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	mfa := a.userService.IsMFAEnabled(r.Context(), id)
-	err = a.chageMfaTmpl.Execute(w, map[string]interface{}{
-		"i18n":           a.getTranslatorFor(r.Context(), "change_mfa"),
-		"mfa_enabled":    mfa,
+
+	a.view(r.Context(), a.chageMfaTmpl, map[string]interface{}{
 		csrf.TemplateTag: csrf.TemplateField(r),
-	})
-	if err != nil {
-		a.log.Error("unable to render template for page", zap.Error(err))
-	}
+		"mfa_enabled":    mfa,
+	}, w)
 }
 
 func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) {
@@ -48,14 +45,10 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 	secret, uri, err := a.userService.ProvisionMFA(r.Context(), id)
 	if err != nil {
 		a.log.Error("could not provision mfa", zap.Error(err))
-		err = a.mfaSetupTmpl.Execute(w, map[string]interface{}{
-			"i18n":           a.getTranslatorFor(r.Context(), "provision_mfa"),
+		a.view(r.Context(), a.mfaSetupTmpl, map[string]interface{}{
 			csrf.TemplateTag: csrf.TemplateField(r),
 			"error":          "unknown",
-		})
-		if err != nil {
-			a.log.Error("unable to render template page", zap.Error(err))
-		}
+		}, w)
 		return
 	}
 	//to avoid double encoding
@@ -66,27 +59,20 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 	png, err := qrcode.Encode(decodedValue, qrcode.Medium, 256)
 	if err != nil {
 		a.log.Error("could not generate qr code", zap.Error(err))
-		err = a.mfaSetupTmpl.Execute(w, map[string]interface{}{
-			"i18n":           a.getTranslatorFor(r.Context(), "provision_mfa"),
+		a.view(r.Context(), a.mfaSetupTmpl, map[string]interface{}{
 			csrf.TemplateTag: csrf.TemplateField(r),
 			"secret":         secret,
-		})
-		if err != nil {
-			a.log.Error("unable to render template page", zap.Error(err))
-		}
+		}, w)
 		return
 	}
 	qrb64 := base64.StdEncoding.EncodeToString(png)
 
-	err = a.mfaSetupTmpl.Execute(w, map[string]interface{}{
-		"i18n":           a.getTranslatorFor(r.Context(), "provision_mfa"),
+	a.view(r.Context(), a.mfaSetupTmpl, map[string]interface{}{
 		csrf.TemplateTag: csrf.TemplateField(r),
 		"qr":             qrb64,
 		"secret":         secret,
-	})
-	if err != nil {
-		a.log.Error("unable to render template page", zap.Error(err))
-	}
+	}, w)
+
 }
 
 func (a *AccountRessource) setMFA(w http.ResponseWriter, r *http.Request) {
@@ -110,29 +96,20 @@ func (a *AccountRessource) setMFA(w http.ResponseWriter, r *http.Request) {
 	recoveryKey, err := a.userService.EnableMFA(r.Context(), id, secret)
 	if err != nil {
 		a.log.Error("could not enable MFA", zap.Error(err))
-		err = a.mfaSetupTmpl.Execute(w, map[string]interface{}{
-			"i18n":           a.getTranslatorFor(r.Context(), "provision_mfa"),
+		a.view(r.Context(), a.mfaSetupTmpl, map[string]interface{}{
 			csrf.TemplateTag: csrf.TemplateField(r),
 			"error":          "unknown",
 			"secret":         secret,
-		})
-		if err != nil {
-			a.log.Error("unable to render template page", zap.Error(err))
-		}
+		}, w)
 		return
 	}
 
-	err = a.mfaSetupTmpl.Execute(w, map[string]interface{}{
-		"i18n":            a.getTranslatorFor(r.Context(), "provision_mfa"),
+	a.view(r.Context(), a.mfaSetupTmpl, map[string]interface{}{
 		csrf.TemplateTag:  csrf.TemplateField(r),
 		"successful":      true,
 		"success_message": "activated",
 		"recovery_key":    recoveryKey,
-	})
-	if err != nil {
-		a.log.Error("unable to render template page", zap.Error(err))
-	}
-
+	}, w)
 }
 
 func (a *AccountRessource) disableMFA(w http.ResponseWriter, r *http.Request) {
@@ -157,39 +134,27 @@ func (a *AccountRessource) disableMFA(w http.ResponseWriter, r *http.Request) {
 	err = a.userSignIn.Validate(r.Context(), id, pwd)
 	if err != nil {
 		a.log.Debug("user failed to authenticate", zap.Error(err))
-		err = a.chageMfaTmpl.Execute(w, map[string]interface{}{
-			"i18n":           a.getTranslatorFor(r.Context(), "change_mfa"),
+		a.view(r.Context(), a.chageMfaTmpl, map[string]interface{}{
+			csrf.TemplateTag: csrf.TemplateField(r),
 			"mfa_enabled":    true,
 			"error":          "invalid_password",
-			csrf.TemplateTag: csrf.TemplateField(r),
-		})
-		if err != nil {
-			a.log.Error("unable to render template for page", zap.Error(err))
-		}
+		}, w)
 		return
 	}
 	err = a.userService.DisableMFA(r.Context(), id)
 	if err != nil {
-		err = a.chageMfaTmpl.Execute(w, map[string]interface{}{
-			"i18n":           a.getTranslatorFor(r.Context(), "change_mfa"),
+		a.view(r.Context(), a.chageMfaTmpl, map[string]interface{}{
+			csrf.TemplateTag: csrf.TemplateField(r),
 			"mfa_enabled":    true,
 			"error":          "unknown",
-			csrf.TemplateTag: csrf.TemplateField(r),
-		})
-		if err != nil {
-			a.log.Error("unable to render template for page", zap.Error(err))
-		}
+		}, w)
 		return
 	}
 	mfa := a.userService.IsMFAEnabled(r.Context(), id)
-	err = a.chageMfaTmpl.Execute(w, map[string]interface{}{
-		"i18n":            a.getTranslatorFor(r.Context(), "change_mfa"),
+	a.view(r.Context(), a.chageMfaTmpl, map[string]interface{}{
+		csrf.TemplateTag:  csrf.TemplateField(r),
 		"mfa_enabled":     mfa,
 		"successful":      true,
 		"success_message": "mfa_disabled",
-		csrf.TemplateTag:  csrf.TemplateField(r),
-	})
-	if err != nil {
-		a.log.Error("unable to render template for page", zap.Error(err))
-	}
+	}, w)
 }

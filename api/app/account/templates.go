@@ -13,5 +13,6 @@ func mustLoadTemplate(fs fs.FS, location string, logger *zap.Logger) (*template.
 		logger.Error("unable to load template", zap.Error(err), zap.String("location", location))
 		return nil, err
 	}
+
 	return template, nil
 }

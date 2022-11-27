@@ -162,7 +162,9 @@ func NewIssuer(
 		privateKeyJwk, options = loadHMACKey(cfg, log, options)
 	case "RS256", "RS384", "RS512":
 		var err error
-		kid, privateKey, pubParsed := loadRSAKeys(cfg, log, kid)
+		var privateKey *rsa.PrivateKey
+		var pubParsed *rsa.PublicKey
+		kid, privateKey, pubParsed = loadRSAKeys(cfg, log)
 		privateKeyJwk, err = jwk.FromRaw(privateKey)
 		if err != nil {
 			log.Fatal("Unable to process private key")
@@ -211,7 +213,6 @@ func NewIssuer(
 func loadRSAKeys(
 	cfg *config.JWTConfiguration,
 	log *zap.Logger,
-	kid string,
 ) (string, *rsa.PrivateKey, *rsa.PublicKey) {
 	var privateKey interface{}
 	var publicKey interface{}
@@ -245,7 +246,7 @@ func loadRSAKeys(
 	} else {
 		log.Fatal("No RSA private key defined, either set jwt.rsa-public-key or jwt.rsa-public-key-file")
 	}
-	kid = fmt.Sprintf("%x", crc32.Checksum(publicKey.([]byte), crc32.IEEETable))
+	kid := fmt.Sprintf("%x", crc32.Checksum(publicKey.([]byte), crc32.IEEETable))
 	pubParsed, err := parseRSAPublicKey(publicKey.([]byte))
 	if err != nil {
 		log.Fatal("Unable to process supllied public key", zap.Error(err))

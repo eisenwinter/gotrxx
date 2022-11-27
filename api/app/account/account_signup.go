@@ -19,12 +19,26 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 	password := r.FormValue("password")
 	if email == "" || !emailRegex.MatchString(email) {
-		a.renderSignupError(w, r, invite, email, password, "invalid_email")
+		a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
+			csrf.TemplateTag:   csrf.TemplateField(r),
+			"error":            "invalid_email",
+			"show_invite_code": true,
+			"invite_code":      invite,
+			"email":            email,
+			"password":         password,
+		}, w)
 		return
 	}
 
 	if invite == "" && a.cfg.InviteOnly {
-		a.renderSignupError(w, r, invite, email, password, "invite_code_required")
+		a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
+			csrf.TemplateTag:   csrf.TemplateField(r),
+			"error":            "invite_code_required",
+			"show_invite_code": true,
+			"invite_code":      invite,
+			"email":            email,
+			"password":         password,
+		}, w)
 		return
 
 	}
@@ -35,7 +49,14 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	if invite != "" {
 		_, err = a.userService.RegisterFromInvite(r.Context(), email, password, phoneNr, invite)
 		if errors.Is(user.ErrTokenExpired, err) {
-			a.renderSignupError(w, r, invite, email, password, "invite_code_expired")
+			a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
+				csrf.TemplateTag:   csrf.TemplateField(r),
+				"error":            "invite_code_expired",
+				"show_invite_code": true,
+				"invite_code":      invite,
+				"email":            email,
+				"password":         password,
+			}, w)
 			return
 		}
 
@@ -44,11 +65,25 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		if errors.Is(user.ErrPasswordGuidelines, err) {
-			a.renderSignupError(w, r, invite, email, password, "password_guidlines")
+			a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
+				csrf.TemplateTag:   csrf.TemplateField(r),
+				"error":            "password_guidlines",
+				"show_invite_code": true,
+				"invite_code":      invite,
+				"email":            email,
+				"password":         password,
+			}, w)
 			return
 		}
 		if errors.Is(user.ErrEntityAlreadyExists, err) {
-			a.renderSignupError(w, r, invite, email, password, "email_already_used")
+			a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
+				csrf.TemplateTag:   csrf.TemplateField(r),
+				"error":            "email_already_used",
+				"show_invite_code": true,
+				"invite_code":      invite,
+				"email":            email,
+				"password":         password,
+			}, w)
 			return
 		}
 		a.log.Error("unexpected user sign up error", zap.Error(err))
@@ -57,37 +92,14 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	if a.cfg.AutoConfirmUsers {
 		successMessage = "welcome_text"
 	}
-	err = a.signUpTmpl.Execute(w, map[string]interface{}{
-		"i18n":            a.getTranslatorFor(r.Context(), "signup"),
+
+	a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
+		csrf.TemplateTag:  csrf.TemplateField(r),
+		"error":           "email_already_used",
 		"successful":      true,
 		"success_message": successMessage,
-		csrf.TemplateTag:  csrf.TemplateField(r),
-	})
-	if err != nil {
-		a.log.Error("unable to render template for signup page", zap.Error(err))
-	}
-}
+	}, w)
 
-func (a *AccountRessource) renderSignupError(
-	w http.ResponseWriter,
-	r *http.Request,
-	invite string,
-	email string,
-	password string,
-	errorString string,
-) {
-	err := a.signUpTmpl.Execute(w, map[string]interface{}{
-		"i18n":             a.getTranslatorFor(r.Context(), "signup"),
-		"error":            errorString,
-		"show_invite_code": true,
-		"invite_code":      invite,
-		"email":            email,
-		"password":         password,
-		csrf.TemplateTag:   csrf.TemplateField(r),
-	})
-	if err != nil {
-		a.log.Error("unable to render template for signup page", zap.Error(err))
-	}
 }
 
 func (a *AccountRessource) signupPage(w http.ResponseWriter, r *http.Request) {
@@ -97,13 +109,10 @@ func (a *AccountRessource) signupPage(w http.ResponseWriter, r *http.Request) {
 		inviteCode = codes[0]
 	}
 	showInviteCode := a.cfg.InviteOnly || inviteCode != ""
-	err := a.signUpTmpl.Execute(w, map[string]interface{}{
-		"i18n":             a.getTranslatorFor(r.Context(), "signup"),
+
+	a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
+		csrf.TemplateTag:   csrf.TemplateField(r),
 		"show_invite_code": showInviteCode,
 		"invite_code":      inviteCode,
-		csrf.TemplateTag:   csrf.TemplateField(r),
-	})
-	if err != nil {
-		a.log.Error("unable to render template for signup page", zap.Error(err))
-	}
+	}, w)
 }
