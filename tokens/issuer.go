@@ -150,8 +150,6 @@ func NewIssuer(
 	cfg *config.JWTConfiguration,
 	storage CommonTokenInserter,
 ) *TokenIssuer {
-	var privateKey interface{}
-	var publicKey interface{}
 
 	var privateKeyJwk jwk.Key
 	var publicKeyJwk jwk.Key
@@ -161,11 +159,10 @@ func NewIssuer(
 	//okay this is probably the only reason and place to panic...
 	switch cfg.Algorithm {
 	case "HS256", "HS384", "HS512":
-		options = loadHMACKey(cfg, log, privateKey, privateKeyJwk, options)
+		privateKeyJwk, options = loadHMACKey(cfg, log, options)
 	case "RS256", "RS384", "RS512":
 		var err error
-		var pubParsed *rsa.PublicKey
-		kid, privateKey, pubParsed = loadRSAKeys(cfg, privateKey, log, publicKey, kid)
+		kid, privateKey, pubParsed := loadRSAKeys(cfg, log, kid)
 		privateKeyJwk, err = jwk.FromRaw(privateKey)
 		if err != nil {
 			log.Fatal("Unable to process private key")
@@ -213,11 +210,11 @@ func NewIssuer(
 
 func loadRSAKeys(
 	cfg *config.JWTConfiguration,
-	privateKey interface{},
 	log *zap.Logger,
-	publicKey interface{},
 	kid string,
 ) (string, *rsa.PrivateKey, *rsa.PublicKey) {
+	var privateKey interface{}
+	var publicKey interface{}
 	if len(cfg.RSAPrivateKey) > 0 {
 		privateKey = []byte(cfg.RSAPrivateKey)
 	} else if len(cfg.RSAPRivateKeyFile) > 0 {
@@ -260,9 +257,9 @@ func loadRSAKeys(
 
 func loadHMACKey(
 	cfg *config.JWTConfiguration,
-	log *zap.Logger, privateKey interface{},
-	privateKeyJwk jwk.Key,
-	options []jwt.ParseOption) []jwt.ParseOption {
+	log *zap.Logger,
+	options []jwt.ParseOption) (jwk.Key, []jwt.ParseOption) {
+	var privateKey interface{}
 	//direct key takes precende
 	if len(cfg.HMACSigningKey) > 0 {
 		checkForWeakHMAC(log, cfg.Algorithm, cfg.HMACSigningKey)
@@ -273,13 +270,14 @@ func loadHMACKey(
 			log.Fatal("Could not load key file", zap.String("file", cfg.HMACSigningKeyFile), zap.Error(err))
 		}
 		checkForWeakHMAC(log, cfg.Algorithm, string(content))
+		privateKey = content
 
 	} else {
 		log.Fatal("No HMAC key defined, either set jwt.hmac-signing-key or jwt.hmac-signing-key-file")
 	}
 	if len(privateKey.([]byte)) > 0 {
 		var err error
-		privateKeyJwk, err = jwk.FromRaw(privateKey)
+		privateKeyJwk, err := jwk.FromRaw(privateKey)
 		if err != nil {
 			log.Fatal("Unable to process symetric key")
 		}
@@ -287,8 +285,10 @@ func loadHMACKey(
 			options,
 			jwt.WithKey(jwa.SignatureAlgorithm(cfg.Algorithm), privateKeyJwk),
 		)
+		return privateKeyJwk, options
 	}
-	return options
+	log.Fatal("No HMAC key defined, either set jwt.hmac-signing-key or jwt.hmac-signing-key-file")
+	panic("no valid key found")
 }
 
 func (t *TokenIssuer) Audience() []string {
