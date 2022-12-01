@@ -10,6 +10,6 @@
     * [Creating Users](create_users.md)
 - Guides (gotrxx +)
     * [gotrxx-admin](gotrxx_admin.md)
-    <!-- * [selfhosted Netlify CMS](guide_netlifycms.md) -->
+    * [selfhosted Netlify CMS](guide_netlifycms.md)
     * [ASP.NET Core Web API](guide_aspnet.md)
     <!-- * [oidc-client](guide_oidcclient.md) -->
