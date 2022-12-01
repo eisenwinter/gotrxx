@@ -11,9 +11,6 @@
 
 # gotrxx
 
-> **Warning**
-> I am moving stuff to github right now, a lot still needs furhter testing and polishing and docs are lacking
-
 ## Whats in the box
 
 - **Authorization Code Grant** with Proof Key of Exchange for all your SPA and public needs.
