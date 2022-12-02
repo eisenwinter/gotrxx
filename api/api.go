@@ -165,7 +165,7 @@ Disallow: /
 		if err != nil {
 			return
 		}
-		robotsTemplate.Execute(w, nil)
+		_ = robotsTemplate.Execute(w, nil)
 	})
 	return r, nil
 }

@@ -9,6 +9,7 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/google/uuid"
+	"github.com/jmoiron/sqlx"
 
 	"github.com/eisenwinter/gotrxx/db/tables"
 	"go.uber.org/zap"
@@ -281,10 +282,7 @@ func (d *DataStore) RetireApplication(ctx context.Context, id int) (int64, int64
 		Where(sq.And{sq.Eq{"id": id}, sq.Eq{"retired_on": nil}})
 	_, err = d.updateStatement(ctx, app, tx)
 	if err != nil {
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
-		}
+		rollBack(tx, d)
 		return 0, 0, err
 	}
 	aut := sq.
@@ -294,18 +292,12 @@ func (d *DataStore) RetireApplication(ctx context.Context, id int) (int64, int64
 		Where(sq.Eq{"application_id": id})
 	rs, err := d.updateStatement(ctx, aut, tx)
 	if err != nil {
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
-		}
+		rollBack(tx, d)
 		return 0, 0, err
 	}
 	auths, err := rs.RowsAffected()
 	if err != nil {
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
-		}
+		rollBack(tx, d)
 		return 0, 0, err
 	}
 	tok := sq.
@@ -315,18 +307,12 @@ func (d *DataStore) RetireApplication(ctx context.Context, id int) (int64, int64
 		Where(sq.Eq{"application_id": id})
 	rs, err = d.updateStatement(ctx, tok, tx)
 	if err != nil {
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
-		}
+		rollBack(tx, d)
 		return 0, 0, err
 	}
 	tokens, err := rs.RowsAffected()
 	if err != nil {
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
-		}
+		rollBack(tx, d)
 		return 0, 0, err
 	}
 	err = tx.Commit()
@@ -334,4 +320,10 @@ func (d *DataStore) RetireApplication(ctx context.Context, id int) (int64, int64
 		return 0, 0, err
 	}
 	return auths, tokens, nil
+}
+
+func rollBack(tx *sqlx.Tx, d *DataStore) {
+	if rerr := tx.Rollback(); rerr != nil {
+		d.log.Error("couldnt rollback", zap.Error(rerr))
+	}
 }

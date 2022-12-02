@@ -207,10 +207,7 @@ func (d *DataStore) RevokeAuthorization(ctx context.Context, id uuid.UUID) (int6
 	tx, err := d.db.BeginTxx(ctx, nil)
 	if err != nil {
 		if tx != nil {
-			rerr := tx.Rollback()
-			if rerr != nil {
-				d.log.Error("couldnt rollback", zap.Error(rerr))
-			}
+			rollBack(tx, d)
 		}
 		return 0, err
 	}
@@ -220,10 +217,7 @@ func (d *DataStore) RevokeAuthorization(ctx context.Context, id uuid.UUID) (int6
 		Where(sq.Eq{"id": id})
 	_, err = d.updateStatement(ctx, a, tx)
 	if err != nil {
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
-		}
+		rollBack(tx, d)
 		return 0, err
 	}
 	t := sq.Update("tokens").
@@ -232,18 +226,12 @@ func (d *DataStore) RevokeAuthorization(ctx context.Context, id uuid.UUID) (int6
 		Where(sq.And{sq.Eq{"authorization_id": id}, sq.GtOrEq{"expires_at": time.Now().UTC()}})
 	rs, err := d.updateStatement(ctx, t, tx)
 	if err != nil {
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
-		}
+		rollBack(tx, d)
 		return 0, err
 	}
 	count, err := rs.RowsAffected()
 	if err != nil {
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
-		}
+		rollBack(tx, d)
 		return 0, err
 	}
 	err = tx.Commit()

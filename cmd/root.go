@@ -32,11 +32,6 @@ var rootCommand = cobra.Command{
 }
 
 func Execute() {
-	// err := doc.GenMarkdownTree(&rootCommand, ".dev")
-	// if err != nil {
-	// 	log.Fatal(err)
-	// }
-
 	if err := rootCommand.Execute(); err != nil {
 		fmt.Fprintln(os.Stderr, err)
 		os.Exit(1)

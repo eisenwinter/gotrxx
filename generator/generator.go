@@ -26,8 +26,8 @@ func (*RandomTokenGenerator) CreatePINLikeToken() RandomTokenType {
 	return tokenTypeFromString(fmt.Sprintf("%08d", num))
 }
 
-//thanks for the gotrue authors for this, i just bluntly took it (https://github.com/netlify/gotrue/blob/master/crypto/crypto.go)
-//altough we are using 32 here
+// thanks for the gotrue authors for this, i just bluntly took it (https://github.com/netlify/gotrue/blob/master/crypto/crypto.go)
+// altough we are using 32 here
 
 func (*RandomTokenGenerator) CreateSecureToken() RandomTokenType {
 	b := make([]byte, 32)

@@ -42,6 +42,14 @@ const (
 
 	//ClaimNetlifyUserMetaData represents the user_metadata claim used in netlifys token
 	ClaimNetlifyUserMetaData = "user_metadata"
+
+	algHS256 = "HS256"
+	algHS384 = "HS384"
+	algHS512 = "HS512"
+
+	algRS256 = "RS256"
+	algRS384 = "RS384"
+	algRS512 = "RS512"
 )
 
 type CommonTokenInserter interface {
@@ -72,13 +80,13 @@ type TokenIssuer struct {
 }
 
 func checkForWeakHMAC(log *zap.Logger, alg string, key string) {
-	if alg == "HS256" && len(key) <= 31 {
+	if alg == algHS256 && len(key) <= 31 {
 		log.Warn("Weak secret, consider chossing another secret")
 	}
-	if alg == "HS384" && len(key) <= 39 {
+	if alg == algHS384 && len(key) <= 39 {
 		log.Warn("Weak secret, consider chossing another secret")
 	}
-	if alg == "HS512" && len(key) <= 57 {
+	if alg == algHS512 && len(key) <= 57 {
 		log.Warn("Weak secret, consider chossing another secret")
 	}
 }
@@ -158,9 +166,9 @@ func NewIssuer(
 	options = append(options, jwt.WithValidate(true))
 	//okay this is probably the only reason and place to panic...
 	switch cfg.Algorithm {
-	case "HS256", "HS384", "HS512":
+	case algHS256, algHS384, algHS512:
 		privateKeyJwk, options = loadHMACKey(cfg, log, options)
-	case "RS256", "RS384", "RS512":
+	case algRS256, algRS384, algRS512:
 		var err error
 		var privateKey *rsa.PrivateKey
 		var pubParsed *rsa.PublicKey
@@ -461,11 +469,11 @@ func (t *TokenIssuer) KeyID() string {
 
 func (t *TokenIssuer) AsJWKSet() (jwk.Set, error) {
 	switch t.Alg() {
-	case "HS256", "HS384", "HS512":
+	case algHS256, algHS384, algHS512:
 		set := jwk.NewSet()
 		_ = set.AddKey(t.PrivateKey())
 		return set, nil
-	case "RS256", "RS384", "RS512":
+	case algRS256, algRS384, algRS512:
 		set := jwk.NewSet()
 		_ = set.AddKey(t.PrivateKey())
 		_ = set.AddKey(t.PublicKey())
@@ -476,11 +484,11 @@ func (t *TokenIssuer) AsJWKSet() (jwk.Set, error) {
 
 func (t *TokenIssuer) AsPublicOnlyJWKSet() (jwk.Set, error) {
 	switch t.Alg() {
-	case "HS256", "HS384", "HS512":
+	case algHS256, algHS384, algHS512:
 		set := jwk.NewSet()
 
 		return set, nil
-	case "RS256", "RS384", "RS512":
+	case algRS256, algRS384, algRS512:
 		set := jwk.NewSet()
 		key, err := t.PublicKey().PublicKey()
 		if err != nil {

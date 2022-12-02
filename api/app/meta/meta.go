@@ -62,7 +62,7 @@ func (m *MetaRessource) jwks(w http.ResponseWriter, _ *http.Request) {
 // this ensures enough compatbility to easily use oidc-client - sorry not sorry
 // and once again - this server does not support openidconnect
 func (m *MetaRessource) openidConfiguration(w http.ResponseWriter, r *http.Request) {
-	oidc := &openIdMetaData{
+	oidc := &openIDMetaData{
 		Issuer:                 m.issuer.Issuer(),
 		AuthorizationEndpoint:  fmt.Sprintf("%s/connect/authorize", m.cfg.ServiceDomain),
 		JWKSUri:                fmt.Sprintf("%s/.well-known/jwks", m.cfg.ServiceDomain),

@@ -68,7 +68,7 @@ func (m *ManagementRessource) createApplication(w http.ResponseWriter, r *http.R
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
-	t := 0
+	var t int
 	switch req.Type {
 	case "implicit_granted":
 		t = 1

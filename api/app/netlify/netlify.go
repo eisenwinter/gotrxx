@@ -185,12 +185,12 @@ func (n *NetlifyRessource) passwordGrant(r *http.Request, w http.ResponseWriter)
 func (n *NetlifyRessource) user(w http.ResponseWriter, r *http.Request) {
 	j, _, err := jwtauth.FromContext(r.Context())
 	if err != nil {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	email, ok := j.Get(tokens.ClaimEmail)
 	if !ok {
-		w.WriteHeader(500)
+		w.WriteHeader(http.StatusInternalServerError)
 		return
 	}
 	err = render.Render(w, r, &userInfoResponse{

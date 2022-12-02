@@ -305,12 +305,21 @@ func (a *AccountRessource) userPage(w http.ResponseWriter, r *http.Request) {
 		csrf.TemplateTag: csrf.TemplateField(r)}, w)
 }
 
-func (a *AccountRessource) view(ctx context.Context, tmpl *template.Template, viewData map[string]interface{}, w http.ResponseWriter) {
+func (a *AccountRessource) view(
+	ctx context.Context,
+	tmpl *template.Template,
+	viewData map[string]interface{},
+	w http.ResponseWriter,
+) {
 	name := strings.TrimSuffix(path.Base(tmpl.Name()), ".html")
 	viewData["i18n"] = a.getTranslatorFor(ctx, name)
 	err := tmpl.Execute(w, viewData)
 	if err != nil {
-		a.log.Error("unable to render template for page", zap.String("template", name), zap.Error(err))
+		a.log.Error(
+			"unable to render template for page",
+			zap.String("template", name),
+			zap.Error(err),
+		)
 	}
 }
 

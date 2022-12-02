@@ -179,7 +179,6 @@ func NewMysqlStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*Data
 	}
 
 	migrate := func() error {
-		//multiStatements=true
 		migdb, err := sqlx.Open("mysql", cfg.DSN+"?multiStatements=True")
 		if err != nil {
 			logger.Error("Could open database", zap.Error(err))

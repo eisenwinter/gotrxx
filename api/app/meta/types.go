@@ -3,7 +3,7 @@ package meta
 import "net/http"
 
 // notice: this server is NOT openid capable, it does NOT issue any id tokens nor implements the spec
-type openIdMetaData struct {
+type openIDMetaData struct {
 	Issuer                 string   `json:"issuer"`
 	AuthorizationEndpoint  string   `json:"authorization_endpoint"`
 	JWKSUri                string   `json:"jwks_uri"`
@@ -17,6 +17,6 @@ type openIdMetaData struct {
 	RequestParameterSupported bool     `json:"request_parameter_supported"`
 }
 
-func (*openIdMetaData) Render(_ http.ResponseWriter, _ *http.Request) error {
+func (*openIDMetaData) Render(_ http.ResponseWriter, _ *http.Request) error {
 	return nil
 }

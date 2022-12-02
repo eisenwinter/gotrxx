@@ -22,9 +22,9 @@ type SMTPConfiguration struct {
 	Port     int
 	Username string
 	Password string `json:"-"`
-	//DisplayName will be displayed as email sender
+	// DisplayName will be displayed as email sender
 	DisplayName string `         mapstructure:"display-name"`
-	//Address is the sender address
+	// Address is the sender address
 	Address string
 }
 
