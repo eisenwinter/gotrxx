@@ -12,4 +12,6 @@
     * [gotrxx-admin](gotrxx_admin.md)
     * [selfhosted Netlify CMS](guide_netlifycms.md)
     * [ASP.NET Core Web API](guide_aspnet.md)
-    * [oidc-client (SPA)](guide_oidcclient.md) 
+    * [oidc-client (SPA)](guide_oidcclient.md)
+- CLI Reference
+    * [Generated](cli/gotrxx.md)
