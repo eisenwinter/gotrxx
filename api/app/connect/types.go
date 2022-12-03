@@ -98,6 +98,8 @@ const authorizationCodeGrant grantType = "authorization_code"
 const refreshTokenGrant grantType = "refresh_token"
 const passwordGrant grantType = "password"
 
+const bearerTokenType = "bearer"
+
 // PasswordGrantTokenRequest wraps everything from the password grant request
 type PasswordGrantTokenRequest struct {
 	Username     string

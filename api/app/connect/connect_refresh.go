@@ -182,7 +182,7 @@ func (c *ConnnectRessource) RefreshTokenGrant(
 	expires := int(t.Expiration().Sub(time.Now().UTC()).Seconds())
 	response := &accessTokenResponse{
 		AccessToken:  string(signed),
-		TokenType:    "bearer_token",
+		TokenType:    bearerTokenType,
 		ExpiresIn:    &expires,
 		RefreshToken: refresh,
 	}

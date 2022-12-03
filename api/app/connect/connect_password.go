@@ -184,7 +184,7 @@ func (c *ConnnectRessource) PasswordGrant(
 	expires := int(t.Expiration().Sub(time.Now().UTC()).Seconds())
 	response := &accessTokenResponse{
 		AccessToken:  string(signed),
-		TokenType:    "bearer_token",
+		TokenType:    bearerTokenType,
 		ExpiresIn:    &expires,
 		RefreshToken: refreshToken,
 	}

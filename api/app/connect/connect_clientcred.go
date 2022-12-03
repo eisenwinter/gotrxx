@@ -91,7 +91,7 @@ func (c *ConnnectRessource) clientCredentialsGrant(
 	expires := int(t.Expiration().Sub(time.Now().UTC()).Seconds())
 	response := &accessTokenResponse{
 		AccessToken: string(signed),
-		TokenType:   "bearer",
+		TokenType:   bearerTokenType,
 		ExpiresIn:   &expires,
 	}
 	render.Respond(w, r, response)
