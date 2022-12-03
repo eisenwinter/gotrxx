@@ -48,6 +48,7 @@ func init() {
 	applicationCommand.AddCommand(&createApplicationCommand)
 	applicationCommand.AddCommand(&retireApplicationCommand)
 	applicationCommand.AddCommand(&purgeApplicationCommand)
+	applicationCommand.AddCommand(&listApplicationsCommand)
 
 	authorizationCommand.AddCommand(&grantAuthorizationCommand)
 	authorizationCommand.AddCommand(&revokeAuthorizationCommand)
