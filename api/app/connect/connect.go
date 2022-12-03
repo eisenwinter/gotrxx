@@ -102,140 +102,16 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 	grant := r.FormValue("grant_type")
 	switch grantType(grant) {
 	case passwordGrant:
-		username := r.FormValue("username")
-		if !c.fieldValidationNotEmpty(w, r, "username", username) {
-			return
-		}
-		password := r.FormValue("password")
-		if !c.fieldValidationNotEmpty(w, r, "password", password) {
-			return
-		}
-		clientID := r.FormValue("client_id")
-
-		if !c.fieldValidationNotEmpty(w, r, "client_id", clientID) {
-			return
-		}
-		clientSecret := r.FormValue("client_secret")
-		//we dont do scopes here - at all, but for the sake of completeness
-		scope := r.FormValue("scope")
-		req := &PasswordGrantTokenRequest{
-			Username:     username,
-			Password:     password,
-			ClientID:     clientID,
-			ClientSecret: clientSecret,
-			Scope:        scope,
-		}
-		c.logger.Debug("password_grant called")
-		c.PasswordGrant(req, w, r)
+		c.tokenPasswordGrant(r, w)
 		return
 	case refreshTokenGrant:
-		refreshToken := r.FormValue("refresh_token")
-		if !c.fieldValidationNotEmpty(w, r, "refresh_token", refreshToken) {
-			return
-		}
-		// client id is NOT required for a refresh_token grant see
-		// https://datatracker.ietf.org/doc/html/rfc6749#section-6 tough it must
-		// require client authentication for confidential clients or for any
-		// client that was issued client credentials (or with other
-		//	authentication requirements),
-		// authenticate the client if client authentication is included and
-		// ensure that the refresh token was issued to the authenticated
-		// client, and validate the refresh token.
-
-		clientID := r.FormValue("client_id")
-		clientSecret := r.FormValue("client_secret")
-		//we dont do scopes here - at all, but for the sake of completeness
-		scope := r.FormValue("scope")
-		req := &RefreshTokenTokenRequest{
-			RefreshToken: refreshToken,
-			ClientID:     clientID,
-			ClientSecret: clientSecret,
-			Scope:        scope,
-		}
-		c.RefreshTokenGrant(req, w, r)
+		c.tokenRefreshTokenGrant(r, w)
 		return
 	case clientCredentialsGrant:
-		c.logger.Debug("client credentials")
-		// https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
-		// The authorization server MUST authenticate the client.
-		// well we basically only accept with a client secret here
-		clientID := r.FormValue("client_id")
-		clientSecret := r.FormValue("client_secret")
-
-		if clientID == "" {
-			id, suppliedSecret, err := auth.ClientIDFromBasicAuth(r, c.appService)
-			if err != nil {
-				c.logger.Info("unable to get client_id from basic auth", zap.Error(err))
-				err = render.Render(
-					w,
-					r,
-					createStdError(
-						stdInvalidRequest,
-						http.StatusBadRequest,
-						"client_id field not supplied",
-					),
-				)
-				if err != nil {
-					c.logger.Error("unable to render response", zap.Error(err))
-				}
-				return
-			}
-			clientID = id
-			clientSecret = suppliedSecret
-		}
-		if !c.fieldValidationNotEmpty(w, r, "client_id", clientID) {
-			return
-		}
-
-		if !c.fieldValidationNotEmpty(w, r, "client_secret", clientSecret) {
-			return
-		}
-
-		scope := r.FormValue("scope")
-		req := &clientCredentialsTokenRequest{
-			clientID:     clientID,
-			clientSecret: clientSecret,
-			scope:        scope,
-		}
-		c.clientCredentialsGrant(req, w, r)
+		c.tokenClientCredentialsGrant(r, w)
 		return
 	case authorizationCodeGrant:
-		//https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
-		c.logger.Debug("auth code")
-		code := r.FormValue("code")
-
-		if !c.fieldValidationNotEmpty(w, r, "code", code) {
-			return
-		}
-
-		redirectURI := r.FormValue("redirect_uri")
-		if !c.fieldValidationNotEmpty(w, r, "redirect_uri", redirectURI) {
-			return
-		}
-
-		clientID := r.FormValue("client_id")
-		if !c.fieldValidationNotEmpty(w, r, "client_id", clientID) {
-			return
-		}
-
-		clientSecret := r.FormValue("client_secret")
-		codeVerifier := r.FormValue("code_verifier")
-		if codeVerifier == "" && clientSecret == "" {
-			//https://datatracker.ietf.org/doc/html/rfc7636
-			c.logger.Warn(
-				"no code verifier for PKCE AND no client secret!",
-				zap.String("client_id", clientID),
-			)
-		}
-
-		req := &authorizationCodeTokenRequest{
-			code:         code,
-			redirectURI:  redirectURI,
-			clientID:     clientID,
-			clientSecret: clientSecret,
-			codeVerifier: codeVerifier,
-		}
-		c.authorizationCodeGrant(req, w, r)
+		c.tokenAuthorizationCodeGrant(r, w)
 		return
 	default:
 		err = render.Render(w, r, createStdError(stdUnspportedGrantType, http.StatusBadRequest, ""))
@@ -244,6 +120,146 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+}
+
+func (c *ConnnectRessource) tokenRefreshTokenGrant(r *http.Request, w http.ResponseWriter) {
+	refreshToken := r.FormValue("refresh_token")
+	if !c.fieldValidationNotEmpty(w, r, "refresh_token", refreshToken) {
+		return
+	}
+	// client id is NOT required for a refresh_token grant see
+	// https://datatracker.ietf.org/doc/html/rfc6749#section-6 tough it must
+	// require client authentication for confidential clients or for any
+	// client that was issued client credentials (or with other
+	//	authentication requirements),
+	// authenticate the client if client authentication is included and
+	// ensure that the refresh token was issued to the authenticated
+	// client, and validate the refresh token.
+
+	clientID := r.FormValue("client_id")
+	clientSecret := r.FormValue("client_secret")
+	//we dont do scopes here - at all, but for the sake of completeness
+	scope := r.FormValue("scope")
+	req := &RefreshTokenTokenRequest{
+		RefreshToken: refreshToken,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		Scope:        scope,
+	}
+	c.RefreshTokenGrant(req, w, r)
+}
+
+func (c *ConnnectRessource) tokenClientCredentialsGrant(r *http.Request, w http.ResponseWriter) {
+	c.logger.Debug("client credentials")
+	// https://datatracker.ietf.org/doc/html/rfc6749#section-4.4.2
+	// The authorization server MUST authenticate the client.
+	// well we basically only accept with a client secret here
+	clientID := r.FormValue("client_id")
+	clientSecret := r.FormValue("client_secret")
+
+	if clientID == "" {
+		id, suppliedSecret, err := auth.ClientIDFromBasicAuth(r, c.appService)
+		if err != nil {
+			c.logger.Info("unable to get client_id from basic auth", zap.Error(err))
+			err = render.Render(
+				w,
+				r,
+				createStdError(
+					stdInvalidRequest,
+					http.StatusBadRequest,
+					"client_id field not supplied",
+				),
+			)
+			if err != nil {
+				c.logger.Error("unable to render response", zap.Error(err))
+			}
+			return
+		}
+		clientID = id
+		clientSecret = suppliedSecret
+	}
+	if !c.fieldValidationNotEmpty(w, r, "client_id", clientID) {
+		return
+	}
+
+	if !c.fieldValidationNotEmpty(w, r, "client_secret", clientSecret) {
+		return
+	}
+
+	scope := r.FormValue("scope")
+	req := &clientCredentialsTokenRequest{
+		clientID:     clientID,
+		clientSecret: clientSecret,
+		scope:        scope,
+	}
+	c.clientCredentialsGrant(req, w, r)
+}
+
+func (c *ConnnectRessource) tokenAuthorizationCodeGrant(r *http.Request, w http.ResponseWriter) {
+	//https://datatracker.ietf.org/doc/html/rfc6749#section-4.1.3
+	c.logger.Debug("auth code")
+	code := r.FormValue("code")
+
+	if !c.fieldValidationNotEmpty(w, r, "code", code) {
+		return
+	}
+
+	redirectURI := r.FormValue("redirect_uri")
+	if !c.fieldValidationNotEmpty(w, r, "redirect_uri", redirectURI) {
+		return
+	}
+
+	clientID := r.FormValue("client_id")
+	if !c.fieldValidationNotEmpty(w, r, "client_id", clientID) {
+		return
+	}
+
+	clientSecret := r.FormValue("client_secret")
+	codeVerifier := r.FormValue("code_verifier")
+	if codeVerifier == "" && clientSecret == "" {
+		//https://datatracker.ietf.org/doc/html/rfc7636
+		c.logger.Warn(
+			"no code verifier for PKCE AND no client secret!",
+			zap.String("client_id", clientID),
+		)
+	}
+
+	req := &authorizationCodeTokenRequest{
+		code:         code,
+		redirectURI:  redirectURI,
+		clientID:     clientID,
+		clientSecret: clientSecret,
+		codeVerifier: codeVerifier,
+	}
+	c.authorizationCodeGrant(req, w, r)
+}
+
+func (c *ConnnectRessource) tokenPasswordGrant(r *http.Request, w http.ResponseWriter) {
+	username := r.FormValue("username")
+	if !c.fieldValidationNotEmpty(w, r, "username", username) {
+		return
+	}
+	password := r.FormValue("password")
+	if !c.fieldValidationNotEmpty(w, r, "password", password) {
+		return
+	}
+	clientID := r.FormValue("client_id")
+
+	if !c.fieldValidationNotEmpty(w, r, "client_id", clientID) {
+		return
+	}
+	clientSecret := r.FormValue("client_secret")
+
+	scope := r.FormValue("scope")
+	req := &PasswordGrantTokenRequest{
+		Username:     username,
+		Password:     password,
+		ClientID:     clientID,
+		ClientSecret: clientSecret,
+		Scope:        scope,
+	}
+	c.logger.Debug("password_grant called")
+	c.PasswordGrant(req, w, r)
 }
 
 func (c *ConnnectRessource) authorize(w http.ResponseWriter, r *http.Request) {
@@ -341,6 +357,23 @@ func (c *ConnnectRessource) userinfo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		c.logger.Error("unable to render response", zap.Error(err))
 	}
+}
+
+func validateRequiredField(field string, name string, w http.ResponseWriter,
+	r *http.Request) bool {
+	if field == "" {
+		render.Respond(
+			w,
+			r,
+			createStdError(
+				stdInvalidClient,
+				http.StatusBadRequest,
+				fmt.Sprintf("requires %s", name),
+			),
+		)
+		return false
+	}
+	return true
 }
 
 func NewConnnectRessource(logger *zap.Logger,

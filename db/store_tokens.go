@@ -19,6 +19,7 @@ type autIDPair struct {
 	UserID        uuid.UUID `db:"user_id"`
 }
 
+// InsertCommonToken inserts a common token into the datastore
 func (d *DataStore) InsertCommonToken(
 	ctx context.Context,
 	authorizationID uuid.UUID,
@@ -66,6 +67,7 @@ func (d *DataStore) InsertCommonToken(
 	return id, nil
 }
 
+// RevokeCommonTokensForAuthorization revokes a authorization for a common token in the datastore
 func (d *DataStore) RevokeCommonTokensForAuthorization(
 	ctx context.Context,
 	authorizationID uuid.UUID,
@@ -84,6 +86,7 @@ func (d *DataStore) RevokeCommonTokensForAuthorization(
 	return int(count), err
 }
 
+// RevokeCommonToken revokes a common token in the datastore
 func (d *DataStore) RevokeCommonToken(ctx context.Context, tokenType string, token string) error {
 	a := sq.Update("tokens").
 		Set("revoked_at", time.Now().UTC()).
@@ -99,6 +102,7 @@ func (d *DataStore) RevokeCommonToken(ctx context.Context, tokenType string, tok
 	return nil
 }
 
+// CommonTokenDetails gets details of a supplied common token
 func (d *DataStore) CommonTokenDetails(
 	ctx context.Context,
 	tokenType string,
@@ -131,6 +135,7 @@ func (d *DataStore) CommonTokenDetails(
 	return &td, nil
 }
 
+// RedeemCommonToken redeems a common token
 func (d *DataStore) RedeemCommonToken(ctx context.Context, tokenType string, token string) error {
 	a := sq.Update("tokens").
 		Set("redeemed_at", time.Now().UTC()).

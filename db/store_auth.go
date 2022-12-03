@@ -9,7 +9,6 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/eisenwinter/gotrxx/db/tables"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 func (d *DataStore) Authorizations(
@@ -236,10 +235,7 @@ func (d *DataStore) RevokeAuthorization(ctx context.Context, id uuid.UUID) (int6
 	}
 	err = tx.Commit()
 	if err != nil {
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
-		}
+		rollBack(tx, d)
 		return 0, err
 	}
 	return count, nil

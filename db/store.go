@@ -165,6 +165,19 @@ func (d *DataStore) updateStatement(
 	return d.db.ExecContext(ctx, q, a...)
 }
 
+func NewStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
+	switch cfg.Type {
+	case "sqlite":
+		return NewSqliteStore(logger.Named("database"), cfg)
+	case "mysql":
+		return NewMysqlStore(logger.Named("database"), cfg)
+	case "pg":
+		return NewPostgrestore(logger.Named("database"), cfg)
+	default:
+		return nil, errors.New("unknown datastore")
+	}
+}
+
 func NewMysqlStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
 	adaptedDsn := cfg.DSN
 	if strings.Contains(adaptedDsn, "?") {

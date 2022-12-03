@@ -10,6 +10,7 @@ import (
 	"github.com/eisenwinter/gotrxx/db/tables"
 )
 
+// Roles gets all roles in the datastore paginated
 func (d *DataStore) Roles(ctx context.Context, opts ListOptions) ([]*tables.RoleTable, int, error) {
 	if opts.Page <= 0 {
 		opts.Page = 1
@@ -47,6 +48,7 @@ func (d *DataStore) Roles(ctx context.Context, opts ListOptions) ([]*tables.Role
 	return entities, c, nil
 }
 
+// AddRole adds a role to the datastore
 func (d *DataStore) AddRole(ctx context.Context, role string) (int, error) {
 	exists, err := d.exists(ctx, "roles", sq.Eq{"name": role})
 	if err != nil {
@@ -69,6 +71,7 @@ func (d *DataStore) AddRole(ctx context.Context, role string) (int, error) {
 	return roleID, nil
 }
 
+// DeleteRole delets a role from the datastore
 func (d *DataStore) DeleteRole(ctx context.Context, role string) error {
 	roleQuery := sq.Select("id").From("roles").Where(sq.Eq{"role": role})
 	var roleID int

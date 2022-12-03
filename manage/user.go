@@ -24,17 +24,30 @@ import (
 const maxIterationCycles = 100
 
 var (
+	// ErrInviteOnly indicates a invite only setup - only invited members may be accepted
 	ErrInviteOnly = errors.New(
 		"behaivoural setting is set to only accept invited members",
 	)
-	ErrTokenGenTimeout         = errors.New("could not generate a token within given cycles")
-	ErrEntityAlreadyExists     = errors.New("entity already exists in system")
-	ErrTokenExpired            = errors.New("supplied token has expired")
+	// ErrTokenGenTimeout indicates a token generation has timed out
+	ErrTokenGenTimeout = errors.New("could not generate a token within given cycles")
+
+	// ErrEntityAlreadyExists indicates this entity already exists
+	ErrEntityAlreadyExists = errors.New("entity already exists in system")
+
+	// ErrTokenExpired indicates that the supplied token has expired
+	ErrTokenExpired = errors.New("supplied token has expired")
+
+	// ErrEntityInvalidTransition indicates this entity cant transition
 	ErrEntityInvalidTransition = errors.New("entity does not support transition")
-	ErrPasswordGuidelines      = errors.New("password doesnt match password guidlines")
-	ErrNotFound                = errors.New("entity not found")
+
+	// ErrPasswordGuidelines indicates a violation of the password guidlines
+	ErrPasswordGuidelines = errors.New("password doesnt match password guidlines")
+
+	// ErrNotFound indicates the entity does not exist
+	ErrNotFound = errors.New("entity not found")
 )
 
+// NewUserService returns a new user service
 func NewUserService(store *db.DataStore,
 	log *zap.Logger,
 	cfg *config.Configuration,
@@ -49,6 +62,7 @@ func NewUserService(store *db.DataStore,
 	}
 }
 
+// UserService is used to manage user data
 type UserService struct {
 	store      *db.DataStore
 	log        *zap.Logger

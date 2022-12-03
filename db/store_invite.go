@@ -31,10 +31,7 @@ func (d *DataStore) InviteUser(
 	err = d.returningInsertStatement(ctx, &inviteID, inv, tx)
 	if err != nil {
 		d.log.Debug("retunring insert statement failed")
-		rerr := tx.Rollback()
-		if rerr != nil {
-			d.log.Error("couldnt rollback", zap.Error(rerr))
-		}
+		rollBack(tx, d)
 		return err
 	}
 	if len(roles) > 0 {
@@ -50,10 +47,7 @@ func (d *DataStore) InviteUser(
 				Values(v, inviteID)
 			_, err := d.insertStatement(ctx, i, tx)
 			if err != nil {
-				rerr := tx.Rollback()
-				if rerr != nil {
-					d.log.Error("couldnt rollback", zap.Error(rerr))
-				}
+				rollBack(tx, d)
 				return err
 			}
 		}
@@ -66,10 +60,7 @@ func (d *DataStore) InviteUser(
 				Values(v, inviteID)
 			_, err := d.insertStatement(ctx, i, tx)
 			if err != nil {
-				rerr := tx.Rollback()
-				if rerr != nil {
-					d.log.Error("couldnt rollback", zap.Error(rerr))
-				}
+				rollBack(tx, d)
 				return err
 			}
 		}
