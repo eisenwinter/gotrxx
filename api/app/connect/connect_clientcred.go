@@ -60,13 +60,7 @@ func (c *ConnnectRessource) clientCredentialsGrant(
 		render.Respond(w, r, createStdError(stdInvalidScope, http.StatusBadRequest, ""))
 		return
 	}
-	if app.IsFlowAllowed(application.RefreshTokenFlow) {
-		c.logger.Info(
-			"client_credentials flow does not support refresh tokens",
-			zap.String("client_id", app.ClientID()),
-		)
-		return
-	}
+
 	scopes := []string{}
 	if req.scope != "" {
 		scopes = strings.Split(req.scope, " ")
@@ -97,7 +91,7 @@ func (c *ConnnectRessource) clientCredentialsGrant(
 	expires := int(t.Expiration().Sub(time.Now().UTC()).Seconds())
 	response := &accessTokenResponse{
 		AccessToken: string(signed),
-		TokenType:   "bearer_token",
+		TokenType:   "bearer",
 		ExpiresIn:   &expires,
 	}
 	render.Respond(w, r, response)
