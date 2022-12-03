@@ -64,6 +64,7 @@ func init() {
 	userCommand.AddCommand(&userCreateCommand)
 
 	inviteCommand.AddCommand(&seedInviteCommand)
+	inviteCommand.AddCommand(&listInvitesCommand)
 
 	tokenIssueCommand.AddCommand(&tokenIssueAccessTokenCommand)
 	tokenCommand.AddCommand(&tokenIssueCommand)

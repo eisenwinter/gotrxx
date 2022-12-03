@@ -34,6 +34,9 @@ var listApplicationsCommand = cobra.Command{
 		for _, v := range lst.Entries.([]*manage.ApplicationDTO) {
 			fmt.Fprintf(w, "%d\t%s\t%s\t%v\t%s\t%s\t%s\t%v\t%v\t%v\t%v\t%v \r\n", v.ID, v.ClientID, v.Name, v.Confidentiality, v.Type, v.Status, v.Scope, v.Flows, v.RedirectURIs, v.LogoutURIs, v.PKCE, v.HasSecret)
 		}
+
+		fmt.Fprintf(w, "------------------------------------------------- \r\n")
+		fmt.Fprintf(w, "%d entries loaded", lst.Total)
 		w.Flush()
 	},
 }
