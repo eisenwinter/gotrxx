@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.0.16](https://github.com/eisenwinter/gotrxx/compare/0.0.15...0.0.16) (2022-12-04)
+
+
+### Bug Fixes
+
+* basic guard rails for preventing possible log injections ([00b0fc5](https://github.com/eisenwinter/gotrxx/commit/00b0fc5b03751dcf12933dfd8d4694cb36c76e1a))
+* checkup for allowed redirectURI ([eea3a65](https://github.com/eisenwinter/gotrxx/commit/eea3a6507d0279220e9ca8cc095614bc870071a3))
+* forced all redirects  within account to be on the same host to avoid pishin attacks ([726bcd2](https://github.com/eisenwinter/gotrxx/commit/726bcd23139dc00aeedae40906cdc3ea23f0f6bc))
+* wrong invite code error fixed ([87bf034](https://github.com/eisenwinter/gotrxx/commit/87bf034bcb14bf6b0da50ec8bce564a18ac22e9a))
+* wrong invite code error fixed ([c4e04ad](https://github.com/eisenwinter/gotrxx/commit/c4e04adea7fde29b9f714b511b1d10c3d8dc84ac))
+
 ## [0.0.15](https://github.com/eisenwinter/gotrxx/compare/0.0.14...0.0.15) (2022-12-03)
 
 
