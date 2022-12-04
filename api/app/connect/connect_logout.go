@@ -67,7 +67,6 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 		}
 		return
 	}
-	logoutURI := r.FormValue("logout_uri")
 	app, err := c.appService.ApplicationByClientID(r.Context(), clientID)
 	if err != nil {
 		if errors.Is(application.ErrNotFound, err) {
@@ -86,8 +85,9 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 		)
 		return
 	}
+	logoutURI := r.FormValue("logout_uri")
 	if logoutURI != "" {
-		if !app.IsAllowedRedirectURI(logoutURI) {
+		if !app.IsAllowedLogoutURI(logoutURI) {
 			render.Respond(
 				w,
 				r,
