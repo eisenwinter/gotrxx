@@ -10,6 +10,7 @@ import (
 	"github.com/eisenwinter/gotrxx/cmd"
 	"github.com/eisenwinter/gotrxx/config"
 	_ "github.com/go-sql-driver/mysql"
+	"github.com/google/safehtml/template"
 	_ "github.com/jackc/pgx/v4"
 	"github.com/joho/godotenv"
 	_ "github.com/mattn/go-sqlite3"
@@ -19,22 +20,24 @@ import (
 )
 
 //go:embed templates/static
-//go:embed templates/email/template.html
 //go:embed templates/i18n
-//go:embed templates/404.html
-//go:embed templates/change_email.html
-//go:embed templates/change_password.html
-//go:embed templates/change_mfa.html
-//go:embed templates/provision_mfa.html
-//go:embed templates/confirm.html
-//go:embed templates/error.html
-//go:embed templates/recover_password.html
-//go:embed templates/request_password_recovery.html
-//go:embed templates/signin.html
-//go:embed templates/signup.html
-//go:embed templates/user.html
-//go:embed templates/invite.html
-var templates embed.FS
+//go:embed templates/email/template.html
+var templateContent embed.FS
+
+//go:embed templates/pages/404.html
+//go:embed templates/pages/change_email.html
+//go:embed templates/pages/change_password.html
+//go:embed templates/pages/change_mfa.html
+//go:embed templates/pages/provision_mfa.html
+//go:embed templates/pages/confirm.html
+//go:embed templates/pages/error.html
+//go:embed templates/pages/recover_password.html
+//go:embed templates/pages/request_password_recovery.html
+//go:embed templates/pages/signin.html
+//go:embed templates/pages/signup.html
+//go:embed templates/pages/user.html
+//go:embed templates/pages/invite.html
+var templatePages embed.FS
 
 var (
 	// Version holds the version injected by ldflags
@@ -208,7 +211,7 @@ func initConfig(logger *zap.Logger) {
 	cmd.LoadedConfig = conf
 
 	if cmd.LoadedConfig.Server.LoadTemplateFolder {
-		if _, err := os.Stat("/templates"); os.IsNotExist(err) {
+		if _, err := os.Stat("templates"); os.IsNotExist(err) {
 			logger.Fatal(
 				"You need to add the templates folder when using  `server.load-template-folder:true`",
 			)
@@ -218,18 +221,40 @@ func initConfig(logger *zap.Logger) {
 		if err != nil {
 			logger.Fatal("Unable to open templates/static folder")
 		}
+		i18n, err := fs.Sub(templates, "i18n")
+		if err != nil {
+			logger.Fatal("Unable to open templates/i18n folder")
+		}
+		email, err := fs.Sub(templates, "email")
+		if err != nil {
+			logger.Fatal("Unable to open templates/email folder")
+		}
+		src := template.TrustedSourceFromConstant("templates")
 		cmd.FileSystemsConfig = &config.FileSystems{
 			StaticFolder: statics,
-			Templates:    templates,
+			I18n:         i18n,
+			Email:        email,
+			Pages:        template.TrustedFSFromTrustedSource(src),
 		}
 	} else {
-		statics, err := fs.Sub(templates, "templates/static")
+
+		statics, err := fs.Sub(templateContent, "templates/static")
 		if err != nil {
 			logger.Fatal("Unable to open templates/static folder")
 		}
+		i18n, err := fs.Sub(templateContent, "templates/i18n")
+		if err != nil {
+			logger.Fatal("Unable to open templates/i18n folder")
+		}
+		email, err := fs.Sub(templateContent, "templates/email")
+		if err != nil {
+			logger.Fatal("Unable to open templates/email folder")
+		}
 		cmd.FileSystemsConfig = &config.FileSystems{
 			StaticFolder: statics,
-			Templates:    templates,
+			I18n:         i18n,
+			Email:        email,
+			Pages:        template.TrustedFSFromEmbed(templatePages),
 		}
 	}
 

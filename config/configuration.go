@@ -5,6 +5,8 @@ import (
 	"io/fs"
 	"os"
 	"time"
+
+	"github.com/google/safehtml/template"
 )
 
 // ServerConfiguration contains the server settings
@@ -73,7 +75,9 @@ type JWTConfiguration struct {
 // FileSystems contains the used file systems
 type FileSystems struct {
 	StaticFolder fs.FS
-	Templates    fs.FS
+	I18n         fs.FS
+	Email        fs.FS
+	Pages        template.TrustedFS
 }
 
 // CORSConfiguration very basic cors configuration

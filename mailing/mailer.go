@@ -2,10 +2,11 @@ package mailing
 
 import (
 	"fmt"
-	"html/template"
 	"io/fs"
 	"strings"
 	"time"
+
+	"html/template"
 
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/i18n"
@@ -119,7 +120,7 @@ func (m *Mailer) SendTestEmail(email string) error {
 
 func (m *Mailer) send(email string, subject string, viewModel map[string]interface{}) error {
 	buffer := new(strings.Builder)
-	err := m.emailTemplate.ExecuteTemplate(buffer, "email", viewModel)
+	err := m.emailTemplate.Execute(buffer, viewModel)
 	if err != nil {
 		return err
 	}
@@ -143,11 +144,8 @@ func NewMailer(
 	registry *i18n.TranslationRegistry,
 	files fs.FS,
 ) (*Mailer, error) {
-	c, err := fs.ReadFile(files, "templates/email/template.html")
-	if err != nil {
-		return nil, err
-	}
-	t, err := template.New("email").Parse(string(c))
+
+	t, err := template.ParseFS(files, "template.html")
 	if err != nil {
 		return nil, err
 	}

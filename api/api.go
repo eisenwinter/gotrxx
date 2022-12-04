@@ -1,9 +1,10 @@
 package api
 
 import (
-	"html/template"
 	"net/http"
 	"time"
+
+	"github.com/google/safehtml/template"
 
 	"github.com/eisenwinter/gotrxx/api/app/connect"
 	"github.com/eisenwinter/gotrxx/api/app/management"

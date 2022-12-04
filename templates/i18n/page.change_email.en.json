@@ -4,12 +4,14 @@
     },
     "errors": {
         "invalid_email": "Invalid email supplied",
+        "invalid_password": "Invalid password supplied",
         "email_already_in_use": "You already have an account with that email!",
         "unknown": "Unknown error occured"
     },
     "fields": {
         "save": "Save",
-        "email": "Email"
+        "email": "Email",
+        "password": "Password"
     },
     "title": "Change your Email-Address",
     "back_link": "Back"

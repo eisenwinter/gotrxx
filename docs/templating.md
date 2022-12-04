@@ -5,19 +5,20 @@ Gotrxx uses go HTML templates[^1]. Templates and all their needed assets are loc
 
 ```
 templates
-│   404.html
-│   change_email.html
-│   change_mfa.html
-│   change_password.html
-│   confirm.html
-│   error.html
-│   index.html
-│   provision_mfa.html
-│   recover_password.html
-│   request_password_recovery.html
-│   signin.html
-│   signup.html
-│   user.html
+├───pages
+│       404.html
+│       change_email.html
+│       change_mfa.html
+│       change_password.html
+│       confirm.html
+│       error.html
+│       index.html
+│       provision_mfa.html
+│       recover_password.html
+│       request_password_recovery.html
+│       signin.html
+│       signup.html
+│       user.html
 │
 ├───email
 │       template.html
@@ -106,8 +107,6 @@ If no custom build is wanted the template files can be used with an existing bin
 ```
 gotrxx
 + templates
-│   404.html
-│   change_email.html
 │   ...
 ```
 
