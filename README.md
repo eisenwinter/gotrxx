@@ -3,10 +3,10 @@
 </p>
 <a name="readme-top"></a>
 <p align="center">
-<strong>gotrxx</strong> is a <a href="https://github.com/netlify/gotrue">gotrue</a> API-compatible authorization server written in go, with support for OAuth <strong>Authorization Code Grant with PKCE</strong>, <strong>Client Credentials Grant</strong> and <strong>Password Grant</strong> (for gotrue compatibility).
+<strong>gotrxx</strong> is a OAuth2 authorization server written in go, with support for <strong>Authorization Code Grant with PKCE</strong>, <strong>Client Credentials Grant</strong> and <strong>Password Grant</strong> (to mimic <a href="https://github.com/netlify/gotrue">gotrue</a>  behaviour). It is compatible with <a href="https://www.netlifycms.org/">netlifycms</a>.
 </p>
 
-[![GitHub go.mod](https://img.shields.io/github/go-mod/go-version/eisenwinter/gotrxx.svg)](https://github.com/eisenwinter/gotrxx) [![Go Report Card](https://goreportcard.com/badge/github.com/eisenwinter/gotrxx)](https://goreportcard.com/report/github.com/eisenwinter/gotrxx) [![Go](https://github.com/eisenwinter/gotrxx/actions/workflows/go.yml/badge.svg)](https://github.com/eisenwinter/gotrxx/actions/workflows/go.yml) [![Project Status: WIP - Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip) [![License](https://img.shields.io/badge/License-BSD_2--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause) [![DeepSource](https://deepsource.io/gh/eisenwinter/gotrxx.svg/?label=active+issues&show_trend=true&token=me84C5VKS4He2vcgb2VzJF2M)](https://deepsource.io/gh/eisenwinter/gotrxx/?ref=repository-badge) [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org) [![view - Documentation](https://img.shields.io/badge/view-Documentation-blue)](https://eisenwinter.github.io/gotrxx "Go documentation")
+[![GitHub go.mod](https://img.shields.io/github/go-mod/go-version/eisenwinter/gotrxx.svg)](https://github.com/eisenwinter/gotrxx) [![Go Report Card](https://goreportcard.com/badge/github.com/eisenwinter/gotrxx)](https://goreportcard.com/report/github.com/eisenwinter/gotrxx) [![Go](https://github.com/eisenwinter/gotrxx/actions/workflows/go.yml/badge.svg)](https://github.com/eisenwinter/gotrxx/actions/workflows/go.yml) [![Project Status: Active – The project has reached a stable, usable state and is being actively developed.](https://www.repostatus.org/badges/latest/active.svg)](https://www.repostatus.org/#active) [![License](https://img.shields.io/badge/License-BSD_2--Clause-orange.svg)](https://opensource.org/licenses/BSD-2-Clause) [![DeepSource](https://deepsource.io/gh/eisenwinter/gotrxx.svg/?label=active+issues&show_trend=true&token=me84C5VKS4He2vcgb2VzJF2M)](https://deepsource.io/gh/eisenwinter/gotrxx/?ref=repository-badge) [![Conventional Commits](https://img.shields.io/badge/Conventional%20Commits-1.0.0-%23FE5196?logo=conventionalcommits&logoColor=white)](https://conventionalcommits.org) [![view - Documentation](https://img.shields.io/badge/view-Documentation-blue)](https://eisenwinter.github.io/gotrxx "Go documentation")
 
 
 # gotrxx
@@ -15,7 +15,7 @@
 
 - **Authorization Code Grant** with Proof Key of Exchange for all your SPA and public needs.
 - **Client Credentials Grant** for all your Backend and confidential client needs.
-- **Password Grant** for gotrue compatibility
+- **Password Grant** for netlifycms compatibility
 - **Discovery Endpoint** although it does **not** support OpenID-connect it has a discovery endpoint for convenient use with [oidc-client-ts](https://github.com/authts/oidc-client-ts)
 - **Flexible signing and verification choice**  (HS256, HS384, HS512, RS256, RS384, RS512) token signing and verification (very special thanks to [jwx](https://github.com/lestrrat-go/jwx))
 - **jwk** Endpoint when using RS* signing
