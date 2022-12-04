@@ -7,6 +7,7 @@ import (
 	"github.com/eisenwinter/gotrxx/api/auth"
 	"github.com/eisenwinter/gotrxx/application"
 	"github.com/eisenwinter/gotrxx/authorization"
+	"github.com/eisenwinter/gotrxx/sanitize"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/go-chi/chi/v5"
@@ -220,7 +221,7 @@ func (c *ConnnectRessource) tokenAuthorizationCodeGrant(r *http.Request, w http.
 		//https://datatracker.ietf.org/doc/html/rfc7636
 		c.logger.Warn(
 			"no code verifier for PKCE AND no client secret!",
-			zap.String("client_id", clientID),
+			sanitize.UserInputString("client_id", clientID),
 		)
 	}
 

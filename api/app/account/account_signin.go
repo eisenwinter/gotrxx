@@ -6,6 +6,7 @@ import (
 	"net/url"
 
 	"github.com/eisenwinter/gotrxx/authorization"
+	"github.com/eisenwinter/gotrxx/sanitize"
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/go-chi/render"
 	"github.com/gorilla/csrf"
@@ -130,7 +131,7 @@ func (a *AccountRessource) signinPage(w http.ResponseWriter, r *http.Request) {
 	if ok && len(urls) > 0 {
 		_, err := url.ParseRequestURI(urls[0])
 		if err != nil {
-			a.log.Warn("unacceptable redirect_url", zap.String("redirect_url", urls[0]))
+			a.log.Warn("unacceptable redirect_url", sanitize.UserInputString("redirect_url", urls[0]))
 		} else {
 			returnURL = urls[0]
 		}

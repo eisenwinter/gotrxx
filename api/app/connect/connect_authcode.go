@@ -10,6 +10,7 @@ import (
 
 	"github.com/eisenwinter/gotrxx/application"
 	"github.com/eisenwinter/gotrxx/authorization"
+	"github.com/eisenwinter/gotrxx/sanitize"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
@@ -28,7 +29,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 	if !ok {
 		return
 	}
-	c.logger.Debug("using redirect_uri", zap.String("redirect_uri", redirectToUse))
+	c.logger.Debug("using redirect_uri", sanitize.UserInputString("redirect_uri", redirectToUse))
 
 	redirect := func() {
 		// Query params
@@ -229,7 +230,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCodeCheckApplication(
 	} else if len(app.Properties().RedirectURIs()) > 0 {
 		redirectToUse = app.Properties().RedirectURIs()[0]
 	} else {
-		c.logger.Error("authorization code flow: (authorize) no redirect uri aborting", zap.String("client_id", req.clientID))
+		c.logger.Error("authorization code flow: (authorize) no redirect uri aborting", sanitize.UserInputString("client_id", req.clientID))
 		render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "no redirect_uri"))
 		return false, ""
 	}
@@ -364,7 +365,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCodeQuery(
 	qs.Add("state", req.state)
 	rurl.RawQuery = qs.Encode()
 	res := rurl.String()
-	c.logger.Debug("query mode redirect", zap.String("url", res))
+	c.logger.Debug("query mode redirect", sanitize.UserInputString("url", res))
 	http.Redirect(w, r, res, http.StatusFound)
 }
 
@@ -506,7 +507,7 @@ func (c *ConnnectRessource) authorizationCodeGrantCheckAuth(
 	if !app.IsAllowedRedirectURI(req.redirectURI) {
 		c.logger.Debug(
 			"invalid redirect uri for application",
-			zap.String("supplied_uri", req.redirectURI),
+			sanitize.UserInputString("supplied_uri", req.redirectURI),
 			zap.Strings("accepted_uris", app.Properties().RedirectURIs()),
 		)
 		render.Respond(

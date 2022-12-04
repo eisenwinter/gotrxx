@@ -13,6 +13,7 @@ import (
 	"github.com/eisenwinter/gotrxx/i18n"
 	"github.com/eisenwinter/gotrxx/mailing"
 	"github.com/eisenwinter/gotrxx/manage"
+	"github.com/eisenwinter/gotrxx/sanitize"
 	"github.com/google/uuid"
 	"github.com/xlzd/gotp"
 	"go.uber.org/zap"
@@ -152,7 +153,7 @@ func (g *Service) RegisterFromInvite(
 	if err != nil {
 		g.log.Warn(
 			"could not consume invite code",
-			zap.String("invite_code", inviteCode),
+			sanitize.UserInputString("invite_code", inviteCode),
 			zap.Error(err),
 		)
 	} else {
@@ -192,7 +193,7 @@ func (g *Service) register(
 	if err != nil {
 		g.log.Error(
 			"Could not check registration in data store",
-			zap.String("email", email),
+			sanitize.UserInputString("email", email),
 			zap.Error(err),
 		)
 		return uuid.UUID{}, err
@@ -269,7 +270,7 @@ func (g *Service) register(
 func (g *Service) ConfirmUser(ctx context.Context, token string) error {
 	ok, id, err := g.store.ConfirmUser(ctx, token)
 	if err != nil {
-		g.log.Error("Could not confirm in data store", zap.String("token", token), zap.Error(err))
+		g.log.Error("Could not confirm in data store", sanitize.UserInputString("token", token), zap.Error(err))
 		return err
 	}
 	if !ok {

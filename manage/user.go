@@ -13,6 +13,7 @@ import (
 	"github.com/eisenwinter/gotrxx/generator"
 	"github.com/eisenwinter/gotrxx/i18n"
 	"github.com/eisenwinter/gotrxx/mailing"
+	"github.com/eisenwinter/gotrxx/sanitize"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
@@ -358,13 +359,13 @@ func (g *UserService) sendInviteMail(
 	if err != nil {
 		g.log.Error(
 			"Could not send invite email to user",
-			zap.String("email", email),
+			sanitize.UserInputString("email", email),
 			zap.Error(err),
 		)
 	} else {
 		err = g.store.SetInviteSent(ctx, email, string(inviteCode))
 		if err != nil {
-			g.log.Error("Could not persist sent date for invite email to user", zap.String("email", email), zap.Error(err))
+			g.log.Error("Could not persist sent date for invite email to user", sanitize.UserInputString("email", email), zap.Error(err))
 		}
 		g.dispatcher.Dispatch(&event.EmailInviteSent{
 			InviteCode: string(inviteCode),

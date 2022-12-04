@@ -8,6 +8,7 @@ import (
 
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/manage"
+	"github.com/eisenwinter/gotrxx/sanitize"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
@@ -43,7 +44,7 @@ func (m *ManagementRessource) Router() *chi.Mux {
 		m.log.Debug(
 			"Could not found",
 			zap.String("method", r.Method),
-			zap.String("path", r.URL.Path),
+			sanitize.UserInputString("path", r.URL.Path),
 		)
 		w.WriteHeader(404)
 	})
