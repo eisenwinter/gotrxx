@@ -340,23 +340,14 @@ func (a *AccountRessource) changeLanguage(w http.ResponseWriter, r *http.Request
 		}
 		http.SetCookie(w, cookie)
 	}
-	_, err = url.ParseRequestURI(returnURL)
-	if err != nil {
-		returnURL = "/account/"
-	}
-	http.Redirect(w, r, returnURL, http.StatusFound)
+
+	http.Redirect(w, r, sanitizeReturnURL(returnURL, "/account/"), http.StatusFound)
 }
 
 func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
 		a.log.Error("signin: ParseForm failed", zap.Error(err))
-	}
-	returnURL := r.FormValue("return_url")
-
-	_, err = url.ParseRequestURI(returnURL)
-	if err != nil {
-		returnURL = "/account/signin"
 	}
 
 	jwtc, err := r.Cookie(jwtCookie)
@@ -424,8 +415,17 @@ func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 		}
 
 	}
-	http.Redirect(w, r, returnURL, http.StatusFound)
+	returnURL := r.FormValue("return_url")
+	http.Redirect(w, r, sanitizeReturnURL(returnURL, "/account/signin"), http.StatusFound)
 
+}
+
+func sanitizeReturnURL(returnURL string, fallback string) string {
+	parsed, err := url.ParseRequestURI(returnURL)
+	if err != nil {
+		return fallback
+	}
+	return parsed.RequestURI()
 }
 
 func NewAccountRessource(log *zap.Logger,
