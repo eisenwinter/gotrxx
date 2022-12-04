@@ -15,3 +15,5 @@
     * [oidc-client (SPA)](guide_oidcclient.md)
 - CLI Reference
     * [Generated](cli/gotrxx.md)
+- Misc
+    * [Packages & licenses](used_packages.md)
