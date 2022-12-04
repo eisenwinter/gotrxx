@@ -1,7 +1,8 @@
 {
     "errors": {
         "unknown": "Unknown error occured!",
-        "ivnalid_email": "Invalid Email Address!",
+        "invalid_email": "Invalid Email Address!",
+        "invalid_invite_code": "Invalid invite code!",
         "email_already_used": "You already have an account!",
         "password_guidlines": "Your password does not match the password guidelines!",
         "invite_code_expired": "This invite code already expired!",

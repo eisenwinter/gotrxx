@@ -48,6 +48,17 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	}
 	if invite != "" {
 		_, err = a.userService.RegisterFromInvite(r.Context(), email, password, phoneNr, invite)
+		if errors.Is(user.ErrEntityDoesNotExist, err) {
+			a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
+				csrf.TemplateTag:   csrf.TemplateField(r),
+				"error":            "invalid_invite_code",
+				"show_invite_code": true,
+				"invite_code":      invite,
+				"email":            email,
+				"password":         password,
+			}, w)
+			return
+		}
 		if errors.Is(user.ErrTokenExpired, err) {
 			a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
 				csrf.TemplateTag:   csrf.TemplateField(r),

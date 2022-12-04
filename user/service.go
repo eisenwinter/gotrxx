@@ -93,6 +93,9 @@ func (g *Service) RegisterFromInvite(
 ) (uuid.UUID, error) {
 	invite, err := g.store.InviteData(ctx, inviteCode)
 	if err != nil {
+		if errors.Is(err, db.ErrNotFound) {
+			return uuid.UUID{}, ErrEntityDoesNotExist
+		}
 		g.log.Error("could not fetch invite data", zap.Error(err))
 		return uuid.UUID{}, err
 	}
