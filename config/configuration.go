@@ -5,14 +5,16 @@ import (
 	"io/fs"
 	"os"
 	"time"
+
+	"github.com/google/safehtml/template"
 )
 
 // ServerConfiguration contains the server settings
 type ServerConfiguration struct {
 	Port               int
 	Address            string
-	CSRFToken          string `mapstructure:"csrf-token"     json:"-"`
-	LoadTemplateFolder bool   `mapstructure:"load-templates"`
+	CSRFToken          string `mapstructure:"csrf-token"           json:"-"`
+	LoadTemplateFolder bool   `mapstructure:"load-template-folder"`
 }
 
 // SMTPConfiguration contains the email settings
@@ -73,7 +75,9 @@ type JWTConfiguration struct {
 // FileSystems contains the used file systems
 type FileSystems struct {
 	StaticFolder fs.FS
-	Templates    fs.FS
+	I18n         fs.FS
+	Email        fs.FS
+	Pages        template.TrustedFS
 }
 
 // CORSConfiguration very basic cors configuration

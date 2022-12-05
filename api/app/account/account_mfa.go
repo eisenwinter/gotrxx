@@ -25,9 +25,9 @@ func (a *AccountRessource) mfa(w http.ResponseWriter, r *http.Request) {
 	}
 	mfa := a.userService.IsMFAEnabled(r.Context(), id)
 
-	a.view(r.Context(), a.chageMfaTmpl, map[string]interface{}{
-		csrf.TemplateTag: csrf.TemplateField(r),
-		"mfa_enabled":    mfa,
+	a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
+		CsrfToken:  csrf.Token(r),
+		MFAEnabled: mfa,
 	}, w)
 }
 
@@ -41,13 +41,23 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		a.log.Error("unable to parse user id", zap.Error(err))
 	}
+	password := r.FormValue("password")
+	err = a.userSignIn.Validate(r.Context(), id, password)
+	if err != nil {
+		a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
+			CsrfToken: csrf.Token(r),
+			Error:     "invalid_password",
+		}, w)
+
+		return
+	}
 
 	secret, uri, err := a.userService.ProvisionMFA(r.Context(), id)
 	if err != nil {
 		a.log.Error("could not provision mfa", zap.Error(err))
-		a.view(r.Context(), a.mfaSetupTmpl, map[string]interface{}{
-			csrf.TemplateTag: csrf.TemplateField(r),
-			"error":          "unknown",
+		a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
+			CsrfToken: csrf.Token(r),
+			Error:     "unknown",
 		}, w)
 		return
 	}
@@ -59,18 +69,18 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 	png, err := qrcode.Encode(decodedValue, qrcode.Medium, 256)
 	if err != nil {
 		a.log.Error("could not generate qr code", zap.Error(err))
-		a.view(r.Context(), a.mfaSetupTmpl, map[string]interface{}{
-			csrf.TemplateTag: csrf.TemplateField(r),
-			"secret":         secret,
+		a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
+			CsrfToken: csrf.Token(r),
+			Secret:    secret,
 		}, w)
 		return
 	}
 	qrb64 := base64.StdEncoding.EncodeToString(png)
 
-	a.view(r.Context(), a.mfaSetupTmpl, map[string]interface{}{
-		csrf.TemplateTag: csrf.TemplateField(r),
-		"qr":             qrb64,
-		"secret":         secret,
+	a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
+		CsrfToken: csrf.Token(r),
+		QR:        qrb64,
+		Secret:    secret,
 	}, w)
 
 }
@@ -81,6 +91,7 @@ func (a *AccountRessource) setMFA(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/account/signin", http.StatusFound)
 		return
 	}
+
 	err := r.ParseForm()
 	if err != nil {
 		a.log.Error("setMFA: ParseForm failed", zap.Error(err))
@@ -92,23 +103,24 @@ func (a *AccountRessource) setMFA(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/account/signin", http.StatusFound)
 		return
 	}
+
 	secret := r.FormValue("secret")
 	recoveryKey, err := a.userService.EnableMFA(r.Context(), id, secret)
 	if err != nil {
 		a.log.Error("could not enable MFA", zap.Error(err))
-		a.view(r.Context(), a.mfaSetupTmpl, map[string]interface{}{
-			csrf.TemplateTag: csrf.TemplateField(r),
-			"error":          "unknown",
-			"secret":         secret,
+		a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
+			CsrfToken: csrf.Token(r),
+			Error:     "unknown",
+			Secret:    secret,
 		}, w)
 		return
 	}
 
-	a.view(r.Context(), a.mfaSetupTmpl, map[string]interface{}{
-		csrf.TemplateTag:  csrf.TemplateField(r),
-		"successful":      true,
-		"success_message": "activated",
-		"recovery_key":    recoveryKey,
+	a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
+		CsrfToken:      csrf.Token(r),
+		Successful:     true,
+		SuccessMessage: "activated",
+		RecoveryKey:    recoveryKey,
 	}, w)
 }
 
@@ -134,27 +146,27 @@ func (a *AccountRessource) disableMFA(w http.ResponseWriter, r *http.Request) {
 	err = a.userSignIn.Validate(r.Context(), id, pwd)
 	if err != nil {
 		a.log.Debug("user failed to authenticate", zap.Error(err))
-		a.view(r.Context(), a.chageMfaTmpl, map[string]interface{}{
-			csrf.TemplateTag: csrf.TemplateField(r),
-			"mfa_enabled":    true,
-			"error":          "invalid_password",
+		a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
+			CsrfToken:  csrf.Token(r),
+			MFAEnabled: true,
+			Error:      "invalid_password",
 		}, w)
 		return
 	}
 	err = a.userService.DisableMFA(r.Context(), id)
 	if err != nil {
-		a.view(r.Context(), a.chageMfaTmpl, map[string]interface{}{
-			csrf.TemplateTag: csrf.TemplateField(r),
-			"mfa_enabled":    true,
-			"error":          "unknown",
+		a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
+			CsrfToken:  csrf.Token(r),
+			MFAEnabled: true,
+			Error:      "unknown",
 		}, w)
 		return
 	}
 	mfa := a.userService.IsMFAEnabled(r.Context(), id)
-	a.view(r.Context(), a.chageMfaTmpl, map[string]interface{}{
-		csrf.TemplateTag:  csrf.TemplateField(r),
-		"mfa_enabled":     mfa,
-		"successful":      true,
-		"success_message": "mfa_disabled",
+	a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
+		CsrfToken:      csrf.Token(r),
+		MFAEnabled:     mfa,
+		Successful:     true,
+		SuccessMessage: "mfa_disabled",
 	}, w)
 }

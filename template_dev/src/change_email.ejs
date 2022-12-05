@@ -21,6 +21,12 @@ title: '{{ .i18n.T "title" }}'
               </label>
               <input type="email" required value="{{ .email }}" name="email">
           </div>
+          <div class="field">
+            <label for="password">
+                 {{ .i18n.T "fields.password" }}
+            </label>
+            <input type="password" required name="password" >
+        </div>
         <div class="field">
               <button type="submit">{{ .i18n.T "fields.save"}}</button>
           </div>   

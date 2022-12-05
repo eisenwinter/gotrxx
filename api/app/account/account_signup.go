@@ -19,25 +19,26 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	phone := r.FormValue("phone")
 	password := r.FormValue("password")
 	if email == "" || !emailRegex.MatchString(email) {
-		a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
-			csrf.TemplateTag:   csrf.TemplateField(r),
-			"error":            "invalid_email",
-			"show_invite_code": true,
-			"invite_code":      invite,
-			"email":            email,
-			"password":         password,
+
+		a.view(r.Context(), a.signUpTmpl, &signupViewModel{
+			CsrfToken:      csrf.Token(r),
+			Error:          "invalid_email",
+			ShowInviteCode: true,
+			InviteCode:     invite,
+			Email:          email,
+			Password:       password,
 		}, w)
 		return
 	}
 
 	if invite == "" && a.cfg.InviteOnly {
-		a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
-			csrf.TemplateTag:   csrf.TemplateField(r),
-			"error":            "invite_code_required",
-			"show_invite_code": true,
-			"invite_code":      invite,
-			"email":            email,
-			"password":         password,
+		a.view(r.Context(), a.signUpTmpl, &signupViewModel{
+			CsrfToken:      csrf.Token(r),
+			Error:          "invite_code_required",
+			ShowInviteCode: true,
+			InviteCode:     invite,
+			Email:          email,
+			Password:       password,
 		}, w)
 		return
 
@@ -49,24 +50,24 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	if invite != "" {
 		_, err = a.userService.RegisterFromInvite(r.Context(), email, password, phoneNr, invite)
 		if errors.Is(user.ErrEntityDoesNotExist, err) {
-			a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
-				csrf.TemplateTag:   csrf.TemplateField(r),
-				"error":            "invalid_invite_code",
-				"show_invite_code": true,
-				"invite_code":      invite,
-				"email":            email,
-				"password":         password,
+			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
+				CsrfToken:      csrf.Token(r),
+				Error:          "invalid_invite_code",
+				ShowInviteCode: true,
+				InviteCode:     invite,
+				Email:          email,
+				Password:       password,
 			}, w)
 			return
 		}
 		if errors.Is(user.ErrTokenExpired, err) {
-			a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
-				csrf.TemplateTag:   csrf.TemplateField(r),
-				"error":            "invite_code_expired",
-				"show_invite_code": true,
-				"invite_code":      invite,
-				"email":            email,
-				"password":         password,
+			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
+				CsrfToken:      csrf.Token(r),
+				Error:          "invite_code_expired",
+				ShowInviteCode: true,
+				InviteCode:     invite,
+				Email:          email,
+				Password:       password,
 			}, w)
 			return
 		}
@@ -76,24 +77,24 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	}
 	if err != nil {
 		if errors.Is(user.ErrPasswordGuidelines, err) {
-			a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
-				csrf.TemplateTag:   csrf.TemplateField(r),
-				"error":            "password_guidlines",
-				"show_invite_code": true,
-				"invite_code":      invite,
-				"email":            email,
-				"password":         password,
+			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
+				CsrfToken:      csrf.Token(r),
+				Error:          "password_guidlines",
+				ShowInviteCode: true,
+				InviteCode:     invite,
+				Email:          email,
+				Password:       password,
 			}, w)
 			return
 		}
 		if errors.Is(user.ErrEntityAlreadyExists, err) {
-			a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
-				csrf.TemplateTag:   csrf.TemplateField(r),
-				"error":            "email_already_used",
-				"show_invite_code": true,
-				"invite_code":      invite,
-				"email":            email,
-				"password":         password,
+			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
+				CsrfToken:      csrf.Token(r),
+				Error:          "email_already_used",
+				ShowInviteCode: true,
+				InviteCode:     invite,
+				Email:          email,
+				Password:       password,
 			}, w)
 			return
 		}
@@ -104,11 +105,10 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 		successMessage = "welcome_text"
 	}
 
-	a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
-		csrf.TemplateTag:  csrf.TemplateField(r),
-		"error":           "email_already_used",
-		"successful":      true,
-		"success_message": successMessage,
+	a.view(r.Context(), a.signUpTmpl, &signupViewModel{
+		CsrfToken:      csrf.Token(r),
+		Successful:     true,
+		SuccessMessage: successMessage,
 	}, w)
 
 }
@@ -121,9 +121,9 @@ func (a *AccountRessource) signupPage(w http.ResponseWriter, r *http.Request) {
 	}
 	showInviteCode := a.cfg.InviteOnly || inviteCode != ""
 
-	a.view(r.Context(), a.signUpTmpl, map[string]interface{}{
-		csrf.TemplateTag:   csrf.TemplateField(r),
-		"show_invite_code": showInviteCode,
-		"invite_code":      inviteCode,
+	a.view(r.Context(), a.signUpTmpl, &signupViewModel{
+		CsrfToken:      csrf.Token(r),
+		ShowInviteCode: showInviteCode,
+		InviteCode:     inviteCode,
 	}, w)
 }

@@ -35,7 +35,7 @@ func mustResolveUsableDataStore() *db.DataStore {
 
 func mustResolveTranslationRegistry() *i18n.TranslationRegistry {
 	registry, err := i18n.NewTranslationRegistry(
-		FileSystemsConfig.Templates,
+		FileSystemsConfig.I18n,
 		TopLevelLogger.Named("i18n"),
 	)
 	if err != nil {
@@ -57,7 +57,7 @@ func mustResolveMailer(registry *i18n.TranslationRegistry) *mailing.Mailer {
 		TopLevelLogger.Named("mailer"),
 		LoadedConfig,
 		registry,
-		FileSystemsConfig.Templates,
+		FileSystemsConfig.Email,
 	)
 	if err != nil {
 		TopLevelLogger.Fatal("Failed to create mailer", zap.Error(err))

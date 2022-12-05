@@ -26,12 +26,12 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(user.ErrEntityOperationForbidden, err) {
 			//locked or unconfirmed
-			a.view(r.Context(), a.loginTmpl, map[string]interface{}{
-				csrf.TemplateTag: csrf.TemplateField(r),
-				"returnUrl":      returnURL,
-				"error":          "locked_user",
-				"otp":            false,
-				"email":          email,
+			a.view(r.Context(), a.loginTmpl, &signinViewModel{
+				CsrfToken: csrf.Token(r),
+				ReturnURL: returnURL,
+				Error:     "locked_user",
+				Otp:       false,
+				Email:     email,
 			}, w)
 			return
 		}
@@ -41,12 +41,12 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 				a.log.Error("unable prepare MFA", zap.Error(err))
 			}
 			//mfa
-			a.view(r.Context(), a.loginTmpl, map[string]interface{}{
-				csrf.TemplateTag: csrf.TemplateField(r),
-				"returnUrl":      returnURL,
-				"error":          "mfa",
-				"otp":            true,
-				"email":          email,
+			a.view(r.Context(), a.loginTmpl, &signinViewModel{
+				CsrfToken: csrf.Token(r),
+				ReturnURL: returnURL,
+				Error:     "mfa",
+				Otp:       true,
+				Email:     email,
 			}, w)
 			return
 		}
@@ -55,41 +55,41 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			if err != nil {
 				a.log.Error("unable prepare MFA", zap.Error(err))
 			}
-			a.view(r.Context(), a.loginTmpl, map[string]interface{}{
-				csrf.TemplateTag: csrf.TemplateField(r),
-				"returnUrl":      returnURL,
-				"error":          "invalid_otp",
-				"otp":            true,
-				"email":          email,
+			a.view(r.Context(), a.loginTmpl, &signinViewModel{
+				CsrfToken: csrf.Token(r),
+				ReturnURL: returnURL,
+				Error:     "invalid_otp",
+				Otp:       true,
+				Email:     email,
 			}, w)
 			return
 		}
 		if errors.Is(user.ErrEntityDoesNotExist, err) {
-			a.view(r.Context(), a.loginTmpl, map[string]interface{}{
-				csrf.TemplateTag: csrf.TemplateField(r),
-				"returnUrl":      returnURL,
-				"error":          "unknown_or_invalid",
-				"otp":            false,
-				"email":          email,
+			a.view(r.Context(), a.loginTmpl, &signinViewModel{
+				CsrfToken: csrf.Token(r),
+				ReturnURL: returnURL,
+				Error:     "unknown_or_invalid",
+				Otp:       false,
+				Email:     email,
 			}, w)
 			return
 		}
 		if errors.Is(user.ErrInvalidCredentials, err) {
-			a.view(r.Context(), a.loginTmpl, map[string]interface{}{
-				csrf.TemplateTag: csrf.TemplateField(r),
-				"returnUrl":      returnURL,
-				"error":          "unknown_or_invalid",
-				"otp":            false,
-				"email":          email,
+			a.view(r.Context(), a.loginTmpl, &signinViewModel{
+				CsrfToken: csrf.Token(r),
+				ReturnURL: returnURL,
+				Error:     "unknown_or_invalid",
+				Otp:       false,
+				Email:     email,
 			}, w)
 			return
 		}
-		a.view(r.Context(), a.loginTmpl, map[string]interface{}{
-			csrf.TemplateTag: csrf.TemplateField(r),
-			"returnUrl":      returnURL,
-			"error":          "unknown",
-			"otp":            false,
-			"email":          email,
+		a.view(r.Context(), a.loginTmpl, &signinViewModel{
+			CsrfToken: csrf.Token(r),
+			ReturnURL: returnURL,
+			Error:     "unknown",
+			Otp:       false,
+			Email:     email,
 		}, w)
 		//everything below here is unexepcted
 		a.log.Info("failed signin due to unexpected error", zap.Error(err))
@@ -131,9 +131,9 @@ func (a *AccountRessource) signinPage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.view(r.Context(), a.loginTmpl, map[string]interface{}{
-		"returnUrl":      returnURL,
-		"otp":            false,
-		csrf.TemplateTag: csrf.TemplateField(r),
+	a.view(r.Context(), a.loginTmpl, &signinViewModel{
+		ReturnURL: returnURL,
+		Otp:       false,
+		CsrfToken: csrf.Token(r),
 	}, w)
 }

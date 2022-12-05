@@ -109,7 +109,7 @@ func (t *TranslationRegistry) TranslatorFor(
 }
 
 func (t *TranslationRegistry) autoLoad() error {
-	matches, err := fs.Glob(t.dir, "templates/i18n/*.*.json")
+	matches, err := fs.Glob(t.dir, "*.*.json")
 	if err != nil {
 		t.log.Error("could not load i18n files", zap.Error(err))
 		return err

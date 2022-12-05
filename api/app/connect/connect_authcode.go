@@ -3,10 +3,11 @@ package connect
 import (
 	"errors"
 	"fmt"
-	"html/template"
 	"net/http"
 	"net/url"
 	"time"
+
+	"github.com/google/safehtml/template"
 
 	"github.com/eisenwinter/gotrxx/application"
 	"github.com/eisenwinter/gotrxx/authorization"

@@ -20,29 +20,29 @@ func (a *AccountRessource) sendInvite(w http.ResponseWriter, r *http.Request) {
 
 	email := r.FormValue("email")
 	if email == "" || !emailRegex.MatchString(email) {
-		a.view(r.Context(), a.inviteTmpl, map[string]interface{}{
-			csrf.TemplateTag: csrf.TemplateField(r),
-			"email":          email,
-			"error":          "invalid_email",
+		a.view(r.Context(), a.inviteTmpl, &sendInviteViewModel{
+			CsrfToken: csrf.Token(r),
+			Email:     email,
+			Error:     "invalid_email",
 		}, w)
 		return
 	}
 	err := a.userService.InviteUser(r.Context(), email)
 	if err != nil {
 		a.log.Error("could not invite user", zap.Error(err))
-		a.view(r.Context(), a.inviteTmpl, map[string]interface{}{
-			csrf.TemplateTag: csrf.TemplateField(r),
-			"error":          "unknown",
+		a.view(r.Context(), a.inviteTmpl, &sendInviteViewModel{
+			CsrfToken: csrf.Token(r),
+			Error:     "unknown",
 		}, w)
 
 		return
 	}
 
 	//successfull
-	a.view(r.Context(), a.inviteTmpl, map[string]interface{}{
-		csrf.TemplateTag:  csrf.TemplateField(r),
-		"successful":      true,
-		"success_message": "invite_sent",
+	a.view(r.Context(), a.inviteTmpl, &sendInviteViewModel{
+		CsrfToken:      csrf.Token(r),
+		Successful:     true,
+		SuccessMessage: "invite_sent",
 	}, w)
 }
 
@@ -57,7 +57,7 @@ func (a *AccountRessource) invitePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.view(r.Context(), a.inviteTmpl, map[string]interface{}{
-		csrf.TemplateTag: csrf.TemplateField(r),
+	a.view(r.Context(), a.inviteTmpl, &sendInviteViewModel{
+		CsrfToken: csrf.Token(r),
 	}, w)
 }
