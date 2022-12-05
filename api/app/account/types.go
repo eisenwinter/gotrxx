@@ -246,7 +246,7 @@ func (u *userPageViewModel) ViewData() map[string]interface{} {
 type fourOFourViewModel struct {
 }
 
-func (f *fourOFourViewModel) ViewData() map[string]interface{} {
+func (*fourOFourViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{}
 }
 
