@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.17](https://github.com/eisenwinter/gotrxx/compare/0.0.16...0.0.17) (2022-12-05)
+
+
+### Bug Fixes
+
+* loading external templates is working as intended now ([7c81907](https://github.com/eisenwinter/gotrxx/commit/7c81907e6c9dd17d26883b37b9f99f59a68aa597))
+* qr code showing again, enabling mfa requires reentering the password ([9a5e18b](https://github.com/eisenwinter/gotrxx/commit/9a5e18b181b6299837272274ee6323e3385f181e))
+* use safehtml over html/template, typed viewmodels instead of map[string]interface, fixed changed password ([bbb1421](https://github.com/eisenwinter/gotrxx/commit/bbb142103a15bfc6c659cc58fdcee9e5e1fc9f30))
+
 ## [0.0.16](https://github.com/eisenwinter/gotrxx/compare/0.0.15...0.0.16) (2022-12-04)
 
 
