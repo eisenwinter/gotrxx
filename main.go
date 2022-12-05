@@ -229,12 +229,22 @@ func initConfig(logger *zap.Logger) {
 		if err != nil {
 			logger.Fatal("Unable to open templates/email folder")
 		}
-		src := template.TrustedSourceFromConstant("templates")
+
+		src, err := template.TrustedSourceFromConstantDir(
+			`templates`,
+			template.TrustedSourceFromConstant(`pages`),
+			``,
+		)
+		if err != nil {
+			logger.Fatal("Unable to open templates/pages folder")
+		}
+
+		trustfs := template.TrustedFSFromTrustedSource(src)
 		cmd.FileSystemsConfig = &config.FileSystems{
 			StaticFolder: statics,
 			I18n:         i18n,
 			Email:        email,
-			Pages:        template.TrustedFSFromTrustedSource(src),
+			Pages:        trustfs,
 		}
 	} else {
 
@@ -250,11 +260,15 @@ func initConfig(logger *zap.Logger) {
 		if err != nil {
 			logger.Fatal("Unable to open templates/email folder")
 		}
+		pages, err := template.TrustedFSFromEmbed(templatePages).Sub(template.TrustedSourceFromConstant(`templates/pages`))
+		if err != nil {
+			logger.Fatal("Unable to open templates/pages folder")
+		}
 		cmd.FileSystemsConfig = &config.FileSystems{
 			StaticFolder: statics,
 			I18n:         i18n,
 			Email:        email,
-			Pages:        template.TrustedFSFromEmbed(templatePages),
+			Pages:        pages,
 		}
 	}
 

@@ -29,7 +29,17 @@ var listInvitesCommand = cobra.Command{
 			return
 		}
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
-		fmt.Fprintf(w, "%s\t%s\t%s\t%s\t%s\t%s\t%s \r\n", "ID", "Email", "Code", "ConsumedAt", "CreatedAt", "ExpiresAt", "SentAt")
+		fmt.Fprintf(
+			w,
+			"%s\t%s\t%s\t%s\t%s\t%s\t%s \r\n",
+			"ID",
+			"Email",
+			"Code",
+			"ConsumedAt",
+			"CreatedAt",
+			"ExpiresAt",
+			"SentAt",
+		)
 		formatDt := func(t *time.Time) string {
 			if t != nil {
 				return t.Format("2006-02-01")
@@ -41,7 +51,17 @@ var listInvitesCommand = cobra.Command{
 			if v.Email != nil {
 				e = *v.Email
 			}
-			fmt.Fprintf(w, "%d\t%s\t%s\t%s\t%s\t%s\t%s \r\n", v.ID, e, v.Code, formatDt(v.ConsumedAt), formatDt(&v.CreatedAt), formatDt(&v.ExpiresAt), formatDt(v.SentAt))
+			fmt.Fprintf(
+				w,
+				"%d\t%s\t%s\t%s\t%s\t%s\t%s \r\n",
+				v.ID,
+				e,
+				v.Code,
+				formatDt(v.ConsumedAt),
+				formatDt(&v.CreatedAt),
+				formatDt(&v.ExpiresAt),
+				formatDt(v.SentAt),
+			)
 		}
 		fmt.Fprintf(w, "------------------------------------------------- \r\n")
 		fmt.Fprintf(w, "%d entries loaded", total)

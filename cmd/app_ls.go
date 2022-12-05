@@ -30,9 +30,39 @@ var listApplicationsCommand = cobra.Command{
 			return
 		}
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
-		fmt.Fprintf(w, "%s\t%s\t%s\t%v\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s \r\n", "ID", "ClientID", "Name", "Confidentiality", "Type", "Status", "Scope", "Flows", "RedirectURIs", "LogoutURIs", "PKCE", "HasSecret")
+		fmt.Fprintf(
+			w,
+			"%s\t%s\t%s\t%v\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s \r\n",
+			"ID",
+			"ClientID",
+			"Name",
+			"Confidentiality",
+			"Type",
+			"Status",
+			"Scope",
+			"Flows",
+			"RedirectURIs",
+			"LogoutURIs",
+			"PKCE",
+			"HasSecret",
+		)
 		for _, v := range lst.Entries.([]*manage.ApplicationDTO) {
-			fmt.Fprintf(w, "%d\t%s\t%s\t%v\t%s\t%s\t%s\t%v\t%v\t%v\t%v\t%v \r\n", v.ID, v.ClientID, v.Name, v.Confidentiality, v.Type, v.Status, v.Scope, v.Flows, v.RedirectURIs, v.LogoutURIs, v.PKCE, v.HasSecret)
+			fmt.Fprintf(
+				w,
+				"%d\t%s\t%s\t%v\t%s\t%s\t%s\t%v\t%v\t%v\t%v\t%v \r\n",
+				v.ID,
+				v.ClientID,
+				v.Name,
+				v.Confidentiality,
+				v.Type,
+				v.Status,
+				v.Scope,
+				v.Flows,
+				v.RedirectURIs,
+				v.LogoutURIs,
+				v.PKCE,
+				v.HasSecret,
+			)
 		}
 
 		fmt.Fprintf(w, "------------------------------------------------- \r\n")

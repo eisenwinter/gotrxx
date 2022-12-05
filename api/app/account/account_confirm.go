@@ -22,7 +22,12 @@ func (a *AccountRessource) confirm(w http.ResponseWriter, r *http.Request) {
 	err := a.userService.ConfirmUser(r.Context(), confirmToken)
 	if err != nil {
 		if errors.Is(user.ErrEntityDoesNotExist, err) {
-			a.view(r.Context(), a.confirmTemplate, &confirmViewModel{Error: "does_not_exists_or_already_consumed"}, w)
+			a.view(
+				r.Context(),
+				a.confirmTemplate,
+				&confirmViewModel{Error: "does_not_exists_or_already_consumed"},
+				w,
+			)
 			return
 		}
 		a.log.Error("confirm user: unexpected error on conrfirm", zap.Error(err))

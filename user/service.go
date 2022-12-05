@@ -273,7 +273,11 @@ func (g *Service) register(
 func (g *Service) ConfirmUser(ctx context.Context, token string) error {
 	ok, id, err := g.store.ConfirmUser(ctx, token)
 	if err != nil {
-		g.log.Error("Could not confirm in data store", sanitize.UserInputString("token", token), zap.Error(err))
+		g.log.Error(
+			"Could not confirm in data store",
+			sanitize.UserInputString("token", token),
+			zap.Error(err),
+		)
 		return err
 	}
 	if !ok {

@@ -8,9 +8,16 @@ import (
 	"github.com/gorilla/csrf"
 )
 
+//
 //data:image/png;base64,
-var csrfTokenField = template.Must(template.New("csrfToken").Parse(`<input type="hidden" name="gorilla.csrf.Token" value="{{.}}">`))
-var qrCodeField = template.Must(template.New("csrfToken").Parse(`<img  width="256" height="256" src="{{.}}" />`))
+var csrfTokenField = template.Must(
+	template.New("csrfToken").
+		Parse(`<input type="hidden" name="gorilla.csrf.Token" value="{{.}}">`),
+)
+
+var qrCodeField = template.Must(
+	template.New("csrfToken").Parse(`<img  width="256" height="256" src="{{.}}" />`),
+)
 
 func csfrTokenTag(token string) safehtml.HTML {
 	field, err := csrfTokenField.ExecuteToHTML(token)

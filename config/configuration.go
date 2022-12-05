@@ -13,8 +13,8 @@ import (
 type ServerConfiguration struct {
 	Port               int
 	Address            string
-	CSRFToken          string `mapstructure:"csrf-token"     json:"-"`
-	LoadTemplateFolder bool   `mapstructure:"load-templates"`
+	CSRFToken          string `mapstructure:"csrf-token"           json:"-"`
+	LoadTemplateFolder bool   `mapstructure:"load-template-folder"`
 }
 
 // SMTPConfiguration contains the email settings

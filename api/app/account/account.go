@@ -442,7 +442,7 @@ func NewAccountRessource(log *zap.Logger,
 	fsConfig *config.FileSystems,
 	verifier *tokens.TokenVerifier) *AccountRessource {
 
-	loginTmpl, err := mustLoadTemplate(fsConfig.Pages, "templates/pages/signin.html", log)
+	loginTmpl, err := mustLoadTemplate(fsConfig.Pages, "signin.html", log)
 	if err != nil {
 		log.Fatal(
 			"unable to load required template file",
@@ -450,7 +450,7 @@ func NewAccountRessource(log *zap.Logger,
 			zap.Error(err),
 		)
 	}
-	signUpTmpl, err := mustLoadTemplate(fsConfig.Pages, "templates/pages/signup.html", log)
+	signUpTmpl, err := mustLoadTemplate(fsConfig.Pages, "signup.html", log)
 	if err != nil {
 		log.Fatal(
 			"unable to load required template file",
@@ -458,7 +458,7 @@ func NewAccountRessource(log *zap.Logger,
 			zap.Error(err),
 		)
 	}
-	userPageTmpl, err := mustLoadTemplate(fsConfig.Pages, "templates/pages/user.html", log)
+	userPageTmpl, err := mustLoadTemplate(fsConfig.Pages, "user.html", log)
 	if err != nil {
 		log.Fatal(
 			"unable to load required template file",
@@ -466,7 +466,7 @@ func NewAccountRessource(log *zap.Logger,
 			zap.Error(err),
 		)
 	}
-	confirmTemplate, err := mustLoadTemplate(fsConfig.Pages, "templates/pages/confirm.html", log)
+	confirmTemplate, err := mustLoadTemplate(fsConfig.Pages, "confirm.html", log)
 	if err != nil {
 		log.Fatal(
 			"unable to load required template file",
@@ -476,7 +476,7 @@ func NewAccountRessource(log *zap.Logger,
 	}
 	recoverTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
-		"templates/pages/recover_password.html",
+		"recover_password.html",
 		log,
 	)
 	if err != nil {
@@ -488,7 +488,7 @@ func NewAccountRessource(log *zap.Logger,
 	}
 	requestRecoverTmpl, err := mustLoadTemplate(
 		fsConfig.Pages,
-		"templates/pages/request_password_recovery.html",
+		"request_password_recovery.html",
 		log,
 	)
 	if err != nil {
@@ -498,7 +498,7 @@ func NewAccountRessource(log *zap.Logger,
 			zap.Error(err),
 		)
 	}
-	errorTemplate, err := mustLoadTemplate(fsConfig.Pages, "templates/pages/error.html", log)
+	errorTemplate, err := mustLoadTemplate(fsConfig.Pages, "error.html", log)
 	if err != nil {
 		log.Fatal(
 			"unable to load required template file",
@@ -508,7 +508,7 @@ func NewAccountRessource(log *zap.Logger,
 	}
 	changePasswordTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
-		"templates/pages/change_password.html",
+		"change_password.html",
 		log,
 	)
 	if err != nil {
@@ -520,7 +520,7 @@ func NewAccountRessource(log *zap.Logger,
 	}
 	changeEmailTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
-		"templates/pages/change_email.html",
+		"change_email.html",
 		log,
 	)
 	if err != nil {
@@ -531,7 +531,7 @@ func NewAccountRessource(log *zap.Logger,
 		)
 	}
 
-	changeMfaTemplate, err := mustLoadTemplate(fsConfig.Pages, "templates/pages/change_mfa.html", log)
+	changeMfaTemplate, err := mustLoadTemplate(fsConfig.Pages, "change_mfa.html", log)
 	if err != nil {
 		log.Fatal(
 			"unable to load required template file",
@@ -542,7 +542,7 @@ func NewAccountRessource(log *zap.Logger,
 
 	provisionMfaTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
-		"templates/pages/provision_mfa.html",
+		"provision_mfa.html",
 		log,
 	)
 	if err != nil {
@@ -553,7 +553,7 @@ func NewAccountRessource(log *zap.Logger,
 		)
 	}
 
-	inviteTemplate, err := mustLoadTemplate(fsConfig.Pages, "templates/pages/invite.html", log)
+	inviteTemplate, err := mustLoadTemplate(fsConfig.Pages, "invite.html", log)
 	if err != nil {
 		log.Fatal(
 			"unable to load required template file",
@@ -562,7 +562,7 @@ func NewAccountRessource(log *zap.Logger,
 		)
 	}
 
-	fourOFour, err := mustLoadTemplate(fsConfig.Pages, "templates/pages/404.html", log)
+	fourOFour, err := mustLoadTemplate(fsConfig.Pages, "404.html", log)
 	if err != nil {
 		log.Fatal(
 			"unable to load required template file",

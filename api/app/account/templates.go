@@ -6,7 +6,11 @@ import (
 	"go.uber.org/zap"
 )
 
-func mustLoadTemplate(fs template.TrustedFS, location string, logger *zap.Logger) (*template.Template, error) {
+func mustLoadTemplate(
+	fs template.TrustedFS,
+	location string,
+	logger *zap.Logger,
+) (*template.Template, error) {
 
 	template, err := template.ParseFS(fs, location)
 	if err != nil {
