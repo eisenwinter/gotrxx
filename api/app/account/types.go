@@ -1,15 +1,30 @@
 package account
 
 import (
+	"fmt"
+
 	"github.com/google/safehtml"
 	"github.com/google/safehtml/template"
 	"github.com/gorilla/csrf"
 )
 
+//data:image/png;base64,
 var csrfTokenField = template.Must(template.New("csrfToken").Parse(`<input type="hidden" name="gorilla.csrf.Token" value="{{.}}">`))
+var qrCodeField = template.Must(template.New("csrfToken").Parse(`<img  width="256" height="256" src="{{.}}" />`))
 
 func csfrTokenTag(token string) safehtml.HTML {
 	field, err := csrfTokenField.ExecuteToHTML(token)
+	if err != nil {
+		return template.MustParseAndExecuteToHTML(``)
+	}
+	return field
+}
+
+func qrCodeTag(qr string) safehtml.HTML {
+	if qr == "" {
+		return template.MustParseAndExecuteToHTML(``)
+	}
+	field, err := qrCodeField.ExecuteToHTML(fmt.Sprintf("data:image/png;base64,%s", qr))
 	if err != nil {
 		return template.MustParseAndExecuteToHTML(``)
 	}
@@ -136,9 +151,10 @@ func (s *setupMFAViewModel) ViewData() map[string]interface{} {
 		"successful":      s.Successful,
 		"success_message": s.SuccessMessage,
 		"error":           s.Error,
-		"qr":              s.QR,
+		"qr":              qrCodeTag(s.QR),
 		"secret":          s.Secret,
 		"recovery_key":    s.RecoveryKey,
+		"password":        "",
 	}
 }
 

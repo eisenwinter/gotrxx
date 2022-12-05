@@ -41,6 +41,16 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		a.log.Error("unable to parse user id", zap.Error(err))
 	}
+	password := r.FormValue("password")
+	err = a.userSignIn.Validate(r.Context(), id, password)
+	if err != nil {
+		a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
+			CsrfToken: csrf.Token(r),
+			Error:     "invalid_password",
+		}, w)
+
+		return
+	}
 
 	secret, uri, err := a.userService.ProvisionMFA(r.Context(), id)
 	if err != nil {
@@ -81,6 +91,7 @@ func (a *AccountRessource) setMFA(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/account/signin", http.StatusFound)
 		return
 	}
+
 	err := r.ParseForm()
 	if err != nil {
 		a.log.Error("setMFA: ParseForm failed", zap.Error(err))
@@ -92,6 +103,7 @@ func (a *AccountRessource) setMFA(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/account/signin", http.StatusFound)
 		return
 	}
+
 	secret := r.FormValue("secret")
 	recoveryKey, err := a.userService.EnableMFA(r.Context(), id, secret)
 	if err != nil {

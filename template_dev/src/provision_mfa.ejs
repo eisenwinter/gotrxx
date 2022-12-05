@@ -24,7 +24,9 @@ title: '{{ .i18n.T "title" }}'
             <legend>{{ .i18n.T "title"}}</legend>
             {{ if .qr }}
             <div class="field">
-              <img class="m-0-a" width="256" height="256" src="data:image/png;base64,{{ .qr }}" />
+                <figure class="m-0-a">
+                    {{ .qr }}
+                </figure>
             </div>
             {{end}}
             <input type="hidden" required name="secret" value="{{.secret}}">
