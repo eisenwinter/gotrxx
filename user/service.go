@@ -8,11 +8,10 @@ import (
 
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/db"
+	"github.com/eisenwinter/gotrxx/db/tables"
 	"github.com/eisenwinter/gotrxx/events/event"
 	"github.com/eisenwinter/gotrxx/generator"
 	"github.com/eisenwinter/gotrxx/i18n"
-	"github.com/eisenwinter/gotrxx/mailing"
-	"github.com/eisenwinter/gotrxx/manage"
 	"github.com/eisenwinter/gotrxx/sanitize"
 	"github.com/google/uuid"
 	"github.com/xlzd/gotp"
@@ -33,12 +32,75 @@ var (
 	ErrPasswordGuidelines      = errors.New("password doesnt match password guidlines")
 )
 
-func New(store *db.DataStore,
+// Mailer handles sending mails
+type Mailer interface {
+	SendPasswordRecoverMail(email string, code string, language string) error
+	SendConfirmMail(email string, code string, language string) error
+}
+
+// UserStorer is a datasource providing and safing user information in a persistent way
+type UserStorer interface {
+	UserByID(ctx context.Context, id uuid.UUID) (*db.UserData, error)
+	InviteData(ctx context.Context, inviteCode string) (*db.UserInviteData, error)
+	GrantAuthorization(
+		ctx context.Context,
+		applicationId int,
+		userID uuid.UUID,
+		properties tables.MapStructure,
+	) (uuid.UUID, error)
+	ConsumeInvite(ctx context.Context, inviteCode string) error
+	IsRegistred(ctx context.Context, email string) (bool, error)
+	ConfirmTokenExists(ctx context.Context, token string) (bool, error)
+	IsUserInRole(ctx context.Context, id uuid.UUID, role string) (bool, error)
+	SetEmail(ctx context.Context, id uuid.UUID, email string) (bool, error)
+	SetPassword(
+		ctx context.Context,
+		id uuid.UUID,
+		passwordHash string,
+	) (bool, error)
+	SetRecoveryToken(
+		ctx context.Context,
+		id uuid.UUID,
+		recoveryToken string,
+	) (bool, error)
+	ConsumeRecoveryToken(
+		ctx context.Context,
+		id uuid.UUID,
+		recoveryToken string,
+	) (bool, error)
+	DisableMFA(ctx context.Context, id uuid.UUID) (bool, error)
+	EnableMFA(
+		ctx context.Context,
+		id uuid.UUID,
+		userSecret string,
+		userRecoveryKey string,
+	) (bool, error)
+	IDFromEmail(ctx context.Context, email string) (bool, uuid.UUID, error)
+	ConfirmUser(ctx context.Context, confirmToken string) (bool, uuid.UUID, error)
+}
+
+// UserManager allows to manage user data
+type UserManager interface {
+	AddUserToRole(ctx context.Context, id uuid.UUID, role string) error
+	InsertUser(ctx context.Context,
+		email string,
+		password string,
+		phone *string,
+		confirmToken *string) (uuid.UUID, error)
+	InviteUser(
+		ctx context.Context,
+		email *string,
+		roles []string,
+		appIds []int,
+	) (generator.RandomTokenType, error)
+}
+
+func New(store UserStorer,
 	logger *zap.Logger,
 	cfg *config.Configuration,
-	mailer *mailing.Mailer,
+	mailer Mailer,
 	dispatcher Dispatcher,
-	manager *manage.UserService) *Service {
+	manager UserManager) *Service {
 	return &Service{
 		store:      store,
 		log:        logger,
@@ -50,12 +112,12 @@ func New(store *db.DataStore,
 }
 
 type Service struct {
-	store      *db.DataStore
+	store      UserStorer
 	log        *zap.Logger
 	cfg        *config.Configuration
-	mailer     *mailing.Mailer
+	mailer     Mailer
 	dispatcher Dispatcher
-	manager    *manage.UserService
+	manager    UserManager
 }
 
 func (g *Service) currentLocale(ctx context.Context) string {

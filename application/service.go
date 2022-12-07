@@ -12,13 +12,22 @@ import (
 // ErrNotFound indicates the requested entity was not found
 var ErrNotFound = errors.New("application not found")
 
+// ApplicationStorer handles access to the underlying datasource
+type ApplicationStorer interface {
+	ApplicationByID(ctx context.Context, id int) (*tables.ApplicationTable, error)
+	ApplicationByClientID(
+		ctx context.Context,
+		clientID string,
+	) (*tables.ApplicationTable, error)
+}
+
 type Service struct {
 	log   *zap.Logger
-	store *db.DataStore
+	store ApplicationStorer
 }
 
 func NewApplicationSevice(log *zap.Logger,
-	store *db.DataStore) *Service {
+	store ApplicationStorer) *Service {
 	return &Service{
 		log:   log,
 		store: store,

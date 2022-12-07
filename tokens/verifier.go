@@ -14,7 +14,7 @@ import (
 	"go.uber.org/zap"
 )
 
-type Fetcher interface {
+type TokenFetcher interface {
 	CommonTokenDetails(
 		ctx context.Context,
 		tokenType string,
@@ -26,7 +26,7 @@ type Fetcher interface {
 
 func NewTokenVerifier(log *zap.Logger,
 	issuer *TokenIssuer,
-	loader Fetcher,
+	loader TokenFetcher,
 	authService *authorization.Service) *TokenVerifier {
 	return &TokenVerifier{
 		log:         log,
@@ -39,7 +39,7 @@ func NewTokenVerifier(log *zap.Logger,
 type TokenVerifier struct {
 	log         *zap.Logger
 	issuer      *TokenIssuer
-	loader      Fetcher
+	loader      TokenFetcher
 	authService *authorization.Service
 }
 
