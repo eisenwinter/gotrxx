@@ -7,7 +7,6 @@ import (
 	"strings"
 
 	"github.com/eisenwinter/gotrxx/config"
-	"github.com/eisenwinter/gotrxx/manage"
 	"github.com/eisenwinter/gotrxx/sanitize"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/go-chi/chi/v5"
@@ -19,13 +18,14 @@ import (
 
 // ManagementRessource habours the headless admin endpoints
 type ManagementRessource struct {
-	log           *zap.Logger
-	cfg           config.Configuration
-	userService   *manage.UserService
-	authService   *manage.AuthorizationService
-	appService    *manage.ApplicationService
-	roleService   *manage.RoleService
-	inviteService *manage.InviteService
+	log *zap.Logger
+	cfg config.Configuration
+
+	userService   UserService
+	authService   AuthorizationService
+	appService    ApplicationService
+	roleService   Lister
+	inviteService Lister
 }
 
 func (m *ManagementRessource) Router() *chi.Mux {
@@ -125,11 +125,11 @@ type roleChecker interface {
 
 func NewManagementRessource(logger *zap.Logger,
 	cfg config.Configuration,
-	userService *manage.UserService,
-	appService *manage.ApplicationService,
-	authService *manage.AuthorizationService,
-	roleService *manage.RoleService,
-	inviteService *manage.InviteService) *ManagementRessource {
+	userService UserService,
+	appService ApplicationService,
+	authService AuthorizationService,
+	roleService Lister,
+	inviteService Lister) *ManagementRessource {
 	return &ManagementRessource{
 		log:           logger,
 		cfg:           cfg,
