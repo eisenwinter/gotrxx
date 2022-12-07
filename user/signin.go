@@ -21,18 +21,25 @@ type Dispatcher interface {
 	Dispatch(event events.Event)
 }
 
+// LoginStorer handles the datastore for login data
 type LoginStorer interface {
+	UserByEmail(ctx context.Context, email string) (*db.UserData, error)
+	UserByID(ctx context.Context, id uuid.UUID) (*db.UserData, error)
+	SetOTPPending(ctx context.Context, id uuid.UUID, pending bool) error
+	SetFailureCount(ctx context.Context, id uuid.UUID, count int) error
 }
 
+// SigninService manages all tasks related to user sign ins
 type SigninService struct {
-	store      *db.DataStore
+	store      LoginStorer
 	log        *zap.Logger
 	cfg        *config.BehaviourConfiguration
 	dispatcher Dispatcher
 	userLocker UserLocker
 }
 
-func NewSignInService(store *db.DataStore,
+// NewSignInService returns a new signin service
+func NewSignInService(store LoginStorer,
 	log *zap.Logger,
 	cfg *config.BehaviourConfiguration,
 	dispatcher Dispatcher,
