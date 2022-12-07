@@ -6,7 +6,6 @@ import (
 	"net/http"
 
 	"github.com/eisenwinter/gotrxx/config"
-	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
@@ -17,7 +16,7 @@ import (
 type MetaRessource struct {
 	log    *zap.Logger
 	cfg    *config.BehaviourConfiguration
-	issuer *tokens.TokenIssuer
+	issuer JwkSupplier
 }
 
 func (m *MetaRessource) Router() *chi.Mux {
@@ -86,7 +85,7 @@ func (m *MetaRessource) openidConfiguration(w http.ResponseWriter, r *http.Reque
 func NewMetaRessource(
 	log *zap.Logger,
 	cfg *config.BehaviourConfiguration,
-	issuer *tokens.TokenIssuer,
+	issuer JwkSupplier,
 ) *MetaRessource {
 	return &MetaRessource{log: log, cfg: cfg, issuer: issuer}
 }
