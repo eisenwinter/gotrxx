@@ -14,7 +14,6 @@ import (
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
@@ -25,7 +24,6 @@ type ConnnectRessource struct {
 	rotator    *tokens.TokenRotator
 	verifier   *tokens.TokenVerifier
 	userSignIn *user.SigninService
-	validate   *validator.Validate
 
 	appService *application.Service
 	autService *authorization.Service
@@ -381,14 +379,12 @@ func NewConnnectRessource(logger *zap.Logger,
 	issuer *tokens.TokenIssuer,
 	rotator *tokens.TokenRotator,
 	userSignIn *user.SigninService,
-	validator *validator.Validate,
 	authService *authorization.Service,
 	appService *application.Service,
 	verifier *tokens.TokenVerifier) *ConnnectRessource {
 	return &ConnnectRessource{logger: logger,
 		issuer:     issuer,
 		userSignIn: userSignIn,
-		validate:   validator,
 		rotator:    rotator,
 		autService: authService,
 		appService: appService,

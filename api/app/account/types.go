@@ -8,8 +8,6 @@ import (
 	"github.com/gorilla/csrf"
 )
 
-//
-//data:image/png;base64,
 var csrfTokenField = template.Must(
 	template.New("csrfToken").
 		Parse(`<input type="hidden" name="gorilla.csrf.Token" value="{{.}}">`),

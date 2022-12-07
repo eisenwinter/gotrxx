@@ -20,14 +20,12 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/jwtauth/v5"
-	"github.com/go-playground/validator/v10"
 
 	ar "github.com/eisenwinter/gotrxx/api/app/account"
 
 	"go.uber.org/zap"
 )
 
-var validate *validator.Validate
 var tokenAuth *jwtauth.JWTAuth
 
 func compose(logger *zap.Logger,
@@ -46,17 +44,7 @@ func compose(logger *zap.Logger,
 	manageRoleService *manage.RoleService,
 	manageInviteService *manage.InviteService,
 	verifier *tokens.TokenVerifier) (*chi.Mux, error) {
-	validate = validator.New()
 
-	err := validate.RegisterValidation("minpwd", func(fl validator.FieldLevel) bool {
-		if cfg.Behaviour.PasswordMinLength <= 0 {
-			return true
-		}
-		return len(fl.Field().String()) >= cfg.Behaviour.PasswordMinLength
-	})
-	if err != nil {
-		logger.Error("Could not create mindpwd validation", zap.Error(err))
-	}
 	// use same settings as issuer (duh)
 	tokenAuth = jwtauth.New(issuer.Alg(), issuer.PrivateKey(), issuer.PublicKey())
 
@@ -90,7 +78,6 @@ func compose(logger *zap.Logger,
 		issuer,
 		rotator,
 		signInService,
-		validate,
 		authService,
 		appService,
 		verifier,
