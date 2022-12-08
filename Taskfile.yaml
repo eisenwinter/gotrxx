@@ -115,6 +115,12 @@ tasks:
     cmds:
       - go test -v ./...
 
+  test:coverage:
+    desc: "Runs unit tests"
+    cmds:
+      - go test -v  -coverprofile=coverage.out ./...
+      - go tool cover -html=coverage.out
+
   test:integration:sqlite:
     desc: "Integration tests for the sqlite db"
     cmds:
