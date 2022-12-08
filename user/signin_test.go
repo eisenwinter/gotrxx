@@ -319,6 +319,71 @@ func TestInitializeMFNotEnabled(t *testing.T) {
 	assert.ErrorIs(err, ErrEntityOperationForbidden)
 }
 
+func TestSignInInvalidPassword(t *testing.T) {
+	assert := assert.New(t)
+	dataStore := mocks.NewLoginStorer(t)
+	logger := zaptest.NewLogger(t)
+	dispatcher := mocks.NewDispatcher(t)
+	locker := mocks.NewUserLocker(t)
+	service := NewSignInService(
+		dataStore,
+		logger,
+		&config.BehaviourConfiguration{},
+		dispatcher,
+		locker,
+	)
+	ctx := context.Background()
+	email := "test@example.com"
+	password := "test"
+	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 1)
+	confirmed := time.Now()
+	ud := &db.UserData{
+		Email:          email,
+		EmailConfirmed: &confirmed,
+		TwoFactor:      false,
+		PasswordHash:   hash,
+	}
+	dataStore.On("SetFailureCount", ctx, mock.Anything, mock.Anything).Return(nil)
+	dataStore.On("UserByEmail", ctx, email).Return(ud, nil)
+	_, err := service.SignIn(ctx, email, "somethingelse")
+	assert.NotNil(err)
+	assert.ErrorIs(err, ErrInvalidCredentials)
+}
+
+func TestSignInLockoutThresholdCrossed(t *testing.T) {
+	assert := assert.New(t)
+	dataStore := mocks.NewLoginStorer(t)
+	logger := zaptest.NewLogger(t)
+	dispatcher := mocks.NewDispatcher(t)
+	locker := mocks.NewUserLocker(t)
+	service := NewSignInService(
+		dataStore,
+		logger,
+		&config.BehaviourConfiguration{
+			AutoLockoutCount: 10,
+		},
+		dispatcher,
+		locker,
+	)
+	ctx := context.Background()
+	email := "test@example.com"
+	password := "test"
+	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 1)
+	confirmed := time.Now()
+	ud := &db.UserData{
+		Email:               email,
+		EmailConfirmed:      &confirmed,
+		TwoFactor:           false,
+		PasswordHash:        hash,
+		CurrentFailureCount: 10,
+	}
+	locker.On("LockUser", ctx, mock.Anything, mock.Anything).Return(nil)
+	dataStore.On("UserByEmail", ctx, email).Return(ud, nil)
+	_, err := service.SignIn(ctx, email, "somethingelse")
+	assert.NotNil(err)
+	assert.ErrorIs(err, ErrEntityOperationForbidden)
+}
+
 func TestSignIn(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
