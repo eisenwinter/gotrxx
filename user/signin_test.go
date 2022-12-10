@@ -335,7 +335,7 @@ func TestSignInInvalidPassword(t *testing.T) {
 	ctx := context.Background()
 	email := "test@example.com"
 	password := "test"
-	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 1)
+	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
 	confirmed := time.Now()
 	ud := &db.UserData{
 		Email:          email,
@@ -368,7 +368,7 @@ func TestSignInLockoutThresholdCrossed(t *testing.T) {
 	ctx := context.Background()
 	email := "test@example.com"
 	password := "test"
-	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 1)
+	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
 	confirmed := time.Now()
 	ud := &db.UserData{
 		Email:               email,
@@ -400,7 +400,7 @@ func TestSignIn(t *testing.T) {
 	ctx := context.Background()
 	email := "test@example.com"
 	password := "test"
-	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 1)
+	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
 	confirmed := time.Now()
 	ud := &db.UserData{
 		Email:          email,
@@ -431,7 +431,7 @@ func TestSignInMFAInvalidOTP(t *testing.T) {
 	ctx := context.Background()
 	email := "test@example.com"
 	password := "test"
-	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 1)
+	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
 	otp := "test"
 	confirmed := time.Now()
 	ud := &db.UserData{
@@ -464,7 +464,7 @@ func TestSignInMFA(t *testing.T) {
 	ctx := context.Background()
 	email := "test@example.com"
 	password := "test"
-	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 1)
+	hash, _ := bcrypt.GenerateFromPassword([]byte(password), 10)
 	confirmed := time.Now()
 	secret := gotp.RandomSecret(64)
 	ud := &db.UserData{
