@@ -41,7 +41,7 @@ type AuthorizationService interface {
 	) error
 }
 
-// AuthorizationService enables managing applications
+// ApplicationService enables managing applications
 type ApplicationService interface {
 	Lister
 	WithActiveUserAuthorizations(
@@ -100,7 +100,7 @@ type ApplicationService interface {
 	SetSecret(ctx context.Context, clientID string, secret string) error
 }
 
-// AuthorizationService enables managing users
+// UserService enables managing users
 type UserService interface {
 	Lister
 	InviteUser(
