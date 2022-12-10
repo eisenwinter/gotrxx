@@ -43,18 +43,21 @@ type AccountRessource struct {
 	mfaSetupTmpl           *template.Template
 	inviteTmpl             *template.Template
 
-	log         *zap.Logger
-	userSignIn  *user.SigninService
-	userService *user.Service
+	registry *i18n.TranslationRegistry
 
-	cfg        *config.BehaviourConfiguration
-	serverCfg  *config.ServerConfiguration
-	autService *authorization.Service
-	issuer     *tokens.TokenIssuer
-	verifier   *tokens.TokenVerifier
-	registry   *i18n.TranslationRegistry
-	rotator    *tokens.TokenRotator
-	statics    fs.FS
+	log         *zap.Logger
+	userSignIn  SignIner
+	userService UserService
+	autService  AuthorizationService
+
+	cfg       *config.BehaviourConfiguration
+	serverCfg *config.ServerConfiguration
+
+	issuer   TokenIssuer
+	verifier TokenVerifier
+	rotator  TokenRotator
+
+	statics fs.FS
 }
 
 func (a *AccountRessource) Router() *chi.Mux {
@@ -431,16 +434,16 @@ func sanitizeReturnURL(returnURL string, fallback string) string {
 }
 
 func NewAccountRessource(log *zap.Logger,
-	userSignIn *user.SigninService,
+	userSignIn SignIner,
 	cfg *config.BehaviourConfiguration,
-	userService *user.Service,
-	autService *authorization.Service,
-	issuer *tokens.TokenIssuer,
+	userService UserService,
+	autService AuthorizationService,
+	issuer TokenIssuer,
 	registry *i18n.TranslationRegistry,
-	rotator *tokens.TokenRotator,
+	rotator TokenRotator,
 	serverCfg *config.ServerConfiguration,
 	fsConfig *config.FileSystems,
-	verifier *tokens.TokenVerifier) *AccountRessource {
+	verifier TokenVerifier) *AccountRessource {
 
 	loginTmpl, err := mustLoadTemplate(fsConfig.Pages, "signin.html", log)
 	if err != nil {

@@ -17,7 +17,6 @@ This is an overview of all the used packages and their licensing.
 |github.com/go-mail/mail|https://github.com/go-mail/mail/blob/v2.3.1/LICENSE|MIT    |
 |github.com/go-playground/locales|https://github.com/go-playground/locales/blob/v0.14.0/LICENSE|MIT    |
 |github.com/go-playground/universal-translator|https://github.com/go-playground/universal-translator/blob/v0.18.0/LICENSE|MIT    |
-|github.com/go-playground/validator/v10|https://github.com/go-playground/validator/blob/v10.11.1/LICENSE|MIT    |
 |github.com/go-sql-driver/mysql|https://github.com/go-sql-driver/mysql/blob/v1.6.0/LICENSE|MPL-2.0|
 |github.com/google/uuid|https://github.com/google/uuid/blob/v1.3.0/LICENSE|BSD-3-Clause|
 |github.com/gorilla/csrf|https://github.com/gorilla/csrf/blob/v1.7.1/LICENSE|BSD-3-Clause|

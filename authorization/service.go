@@ -23,6 +23,30 @@ var (
 	ErrNotFound error = errors.New("requested entity not found")
 )
 
+// AuthorizationStorer handles the datastore for the authorizations
+type AuthorizationStorer interface {
+	ActiveAuthorizationByCommonToken(
+		ctx context.Context,
+		tokenType string,
+		token string,
+	) (*tables.AuthorizationTable, error)
+	ActiveAuthorizationByUserAndClientID(
+		ctx context.Context,
+		clientID string,
+		userID uuid.UUID,
+	) (*tables.AuthorizationTable, error)
+	GrantAuthorization(
+		ctx context.Context,
+		applicationId int,
+		userID uuid.UUID,
+		properties tables.MapStructure,
+	) (uuid.UUID, error)
+	AuthorizationByID(
+		ctx context.Context,
+		id uuid.UUID,
+	) (*tables.AuthorizationTable, error)
+}
+
 type ApplicationSupplier interface {
 	ApplicationByID(ctx context.Context, id int) (*application.Application, error)
 	ApplicationByClientID(ctx context.Context, clientID string) (*application.Application, error)
@@ -30,13 +54,13 @@ type ApplicationSupplier interface {
 
 type Service struct {
 	log        *zap.Logger
-	store      *db.DataStore
+	store      AuthorizationStorer
 	dispatcher *events.Dispatcher
 	supplier   ApplicationSupplier
 }
 
 func NewAuthorizationService(log *zap.Logger,
-	store *db.DataStore,
+	store AuthorizationStorer,
 	dispatcher *events.Dispatcher,
 	supplier ApplicationSupplier) *Service {
 	return &Service{

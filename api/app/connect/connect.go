@@ -5,30 +5,26 @@ import (
 	"net/http"
 
 	"github.com/eisenwinter/gotrxx/api/auth"
-	"github.com/eisenwinter/gotrxx/application"
-	"github.com/eisenwinter/gotrxx/authorization"
 	"github.com/eisenwinter/gotrxx/sanitize"
-	"github.com/eisenwinter/gotrxx/tokens"
-	"github.com/eisenwinter/gotrxx/user"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 )
 
 type ConnnectRessource struct {
-	logger     *zap.Logger
-	issuer     *tokens.TokenIssuer
-	rotator    *tokens.TokenRotator
-	verifier   *tokens.TokenVerifier
-	userSignIn *user.SigninService
-	validate   *validator.Validate
+	logger *zap.Logger
 
-	appService *application.Service
-	autService *authorization.Service
+	issuer   TokenIssuer
+	rotator  TokenRotator
+	verifier TokenVerifier
+
+	userSignIn SignIner
+
+	appService ApplicationToClientIDMapper
+	autService Authorizer
 }
 
 // https://www.oauth.com/oauth2-servers/access-tokens/password-grant/ gonna be removed
@@ -378,17 +374,15 @@ func validateRequiredField(field string, name string, w http.ResponseWriter,
 }
 
 func NewConnnectRessource(logger *zap.Logger,
-	issuer *tokens.TokenIssuer,
-	rotator *tokens.TokenRotator,
-	userSignIn *user.SigninService,
-	validator *validator.Validate,
-	authService *authorization.Service,
-	appService *application.Service,
-	verifier *tokens.TokenVerifier) *ConnnectRessource {
+	issuer TokenIssuer,
+	rotator TokenRotator,
+	userSignIn SignIner,
+	authService Authorizer,
+	appService ApplicationToClientIDMapper,
+	verifier TokenVerifier) *ConnnectRessource {
 	return &ConnnectRessource{logger: logger,
 		issuer:     issuer,
 		userSignIn: userSignIn,
-		validate:   validator,
 		rotator:    rotator,
 		autService: authService,
 		appService: appService,
