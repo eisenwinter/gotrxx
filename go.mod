@@ -24,7 +24,6 @@ require (
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e
 	github.com/spf13/cobra v1.6.1
 	github.com/spf13/viper v1.14.0
-	github.com/steinfletcher/apitest v1.5.14
 	github.com/stretchr/testify v1.8.1
 	github.com/xlzd/gotp v0.1.0
 	go.uber.org/zap v1.23.0
