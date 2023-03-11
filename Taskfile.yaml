@@ -36,7 +36,7 @@ tasks:
   build:
     desc: "build the compiled binary"
     cmds:
-      - go build -v  -ldflags "-X 'main.Version=head' -X 'main.BuildTime={{now | date "2006-01-02"}}' -X 'main.GitCommit={{.GIT_COMMIT}}'" -o bin/{{.EXE}}
+      - go build -v  -ldflags "-s -w -X 'main.Version=head' -X 'main.BuildTime={{now | date "2006-01-02"}}' -X 'main.GitCommit={{.GIT_COMMIT}}'" -o bin/{{.EXE}}
     vars:
       GIT_COMMIT:
         sh: git log -n 1 --format=%h
