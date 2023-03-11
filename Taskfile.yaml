@@ -40,6 +40,12 @@ tasks:
     vars:
       GIT_COMMIT:
         sh: git log -n 1 --format=%h
+
+  build:container:
+    desc: "build the docker container"
+    cmds:
+      - docker build -t ghcr.io/eisenwinter/gotrxx:dev .
+
   assets:sass:
     desc: "Rebuilds the sass unminified"
     cmds:
