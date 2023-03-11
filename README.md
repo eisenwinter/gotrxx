@@ -59,7 +59,7 @@ version of netlify CMS. And things did not go as I wanted. Fast-forward - we are
 
 ### Building from source
 
-gotrxx is written and tested against Go 1.18+
+gotrxx is written and tested against Go 1.19+
 
 ```
 git clone https://github.com/eisenwinter/gotrxx.git
