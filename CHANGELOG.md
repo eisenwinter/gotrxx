@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.18](https://github.com/eisenwinter/gotrxx/compare/0.0.17...0.0.18) (2023-03-11)
+
+
+### Bug Fixes
+
+* added listeners for UserSignedInByToken, RoleCreated, RoleDeleted events ([5f357d5](https://github.com/eisenwinter/gotrxx/commit/5f357d5d6e0d40920ab83475dcc8055df7df8afa))
+
 ## [0.0.17](https://github.com/eisenwinter/gotrxx/compare/0.0.16...0.0.17) (2022-12-05)
 
 
