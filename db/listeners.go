@@ -115,6 +115,18 @@ func BootstrapListeners(store Auditor, log *zap.Logger) []events.EventListener {
 			log:   log,
 			store: store,
 		},
+		&userSignedInByTokenListener{
+			log:   log,
+			store: store,
+		},
+		&roleCreatedListener{
+			log:   log,
+			store: store,
+		},
+		&roleDeletedListener{
+			log:   log,
+			store: store,
+		},
 	}
 }
 
@@ -676,6 +688,67 @@ func (l *applicationPurgeListener) Handle(ev events.Event) error {
 	e := ev.(*event.AllRetiredApplicationsPurged)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"affected_client_ids": e.AffectedClientIDs,
+	})
+	if err != nil {
+		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+	}
+	return nil
+}
+
+type userSignedInByTokenListener struct {
+	store Auditor
+	log   *zap.Logger
+}
+
+func (*userSignedInByTokenListener) ForEvent() events.EventName {
+	return event.UserSignedInByTokenEvent
+}
+
+func (l *userSignedInByTokenListener) Handle(ev events.Event) error {
+	e := ev.(*event.UserSignedInByToken)
+	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
+		"user_id":    e.UserID.String(),
+		"token_type": e.TokenType,
+	})
+	if err != nil {
+		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+	}
+	return nil
+}
+
+type roleCreatedListener struct {
+	store Auditor
+	log   *zap.Logger
+}
+
+func (*roleCreatedListener) ForEvent() events.EventName {
+	return event.RoleCreatedEvent
+}
+
+func (l *roleCreatedListener) Handle(ev events.Event) error {
+	e := ev.(*event.RoleCreated)
+	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
+		"role": e.Role,
+	})
+	if err != nil {
+		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+	}
+	return nil
+}
+
+type roleDeletedListener struct {
+	store Auditor
+	log   *zap.Logger
+}
+
+func (*roleDeletedListener) ForEvent() events.EventName {
+	return event.RoleDeletedEvent
+}
+
+func (l *roleDeletedListener) Handle(ev events.Event) error {
+	e := ev.(*event.RoleDeleted)
+	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
+		"role": e.Role,
 	})
 	if err != nil {
 		l.log.Warn("Could not persist event to audit log", zap.Error(err))
