@@ -75,6 +75,7 @@ func compose(logger *zap.Logger,
 
 	connectRessource := connect.NewConnnectRessource(
 		logger.Named("connect_ressource"),
+		tokenAuth,
 		issuer,
 		rotator,
 		signInService,
@@ -84,6 +85,7 @@ func compose(logger *zap.Logger,
 	)
 	netlifyRessource := netlify.NewNetlifyRessource(
 		logger.Named("netlify_ressource"),
+		tokenAuth,
 		connectRessource,
 		rotator,
 	)
@@ -106,6 +108,7 @@ func compose(logger *zap.Logger,
 		manageRessource := management.NewManagementRessource(
 			logger.Named("management_ressource"),
 			*cfg,
+			tokenAuth,
 			manageUserService,
 			manageAppService,
 			manageAuthService,
