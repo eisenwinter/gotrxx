@@ -46,23 +46,12 @@
     debug "^4.3.4"
     posthtml-match-helper "^2.0.2"
 
-"@11ty/eleventy-plugin-ejs@^1.0.0":
+"@11ty/eleventy-plugin-ejs@1.0.0":
   version "1.0.0"
   resolved "https://registry.yarnpkg.com/@11ty/eleventy-plugin-ejs/-/eleventy-plugin-ejs-1.0.0.tgz#6ab441d175ccd3e9297862d2c704acd277a3274f"
   integrity sha512-em6B3Has/KwTu5orm5hGWvecZCgFLOuT2jyzGnNXLf36iy9oX7Gqlkio7GpTBLZWs5AxuwukWGCzMHj8qAT7Cg==
   dependencies:
     ejs "^3.1.10"
-
-"@11ty/eleventy-upgrade-help@3":
-  version "3.0.1"
-  resolved "https://registry.yarnpkg.com/@11ty/eleventy-upgrade-help/-/eleventy-upgrade-help-3.0.1.tgz#fd5f2131c0466b107271303d45d0c87c1f955726"
-  integrity sha512-69CttBBfplByurn5vW7eRiLPywZZZHCH6B68Ib3t3348PaHHG9RysVPRqPQzMrGIEEbXg+0+ICm+R8sAkgjfPQ==
-  dependencies:
-    fast-glob "^3.3.2"
-    kleur "^4.1.5"
-    minimist "^1.2.8"
-    posthtml-match-helper "^2.0.2"
-    semver "^7.6.3"
 
 "@11ty/eleventy-utils@^1.0.2", "@11ty/eleventy-utils@^1.0.3":
   version "1.0.3"
@@ -71,7 +60,7 @@
   dependencies:
     normalize-path "^3.0.0"
 
-"@11ty/eleventy@^3.0.0":
+"@11ty/eleventy@3.0.0":
   version "3.0.0"
   resolved "https://registry.yarnpkg.com/@11ty/eleventy/-/eleventy-3.0.0.tgz#a2eabcb0b55f3987d7687f4446e7294e6195476e"
   integrity sha512-0P0ZsJXVW2QiNdhd7z+GYy6n+ivh0enx1DRdua5ta6NlzY2AhbkeWBY6U+FKA8lPS3H4+XsTpfLLfIScpPZLaQ==
@@ -581,7 +570,7 @@ ejs@^3.1.10:
   dependencies:
     jake "^10.8.5"
 
-eleventy-plugin-dart-sass@^1.0.3:
+eleventy-plugin-dart-sass@1.0.3:
   version "1.0.3"
   resolved "https://registry.yarnpkg.com/eleventy-plugin-dart-sass/-/eleventy-plugin-dart-sass-1.0.3.tgz#bceb4ca4d26ee6da6d10c45d4980407f02f9093a"
   integrity sha512-ZJ/0hcTQ9rATbYJe98IUlyID2ikbYOdnSDgRHgkX6OCkvzpYVpzGPMg8Vt4yoLaKYJL3epZehpCJ9uFWLBVwTQ==
@@ -854,7 +843,7 @@ he@^1.2.0:
   resolved "https://registry.yarnpkg.com/he/-/he-1.2.0.tgz#84ae65fa7eafb165fddb61566ae14baf05664f0f"
   integrity sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==
 
-html-minifier@^4.0.0:
+html-minifier@4.0.0:
   version "4.0.0"
   resolved "https://registry.yarnpkg.com/html-minifier/-/html-minifier-4.0.0.tgz#cca9aad8bce1175e02e17a8c33e46d8988889f56"
   integrity sha512-aoGxanpFPLg7MkIl/DDFYtb0iWz7jMFGqFhvEDZga6/4QTjneiD8I/NXL1x5aaoCp7FSIT6h/OhykDdPsbtMig==
