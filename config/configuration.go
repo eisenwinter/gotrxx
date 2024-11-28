@@ -19,7 +19,7 @@ type ServerConfiguration struct {
 
 // SMTPConfiguration contains the email settings
 type SMTPConfiguration struct {
-	Enabled  bool
+	Enable   bool
 	Host     string
 	Port     int
 	Username string
