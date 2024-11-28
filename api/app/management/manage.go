@@ -18,8 +18,9 @@ import (
 
 // ManagementRessource habours the headless admin endpoints
 type ManagementRessource struct {
-	log *zap.Logger
-	cfg config.Configuration
+	log       *zap.Logger
+	cfg       config.Configuration
+	tokenAuth *jwtauth.JWTAuth
 
 	userService   UserService
 	authService   AuthorizationService
@@ -54,7 +55,7 @@ func (m *ManagementRessource) Router() *chi.Mux {
 	})
 
 	r.Group(func(gr chi.Router) {
-		gr.Use(jwtauth.Authenticator)
+		gr.Use(jwtauth.Authenticator(m.tokenAuth))
 		gr.Use(adminOnlyMiddleWare(!m.cfg.JWT.NoRolesClaim, m.userService))
 		gr.Route("/applications", func(r chi.Router) {
 			r.With(pageinate).Get("/", m.listApplications)
@@ -125,6 +126,7 @@ type roleChecker interface {
 
 func NewManagementRessource(logger *zap.Logger,
 	cfg config.Configuration,
+	tokenAuth *jwtauth.JWTAuth,
 	userService UserService,
 	appService ApplicationService,
 	authService AuthorizationService,
@@ -132,6 +134,7 @@ func NewManagementRessource(logger *zap.Logger,
 	inviteService Lister) *ManagementRessource {
 	return &ManagementRessource{
 		log:           logger,
+		tokenAuth:     tokenAuth,
 		cfg:           cfg,
 		userService:   userService,
 		authService:   authService,

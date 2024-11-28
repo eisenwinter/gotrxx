@@ -15,11 +15,11 @@ import (
 )
 
 type ConnnectRessource struct {
-	logger *zap.Logger
-
-	issuer   TokenIssuer
-	rotator  TokenRotator
-	verifier TokenVerifier
+	logger    *zap.Logger
+	tokenAuth *jwtauth.JWTAuth
+	issuer    TokenIssuer
+	rotator   TokenRotator
+	verifier  TokenVerifier
 
 	userSignIn SignIner
 
@@ -46,7 +46,7 @@ func (c *ConnnectRessource) Router() *chi.Mux {
 	r.Post("/authorize", c.authorize)
 
 	r.Group(func(ri chi.Router) {
-		ri.Use(jwtauth.Authenticator)
+		ri.Use(jwtauth.Authenticator(c.tokenAuth))
 		//logout literally means `log out from all devices`
 		ri.Post("/logout", c.logout)
 		ri.Get("/userinfo", c.userinfo)
@@ -374,6 +374,7 @@ func validateRequiredField(field string, name string, w http.ResponseWriter,
 }
 
 func NewConnnectRessource(logger *zap.Logger,
+	tokenAuth *jwtauth.JWTAuth,
 	issuer TokenIssuer,
 	rotator TokenRotator,
 	userSignIn SignIner,
@@ -381,6 +382,7 @@ func NewConnnectRessource(logger *zap.Logger,
 	appService ApplicationToClientIDMapper,
 	verifier TokenVerifier) *ConnnectRessource {
 	return &ConnnectRessource{logger: logger,
+		tokenAuth:  tokenAuth,
 		issuer:     issuer,
 		userSignIn: userSignIn,
 		rotator:    rotator,

@@ -150,7 +150,7 @@ func NewMailer(
 		return nil, err
 	}
 	s := &Mailer{
-		noop:          cfg.SMTP.Enabled,
+		noop:          cfg.SMTP.Enable,
 		log:           log,
 		registry:      registry,
 		emailTemplate: t,

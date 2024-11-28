@@ -17,7 +17,8 @@ import (
 const NetlifyClientID = "netlify-gotrue"
 
 type NetlifyRessource struct {
-	logger *zap.Logger
+	logger    *zap.Logger
+	tokenAuth *jwtauth.JWTAuth
 	//nelitfy ressource just wraps the underlying connect ressource
 	uc      *connect.ConnnectRessource
 	rotator *tokens.TokenRotator
@@ -37,7 +38,7 @@ func (n *NetlifyRessource) Router() *chi.Mux {
 	//this is the miniaml subset required for git-gateway and netlifycms
 	r.Post("/token", n.token)
 	r.Group(func(gr chi.Router) {
-		gr.Use(jwtauth.Authenticator)
+		gr.Use(jwtauth.Authenticator(n.tokenAuth))
 		gr.Get("/user", n.user)
 		gr.Post("/logout", n.logout)
 	})
@@ -242,10 +243,11 @@ func (*NetlifyRessource) settings(w http.ResponseWriter, r *http.Request) {
 
 func NewNetlifyRessource(
 	logger *zap.Logger,
+	tokenAuth *jwtauth.JWTAuth,
 	c *connect.ConnnectRessource,
 	rotator *tokens.TokenRotator,
 ) *NetlifyRessource {
-	return &NetlifyRessource{logger: logger, uc: c, rotator: rotator}
+	return &NetlifyRessource{logger: logger, tokenAuth: tokenAuth, uc: c, rotator: rotator}
 }
 
 type userInfoResponse struct {

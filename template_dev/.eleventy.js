@@ -1,7 +1,9 @@
 const pluginSass = require("eleventy-plugin-dart-sass");
 const htmlmin = require("html-minifier");
+const ejsPlugin = require("@11ty/eleventy-plugin-ejs");
 
 module.exports = function (eleventyConfig) {
+    eleventyConfig.addPlugin(ejsPlugin);
     eleventyConfig.addPassthroughCopy({ "langs/*": "static/language" });
     eleventyConfig.addPassthroughCopy({ "src/_fonts/*": "static/fonts" });
     eleventyConfig.addPlugin(pluginSass, {
@@ -29,6 +31,7 @@ module.exports = function (eleventyConfig) {
     
         return content;
       });
+     
     return {
         passthroughFileCopy: true,
         dir: {
