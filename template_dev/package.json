@@ -9,8 +9,9 @@
     "dev": "eleventy --serve --port 8000"
   },
   "devDependencies": {
-    "@11ty/eleventy": "^1.0.2",
-    "eleventy-plugin-dart-sass": "^1.0.3",
-    "html-minifier": "^4.0.0"
+    "@11ty/eleventy": "3.0.0",
+    "@11ty/eleventy-plugin-ejs": "1.0.0",
+    "eleventy-plugin-dart-sass": "1.0.3",
+    "html-minifier": "4.0.0"
   }
 }
