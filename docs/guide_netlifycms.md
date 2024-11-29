@@ -1,7 +1,7 @@
-# Guide: self-hosted Netlify CMS
+# Guide: self-hosted decap CMS
 
 This guide is probably why you are here. 
-It walks you through self-hosting the [netlifycms](https://www.netlifycms.org/) stack.
+It walks you through self-hosting the [decapcms](https://decapcms.org/) stack.
 
 ## Compose file deploy
 
@@ -44,7 +44,7 @@ Your current working directory should contain two files now: `my_key` which is y
 ### GitHub access token
 
 The next step is to obtain a GitHub access token. The access token should belong to the account hosting the repository we want to 
-use with netlify cms.
+use with decap cms.
 
 The GitHub documentation covers this right here: ['Creating a personal access token'](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/creating-a-personal-access-token)
 
@@ -61,14 +61,14 @@ Replace the following environment variables in the docker-compose file below:
 - YOUR_GITHUB_ACCESS_TOKEN with your GitHub access token
 - USER/REPO with your repository (Your repository is the url path marked bold github.com/**USERNAME/REPOSITORY**)
 - YOUR_SMTP_USER, YOUR_SMTP_PASSWORD, smtp.example.com with your SMTP settings
-- YOUR_CSRF_TOKEN with a random string, this will be used to securely generate cross-site request forgery tokens 
+- YOUR_CSRF_TOKEN with a random string, this is used to securely generate cross-site request forgery tokens 
   - random.org for generation: [random.org](https://www.random.org/passwords/?num=1&len=24&format=html&rnd=new)
   - Generate by reading from urandom: ```</dev/urandom tr -dc 'A-Za-z0-9!"#$%&\(\)*+,.: ;<=>?@\[\]^_`{|}~-' | head -c 21  ; echo```
 - /certs/private.key and /certs/public.key with the location of your key and pub file. 
 
 
 Optional:
-- INVITE_SEED a number to your liking to seed an initial admin account can be left blank if not wanted
+- INVITE_SEED a number to your liking to seed an initial admin account. Leave blank if not wanted
 
 > The supplied settings enable you to manage your instance with the GitHub hosted version of [gotrxx-admin](https://eisenwinter.github.io/gotrxx-admin/).  If you dont want this this feature simply remove the `TRXX_MANAGE_ENDPOINT_ENABLE`, `TRXX_MANAGE_ENDPOINT_CORS_ALLOWED_METHODS` and `TRXX_MANAGE_ENDPOINT_CORS_ALLOWED_ORIGINS` environment variables from the compose file.
 
@@ -191,9 +191,9 @@ docker container exec CONTAINERNAME /app/gotrxx app create -c public -f authoriz
 
 For further information regarding gotrxx-admin see: [https://github.com/eisenwinter/gotrxx-admin](https://github.com/eisenwinter/gotrxx-admin)
 
-### Configure netlify cms
+### Configure decap cms
 
-Once everything is up and running configure netlify cms according to the documentation [https://www.netlifycms.org/docs/](https://www.netlifycms.org/docs/). I won't cover much of the details here just how to get it working with this stack.
+Once everything is up and running configure decap cms according to the documentation [https://decapcms.org/docs/intro/](https://decapcms.org/docs/intro/). I won't cover much of the details here just how to get it working with this stack.
 
 Your index.html should look like this, as always replace example.com with your domain:
 
@@ -209,8 +209,8 @@ Your index.html should look like this, as always replace example.com with your d
   <link href="/admin/config.yml" type="text/yaml" rel="cms-config-url">
 </head>
 <body>
-  <!-- Include the script that builds the page and powers Netlify CMS -->
-  <script src="https://unpkg.com/netlify-cms@^2.0.0/dist/netlify-cms.js"></script>
+  <!-- Include the script that builds the page and powers decap CMS -->
+  <script src="https://unpkg.com/decap-cms@^3.0.0/dist/decap-cms.js"></script>
 <script>
   if (document.readyState === "loading") {
     document.addEventListener("DOMContentLoaded", function () {
@@ -244,11 +244,11 @@ backend:
 
 ### Things to consider
 
-Don't forget to back up your docker volumes (gotrxx_db, caddy_data) so you can easily recover from disaster.
+Don't forget to back up your docker volumes (gotrxx_db, caddy_data) so you can recover from disaster.
 
 ### Enjoy
 
-If you made it this far you have a working self-hosted version of netlify cms now.
+If you made it this far you have a working self-hosted version of decap cms now.
 Enjoy.
 
 If you had any trouble or something is unclear you can open an issue at: https://github.com/eisenwinter/gotrxx/issues 

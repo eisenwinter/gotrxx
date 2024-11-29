@@ -28,12 +28,12 @@ var grantAuthorizationCommand = cobra.Command{
 		dispatcher := bootstrapDispatcher(dataStore.Auditor())
 		service := manage.NewAuthorizationService(
 			dataStore,
-			TopLevelLogger.Named("manage_authorization_service"),
+			TopLevelLogger.WithGroup("manage_authorization_service"),
 			LoadedConfig,
 			dispatcher)
 		userManager := manage.NewUserService(
 			dataStore,
-			TopLevelLogger.Named("user_manager"),
+			TopLevelLogger.WithGroup("user_manager"),
 			LoadedConfig,
 			nil,
 			dispatcher,

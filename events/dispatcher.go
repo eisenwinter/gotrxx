@@ -3,7 +3,7 @@ package events
 import (
 	"fmt"
 
-	"go.uber.org/zap"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 )
 
 // inspired by http://www.inanzzz.com/index.php/post/2qdl/event-listener-and-dispatcher-example-with-golang
@@ -25,12 +25,12 @@ type EventListener interface {
 
 // Dispatcher is used to dispatch events to listeners
 type Dispatcher struct {
-	log      *zap.Logger
+	log      logging.Logger
 	registry map[EventName][]EventListener
 }
 
 // NewDispatcher returns a new dispatcher instance
-func NewDispatcher(log *zap.Logger) *Dispatcher {
+func NewDispatcher(log logging.Logger) *Dispatcher {
 	return &Dispatcher{
 		log:      log,
 		registry: make(map[EventName][]EventListener),
@@ -43,7 +43,7 @@ func (d *Dispatcher) Register(listener ...EventListener) {
 		if _, ok := d.registry[v.ForEvent()]; !ok {
 			d.registry[v.ForEvent()] = make([]EventListener, 0)
 		}
-		d.log.Debug("Registering event listener", zap.String("event", string(v.ForEvent())))
+		d.log.Debug("registering event listener", "event", string(v.ForEvent()))
 		d.registry[v.ForEvent()] = append(d.registry[v.ForEvent()], v)
 	}
 }
@@ -53,19 +53,19 @@ func (d *Dispatcher) executeEvent(el EventListener, ev Event) {
 		if r := recover(); r != nil {
 			d.log.Error(
 				"recovered from panicing event listener",
-				zap.Any("recoverer", r),
-				zap.String("event", string(ev.Name())),
-				zap.String("event_listener", fmt.Sprintf("%T", el)),
+				"recoverer", r,
+				"event", string(ev.Name()),
+				"event_listener", fmt.Sprintf("%T", el),
 			)
 		}
 	}()
 	err := el.Handle(ev)
 	if err != nil {
 		d.log.Error(
-			"Event listener returned error",
-			zap.String("event_listener", fmt.Sprintf("%T", el)),
-			zap.Error(err),
-			zap.String("event", string(ev.Name())),
+			"event listener returned error",
+			"event_listener", fmt.Sprintf("%T", el),
+			"err", err,
+			"event", string(ev.Name()),
 		)
 	}
 
@@ -78,6 +78,6 @@ func (d *Dispatcher) Dispatch(event Event) {
 			d.executeEvent(v, event)
 		}
 	} else {
-		d.log.Info("No event listener for event", zap.String("event", string(event.Name())))
+		d.log.Info("no event listener for event", "event", string(event.Name()))
 	}
 }

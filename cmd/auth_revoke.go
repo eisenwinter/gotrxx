@@ -26,7 +26,7 @@ var revokeAuthorizationCommand = cobra.Command{
 		dispatcher := bootstrapDispatcher(dataStore.Auditor())
 		service := manage.NewAuthorizationService(
 			dataStore,
-			TopLevelLogger.Named("manage_authorization_service"),
+			TopLevelLogger.WithGroup("manage_authorization_service"),
 			LoadedConfig,
 			dispatcher)
 

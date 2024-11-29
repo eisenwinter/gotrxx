@@ -26,7 +26,7 @@ var addRoleCommand = cobra.Command{
 		mailer := mustResolveMailer(registry)
 		userManager := manage.NewUserService(
 			dataStore,
-			TopLevelLogger.Named("user_manager"),
+			TopLevelLogger.WithGroup("user_manager"),
 			LoadedConfig,
 			mailer,
 			dispatcher,

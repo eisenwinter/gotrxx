@@ -9,7 +9,6 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/eisenwinter/gotrxx/db/tables"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 // all token related things in store
@@ -61,7 +60,7 @@ func (d *DataStore) InsertCommonToken(
 	var id int
 	err = d.returningInsertStatement(ctx, &id, insert, nil)
 	if err != nil {
-		d.log.Error("could not insert token", zap.Error(err))
+		d.log.Error("could not insert token", "err", err)
 		return 0, err
 	}
 	return id, nil

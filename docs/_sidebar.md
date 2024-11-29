@@ -10,7 +10,7 @@
     * [Creating Users](create_users.md)
 - Guides (gotrxx +)
     * [gotrxx-admin](gotrxx_admin.md)
-    * [selfhosted Netlify CMS](guide_netlifycms.md)
+    * [selfhosted decap cms](guide_netlifycms.md)
     * [ASP.NET Core Web API](guide_aspnet.md)
     * [oidc-client (SPA)](guide_oidcclient.md)
 - CLI Reference

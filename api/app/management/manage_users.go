@@ -6,7 +6,6 @@ import (
 
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 func (m *ManagementRessource) listUsers(w http.ResponseWriter, r *http.Request) {
@@ -17,7 +16,7 @@ func (m *ManagementRessource) listUsers(w http.ResponseWriter, r *http.Request) 
 
 	apps, err := m.userService.List(r.Context(), page, pageSize, query, sort)
 	if err != nil {
-		m.log.Error("error listing users", zap.Error(err))
+		m.log.Error("error listing users", "err", err)
 
 		return
 	}
@@ -28,13 +27,13 @@ func (m *ManagementRessource) userByID(w http.ResponseWriter, r *http.Request) {
 	u := r.URL.Query().Get("id")
 	id, err := uuid.Parse(u)
 	if err != nil {
-		m.log.Info("invalid query data for user by id", zap.Error(err))
+		m.log.Info("invalid query data for user by id", "err", err)
 		render.Respond(w, r, createError("invalid query data", http.StatusBadRequest))
 		return
 	}
 	user, err := m.userService.ByID(r.Context(), id)
 	if err != nil {
-		m.log.Error("error getting user by id", zap.Error(err))
+		m.log.Error("error getting user by id", "err", err)
 		render.Respond(w, r, createError("internal server error", http.StatusInternalServerError))
 		return
 	}
@@ -45,7 +44,7 @@ func (m *ManagementRessource) confirmUser(w http.ResponseWriter, r *http.Request
 	var req *userIDRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data for confirm user", zap.Error(err))
+		m.log.Info("invalid payload data for confirm user", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -61,7 +60,7 @@ func (m *ManagementRessource) confirmUser(w http.ResponseWriter, r *http.Request
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -69,7 +68,7 @@ func (m *ManagementRessource) addUserToRole(w http.ResponseWriter, r *http.Reque
 	var req *userIDRoleRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -85,7 +84,7 @@ func (m *ManagementRessource) addUserToRole(w http.ResponseWriter, r *http.Reque
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -93,7 +92,7 @@ func (m *ManagementRessource) removeUserFromRole(w http.ResponseWriter, r *http.
 	var req *userIDRoleRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -109,7 +108,7 @@ func (m *ManagementRessource) removeUserFromRole(w http.ResponseWriter, r *http.
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -117,7 +116,7 @@ func (m *ManagementRessource) banUser(w http.ResponseWriter, r *http.Request) {
 	var req *userIDRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -133,7 +132,7 @@ func (m *ManagementRessource) banUser(w http.ResponseWriter, r *http.Request) {
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -141,7 +140,7 @@ func (m *ManagementRessource) unbanUser(w http.ResponseWriter, r *http.Request) 
 	var req *userIDRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data for unban user", zap.Error(err))
+		m.log.Info("invalid payload data for unban user", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -157,7 +156,7 @@ func (m *ManagementRessource) unbanUser(w http.ResponseWriter, r *http.Request) 
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -165,7 +164,7 @@ func (m *ManagementRessource) unlockUser(w http.ResponseWriter, r *http.Request)
 	var req *userIDRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data for unlock user", zap.Error(err))
+		m.log.Info("invalid payload data for unlock user", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -181,6 +180,6 @@ func (m *ManagementRessource) unlockUser(w http.ResponseWriter, r *http.Request)
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }

@@ -17,7 +17,7 @@ var purgeApplicationCommand = cobra.Command{
 		dispatcher := bootstrapDispatcher(dataStore.Auditor())
 		service := manage.NewApplicationSevice(
 			dataStore,
-			TopLevelLogger.Named("manage_application_service"),
+			TopLevelLogger.WithGroup("manage_application_service"),
 			LoadedConfig,
 			dispatcher)
 		err := service.PurgeRetiredApplications(cmd.Context())

@@ -9,13 +9,13 @@ import (
 	"github.com/eisenwinter/gotrxx/db"
 	"github.com/eisenwinter/gotrxx/events"
 	"github.com/eisenwinter/gotrxx/events/event"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 type AuthorizationService struct {
 	store      *db.DataStore
-	log        *zap.Logger
+	log        logging.Logger
 	cfg        *config.Configuration
 	dispatcher *events.Dispatcher
 }
@@ -142,7 +142,7 @@ func (a *AuthorizationService) RevokeAuthorizationClientIDAndEmail(
 }
 
 func NewAuthorizationService(store *db.DataStore,
-	log *zap.Logger,
+	log logging.Logger,
 	cfg *config.Configuration,
 	dispatcher *events.Dispatcher) *AuthorizationService {
 

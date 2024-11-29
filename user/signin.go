@@ -9,8 +9,8 @@ import (
 	"github.com/eisenwinter/gotrxx/db"
 	"github.com/eisenwinter/gotrxx/events"
 	"github.com/eisenwinter/gotrxx/events/event"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 type UserLocker interface {
@@ -32,7 +32,7 @@ type LoginStorer interface {
 // SigninService manages all tasks related to user sign ins
 type SigninService struct {
 	store      LoginStorer
-	log        *zap.Logger
+	log        logging.Logger
 	cfg        *config.BehaviourConfiguration
 	dispatcher Dispatcher
 	userLocker UserLocker
@@ -40,7 +40,7 @@ type SigninService struct {
 
 // NewSignInService returns a new signin service
 func NewSignInService(store LoginStorer,
-	log *zap.Logger,
+	log logging.Logger,
 	cfg *config.BehaviourConfiguration,
 	dispatcher Dispatcher,
 	userLocker UserLocker) *SigninService {
@@ -143,7 +143,7 @@ func (g *SigninService) InitializeMFA(ctx context.Context, email string) error {
 		if errors.Is(err, db.ErrNotFound) {
 			return ErrEntityDoesNotExist
 		}
-		g.log.Error("unexpected date store error", zap.Error(err))
+		g.log.Error("unexpected date store error", "err", err)
 		return err
 	}
 	provider := &userSignin{ud: ud}
@@ -167,7 +167,7 @@ func (g *SigninService) Validate(ctx context.Context, id uuid.UUID, password str
 		if errors.Is(err, db.ErrNotFound) {
 			return ErrEntityDoesNotExist
 		}
-		g.log.Error("unexpected date store error", zap.Error(err))
+		g.log.Error("unexpected date store error", "err", err)
 		return err
 	}
 	provider := &userSignin{ud: ud}
@@ -193,7 +193,7 @@ func (g *SigninService) SignInMFA(
 		if errors.Is(err, db.ErrNotFound) {
 			return nil, ErrEntityDoesNotExist
 		}
-		g.log.Error("unexpected date store error", zap.Error(err))
+		g.log.Error("unexpected date store error", "err", err)
 		return nil, err
 	}
 	provider := &userSignin{ud: ud}
@@ -209,13 +209,13 @@ func (g *SigninService) SignInMFA(
 				time.Now().UTC().Add(g.cfg.AutoLockoutDuration),
 			)
 			if err != nil {
-				g.log.Error("could not lock user after failure count exceeded", zap.Error(err))
+				g.log.Error("could not lock user after failure count exceeded", "err", err)
 			}
 			return nil, ErrEntityOperationForbidden
 		}
 		err = g.store.SetFailureCount(ctx, provider.ID(), provider.CurrentFailureCount()+1)
 		if err != nil {
-			g.log.Error("unable to reset failure count", zap.Error(err))
+			g.log.Error("unable to reset failure count", "err", err)
 		}
 		return nil, ErrInvalidCredentials
 	}
@@ -229,7 +229,7 @@ func (g *SigninService) SignInMFA(
 		}
 		err = g.store.SetOTPPending(ctx, provider.ID(), false)
 		if err != nil {
-			g.log.Error("unable to reset otp timestamp", zap.Error(err))
+			g.log.Error("unable to reset otp timestamp", "err", err)
 		}
 	}
 	g.dispatcher.Dispatch(&event.UserLogin{
@@ -238,7 +238,7 @@ func (g *SigninService) SignInMFA(
 	if provider.CurrentFailureCount() > 0 {
 		err = g.store.SetFailureCount(ctx, provider.ID(), 0)
 		if err != nil {
-			g.log.Error("unable to reset failure count", zap.Error(err))
+			g.log.Error("unable to reset failure count", "err", err)
 		}
 	}
 

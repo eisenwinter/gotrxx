@@ -9,7 +9,6 @@ import (
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
-	"go.uber.org/zap"
 )
 
 // https://www.w3.org/TR/2016/REC-html51-20161101/sec-forms.html#email-state-typeemail
@@ -90,16 +89,16 @@ func (a *AccountRessource) updateEmail(w http.ResponseWriter, r *http.Request) {
 	}
 	user, err := a.userSignIn.UserFromSubject(r.Context(), id)
 	if err != nil {
-		a.log.Error("could not get user from subject", zap.Error(err))
+		a.log.Error("could not get user from subject", "err", err)
 	} else {
 		auth, err := a.autService.VerifyUserAuthorization(r.Context(), id, gotrxxClientID)
 		if err != nil {
-			a.log.Error("could not get user auth for gotrxx", zap.Error(err))
+			a.log.Error("could not get user auth for gotrxx", "err", err)
 			return
 		}
 		_, err = a.issueUserCookie(r.Context(), user, auth, false, w)
 		if err != nil {
-			a.log.Error("could not reissue user cookie", zap.Error(err))
+			a.log.Error("could not reissue user cookie", "err", err)
 		}
 
 	}
@@ -142,7 +141,7 @@ func (a *AccountRessource) updatePassword(w http.ResponseWriter, r *http.Request
 
 	id, err := uuid.Parse(token.Subject())
 	if err != nil {
-		a.log.Error("unable to parse user id", zap.Error(err))
+		a.log.Error("unable to parse user id", "err", err)
 		http.Redirect(w, r, "/account/signin", http.StatusFound)
 		return
 	}

@@ -14,19 +14,19 @@ import (
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/i18n"
 	"github.com/eisenwinter/gotrxx/manage"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/eisenwinter/gotrxx/user"
-	"go.uber.org/zap"
 )
 
 type Server struct {
 	server *http.Server
-	log    *zap.Logger
+	log    logging.Logger
 }
 
 func NewServer(
 	cfg *config.Configuration,
-	logger *zap.Logger,
+	logger logging.Logger,
 	issuer *tokens.TokenIssuer,
 	rotator *tokens.TokenRotator,
 	signInService *user.SigninService,
@@ -41,7 +41,7 @@ func NewServer(
 	manageApplication *manage.ApplicationService,
 	manageRole *manage.RoleService,
 	manageInviteService *manage.InviteService) (*Server, error) {
-	api, err := compose(logger.Named("api"),
+	api, err := compose(logger.WithGroup("api"),
 		cfg,
 		issuer,
 		signInService,
@@ -73,23 +73,25 @@ func NewServer(
 }
 
 // Start runs ListenAndServe on the http.Server with graceful shutdown.
-func (srv *Server) Start() {
-	srv.log.Info("Starting server")
+func (srv *Server) Start() error {
+	srv.log.Info("starting server")
 	go func() {
 		if err := srv.server.ListenAndServe(); err != http.ErrServerClosed {
 			panic(err)
 		}
 	}()
-	srv.log.Info("Listening", zap.String("addr", srv.server.Addr))
+	srv.log.Info("listening", "addr", srv.server.Addr)
 
 	quit := make(chan os.Signal, 1)
 	//nolint
 	signal.Notify(quit, os.Interrupt)
 	sig := <-quit
-	srv.log.Info("Shutting down", zap.Any("signal", sig))
+	srv.log.Info("shutting down", "signal", sig)
 
 	if err := srv.server.Shutdown(context.Background()); err != nil {
-		srv.log.Fatal("Graceful shutdown failed", zap.Error(err))
+		srv.log.Error("graceful shutdown failed", "err", err)
+		return err
 	}
-	srv.log.Info("Graceful shutdown completed")
+	srv.log.Info("graceful shutdown completed")
+	return nil
 }

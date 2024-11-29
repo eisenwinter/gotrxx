@@ -24,7 +24,7 @@ var retireApplicationCommand = cobra.Command{
 		dispatcher := bootstrapDispatcher(dataStore.Auditor())
 		service := manage.NewApplicationSevice(
 			dataStore,
-			TopLevelLogger.Named("manage_application_service"),
+			TopLevelLogger.WithGroup("manage_application_service"),
 			LoadedConfig,
 			dispatcher)
 		err := service.RetireApplication(cmd.Context(), args[0])

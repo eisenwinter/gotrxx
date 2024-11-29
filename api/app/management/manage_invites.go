@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/render"
-	"go.uber.org/zap"
 )
 
 func (m *ManagementRessource) listInvites(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +15,7 @@ func (m *ManagementRessource) listInvites(w http.ResponseWriter, r *http.Request
 
 	roles, err := m.inviteService.List(r.Context(), page, pageSize, query, sort)
 	if err != nil {
-		m.log.Error("error listing invites", zap.Error(err))
+		m.log.Error("error listing invites", "err", err)
 
 		return
 	}
@@ -27,7 +26,7 @@ func (m *ManagementRessource) createInvite(w http.ResponseWriter, r *http.Reques
 	var req *createInviteRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -48,6 +47,6 @@ func (m *ManagementRessource) createInvite(w http.ResponseWriter, r *http.Reques
 		ID:      t,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }

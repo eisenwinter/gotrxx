@@ -8,7 +8,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
 	qrcode "github.com/skip2/go-qrcode"
-	"go.uber.org/zap"
 )
 
 func (a *AccountRessource) mfa(w http.ResponseWriter, r *http.Request) {
@@ -19,7 +18,7 @@ func (a *AccountRessource) mfa(w http.ResponseWriter, r *http.Request) {
 	}
 	id, err := uuid.Parse(token.Subject())
 	if err != nil {
-		a.log.Error("unable to parse user id", zap.Error(err))
+		a.log.Error("unable to parse user id", "err", err)
 		http.Redirect(w, r, "/account/signin", http.StatusFound)
 		return
 	}
@@ -39,7 +38,7 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 	}
 	id, err := uuid.Parse(token.Subject())
 	if err != nil {
-		a.log.Error("unable to parse user id", zap.Error(err))
+		a.log.Error("unable to parse user id", "err", err)
 	}
 	password := r.FormValue("password")
 	err = a.userSignIn.Validate(r.Context(), id, password)
@@ -54,7 +53,7 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 
 	secret, uri, err := a.userService.ProvisionMFA(r.Context(), id)
 	if err != nil {
-		a.log.Error("could not provision mfa", zap.Error(err))
+		a.log.Error("could not provision mfa", "err", err)
 		a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
 			CsrfToken: csrf.Token(r),
 			Error:     "unknown",
@@ -68,7 +67,7 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 	}
 	png, err := qrcode.Encode(decodedValue, qrcode.Medium, 256)
 	if err != nil {
-		a.log.Error("could not generate qr code", zap.Error(err))
+		a.log.Error("could not generate qr code", "err", err)
 		a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
 			CsrfToken: csrf.Token(r),
 			Secret:    secret,
@@ -94,12 +93,12 @@ func (a *AccountRessource) setMFA(w http.ResponseWriter, r *http.Request) {
 
 	err := r.ParseForm()
 	if err != nil {
-		a.log.Error("setMFA: ParseForm failed", zap.Error(err))
+		a.log.Error("setMFA: ParseForm failed", "err", err)
 	}
 
 	id, err := uuid.Parse(token.Subject())
 	if err != nil {
-		a.log.Error("unable to parse user id", zap.Error(err))
+		a.log.Error("unable to parse user id", "err", err)
 		http.Redirect(w, r, "/account/signin", http.StatusFound)
 		return
 	}
@@ -107,7 +106,7 @@ func (a *AccountRessource) setMFA(w http.ResponseWriter, r *http.Request) {
 	secret := r.FormValue("secret")
 	recoveryKey, err := a.userService.EnableMFA(r.Context(), id, secret)
 	if err != nil {
-		a.log.Error("could not enable MFA", zap.Error(err))
+		a.log.Error("could not enable MFA", "err", err)
 		a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
 			CsrfToken: csrf.Token(r),
 			Error:     "unknown",
@@ -127,7 +126,7 @@ func (a *AccountRessource) setMFA(w http.ResponseWriter, r *http.Request) {
 func (a *AccountRessource) disableMFA(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		a.log.Error("disableMFA: ParseForm failed", zap.Error(err))
+		a.log.Error("disableMFA: ParseForm failed", "err", err)
 	}
 	ok, token := a.signedInUser(w, r)
 	if !ok {
@@ -139,13 +138,13 @@ func (a *AccountRessource) disableMFA(w http.ResponseWriter, r *http.Request) {
 
 	id, err := uuid.Parse(token.Subject())
 	if err != nil {
-		a.log.Error("unable to parse user id", zap.Error(err))
+		a.log.Error("unable to parse user id", "err", err)
 		http.Redirect(w, r, "/account/signin", http.StatusFound)
 		return
 	}
 	err = a.userSignIn.Validate(r.Context(), id, pwd)
 	if err != nil {
-		a.log.Debug("user failed to authenticate", zap.Error(err))
+		a.log.Debug("user failed to authenticate", "err", err)
 		a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
 			CsrfToken:  csrf.Token(r),
 			MFAEnabled: true,

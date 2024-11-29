@@ -9,8 +9,8 @@ import (
 	"github.com/eisenwinter/gotrxx/db"
 	"github.com/eisenwinter/gotrxx/events"
 	"github.com/eisenwinter/gotrxx/events/event"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 
 	"crypto/sha256"
 	b64 "encoding/base64"
@@ -34,13 +34,13 @@ type Dispatcher interface {
 type TokenRotator struct {
 	updater    CommonTokenUpdater
 	dispatcher Dispatcher
-	log        *zap.Logger
+	log        logging.Logger
 }
 
 func NewRotator(
 	updater CommonTokenUpdater,
 	dispatcher Dispatcher,
-	log *zap.Logger) *TokenRotator {
+	log logging.Logger) *TokenRotator {
 	return &TokenRotator{
 		updater:    updater,
 		dispatcher: dispatcher,
@@ -76,7 +76,7 @@ func (t *TokenRotator) PreRotationChallenge(
 	//https://datatracker.ietf.org/doc/html/rfc7636#section-4.6
 	method := token.CodeChallengeMethod()
 	if method != "S256" {
-		t.log.Warn("PKCE different then S256 received", zap.String("method", method))
+		t.log.Warn("PKCE different then S256 received", "method", method)
 		return errors.New("unspported challenge method detected")
 	}
 	hash := sha256.Sum256([]byte(codeVerifier))
@@ -108,7 +108,7 @@ func (t *TokenRotator) RevokeCommonToken(
 		if errors.Is(db.ErrNotFound, err) {
 			return ErrTokenNotFound
 		}
-		t.log.Error("could not load common token details", zap.Error(err))
+		t.log.Error("could not load common token details", "err", err)
 		return err
 	}
 	if details.AuthorizationId != autID {
@@ -130,11 +130,11 @@ func (t *TokenRotator) RevokeCommonToken(
 		if err != nil {
 			t.log.Error(
 				"could not revoke tokens for authorization",
-				zap.Any("AuthorizationId", details.AuthorizationId),
+				"AuthorizationId", details.AuthorizationId,
 			)
 			return err
 		}
-		t.log.Warn("revoked all tokens for authorization", zap.Int("revoked_count", total))
+		t.log.Warn("revoked all tokens for authorization", "revoked_count", total)
 		return ErrTokenRevoked
 	}
 	if details.ExpiresAt.Before(time.Now().UTC()) {
@@ -143,7 +143,7 @@ func (t *TokenRotator) RevokeCommonToken(
 	}
 	err = t.updater.RevokeCommonToken(ctx, string(tokenType), token)
 	if err != nil {
-		t.log.Error("could not revoke token", zap.Error(err))
+		t.log.Error("could not revoke token", "err", err)
 		return err
 	}
 	return nil
@@ -157,7 +157,7 @@ func (t *TokenRotator) RotateCommonToken(
 ) error {
 	details, err := t.updater.CommonTokenDetails(ctx, string(tokenType), token)
 	if err != nil {
-		t.log.Error("could not load common token details", zap.Error(err))
+		t.log.Error("could not load common token details", "err", err)
 		return err
 	}
 	if details.ClientID != clientID {
@@ -179,11 +179,11 @@ func (t *TokenRotator) RotateCommonToken(
 		if err != nil {
 			t.log.Error(
 				"could not revoke tokens for authorization",
-				zap.Any("AuthorizationId", details.AuthorizationId),
+				"AuthorizationId", details.AuthorizationId,
 			)
 			return err
 		}
-		t.log.Warn("revoked all tokens for authorization", zap.Int("revoked_count", total))
+		t.log.Warn("revoked all tokens for authorization", "revoked_count", total)
 		return ErrTokenRevoked
 	}
 	if details.ExpiresAt.Before(time.Now().UTC()) {
@@ -192,7 +192,7 @@ func (t *TokenRotator) RotateCommonToken(
 	}
 	err = t.updater.RedeemCommonToken(ctx, string(tokenType), token)
 	if err != nil {
-		t.log.Error("could not redeem token", zap.Error(err))
+		t.log.Error("could not redeem token", "err", err)
 		return err
 	}
 

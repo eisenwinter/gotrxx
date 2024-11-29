@@ -7,18 +7,18 @@ import (
 	"strings"
 
 	"github.com/eisenwinter/gotrxx/config"
-	"github.com/eisenwinter/gotrxx/sanitize"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
+	"github.com/eisenwinter/gotrxx/pkg/sanitize"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 // ManagementRessource habours the headless admin endpoints
 type ManagementRessource struct {
-	log       *zap.Logger
+	log       logging.Logger
 	cfg       config.Configuration
 	tokenAuth *jwtauth.JWTAuth
 
@@ -44,8 +44,8 @@ func (m *ManagementRessource) Router() *chi.Mux {
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
 		m.log.Debug(
 			"Could not found",
-			zap.String("method", r.Method),
-			sanitize.UserInputString("path", r.URL.Path),
+			"method", r.Method,
+			"path", sanitize.UserInputString(r.URL.Path),
 		)
 		w.WriteHeader(404)
 	})
@@ -124,7 +124,7 @@ type roleChecker interface {
 	VerifyUserInRole(ctx context.Context, userID uuid.UUID, role string) error
 }
 
-func NewManagementRessource(logger *zap.Logger,
+func NewManagementRessource(logger logging.Logger,
 	cfg config.Configuration,
 	tokenAuth *jwtauth.JWTAuth,
 	userService UserService,

@@ -36,11 +36,11 @@ var tokenIssueAccessTokenCommand = cobra.Command{
 
 		dispatcher := bootstrapDispatcher(dataStore.Auditor())
 		appService := application.NewApplicationSevice(
-			TopLevelLogger.Named("application_service"),
+			TopLevelLogger.WithGroup("application_service"),
 			dataStore,
 		)
 		service := authorization.NewAuthorizationService(
-			TopLevelLogger.Named("authorization_service"),
+			TopLevelLogger.WithGroup("authorization_service"),
 			dataStore,
 			dispatcher,
 			appService,
@@ -49,14 +49,14 @@ var tokenIssueAccessTokenCommand = cobra.Command{
 		mailer := mustResolveMailer(registry)
 		userManager := manage.NewUserService(
 			dataStore,
-			TopLevelLogger.Named("user_manager"),
+			TopLevelLogger.WithGroup("user_manager"),
 			LoadedConfig,
 			mailer,
 			dispatcher,
 		)
 		signInService := user.NewSignInService(
 			dataStore,
-			TopLevelLogger.Named("signin_service"),
+			TopLevelLogger.WithGroup("signin_service"),
 			LoadedConfig.Behaviour,
 			dispatcher,
 			userManager,
@@ -94,7 +94,7 @@ var tokenIssueAccessTokenCommand = cobra.Command{
 		}
 
 		issuer := tokens.NewIssuer(
-			TopLevelLogger.Named("token_issuer"),
+			TopLevelLogger.WithGroup("token_issuer"),
 			LoadedConfig.JWT,
 			dataStore,
 		)

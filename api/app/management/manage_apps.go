@@ -7,7 +7,6 @@ import (
 
 	"github.com/eisenwinter/gotrxx/application"
 	"github.com/go-chi/render"
-	"go.uber.org/zap"
 )
 
 func (m *ManagementRessource) listApplications(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +17,7 @@ func (m *ManagementRessource) listApplications(w http.ResponseWriter, r *http.Re
 
 	apps, err := m.appService.List(r.Context(), page, pageSize, query, sort)
 	if err != nil {
-		m.log.Error("error listing applications", zap.Error(err))
+		m.log.Error("error listing applications", "err", err)
 
 		return
 	}
@@ -32,14 +31,14 @@ func (m *ManagementRessource) applicationsWithActiveAuthorizationsByUserID(
 	var req *userIDRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
 
 	active, err := m.appService.WithActiveUserAuthorizations(r.Context(), req.ID)
 	if err != nil {
-		m.log.Error("error listing active applications by user authoriziation", zap.Error(err))
+		m.log.Error("error listing active applications by user authoriziation", "err", err)
 
 		return
 	}
@@ -50,13 +49,13 @@ func (m *ManagementRessource) appByClientId(w http.ResponseWriter, r *http.Reque
 	c := r.URL.Query().Get("client_id")
 	app, err := m.appService.ByClientID(r.Context(), c)
 	if err != nil {
-		m.log.Info("error loading application data", zap.Error(err))
+		m.log.Info("error loading application data", "err", err)
 		render.Respond(w, r, createError("internal server error", http.StatusInternalServerError))
 		return
 	}
 	err = render.Render(w, r, app)
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -64,7 +63,7 @@ func (m *ManagementRessource) createApplication(w http.ResponseWriter, r *http.R
 	var req *createApplicationRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -75,7 +74,7 @@ func (m *ManagementRessource) createApplication(w http.ResponseWriter, r *http.R
 	case "explicit_granted":
 		t = 2
 	default:
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -108,7 +107,7 @@ func (m *ManagementRessource) createApplication(w http.ResponseWriter, r *http.R
 		ID:      i,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -116,7 +115,7 @@ func (m *ManagementRessource) retireApplication(w http.ResponseWriter, r *http.R
 	var req *clientIDRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -133,7 +132,7 @@ func (m *ManagementRessource) retireApplication(w http.ResponseWriter, r *http.R
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -150,7 +149,7 @@ func (m *ManagementRessource) purgeRetiredApllications(w http.ResponseWriter, r 
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -158,7 +157,7 @@ func (m *ManagementRessource) addRedirectUriToApplication(w http.ResponseWriter,
 	var req *clientIDAndURIRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -175,7 +174,7 @@ func (m *ManagementRessource) addRedirectUriToApplication(w http.ResponseWriter,
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -186,7 +185,7 @@ func (m *ManagementRessource) removeRedirectURIFromApplication(
 	var req *clientIDAndURIRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -203,7 +202,7 @@ func (m *ManagementRessource) removeRedirectURIFromApplication(
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 
 }
@@ -211,7 +210,7 @@ func (m *ManagementRessource) addLogoutUriToApplication(w http.ResponseWriter, r
 	var req *clientIDAndURIRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -228,7 +227,7 @@ func (m *ManagementRessource) addLogoutUriToApplication(w http.ResponseWriter, r
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -239,7 +238,7 @@ func (m *ManagementRessource) removeLogoutUriFromApplication(
 	var req *clientIDAndURIRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -255,7 +254,7 @@ func (m *ManagementRessource) removeLogoutUriFromApplication(
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -263,7 +262,7 @@ func (m *ManagementRessource) addFlowToApplication(w http.ResponseWriter, r *htt
 	var req *clientIDAndFlowRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -280,7 +279,7 @@ func (m *ManagementRessource) addFlowToApplication(w http.ResponseWriter, r *htt
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 
 }
@@ -289,7 +288,7 @@ func (m *ManagementRessource) removeFlowFromApplication(w http.ResponseWriter, r
 	var req *clientIDAndFlowRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -306,7 +305,7 @@ func (m *ManagementRessource) removeFlowFromApplication(w http.ResponseWriter, r
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -314,7 +313,7 @@ func (m *ManagementRessource) enablePKCEForApplication(w http.ResponseWriter, r 
 	var req *clientIDRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -330,7 +329,7 @@ func (m *ManagementRessource) enablePKCEForApplication(w http.ResponseWriter, r 
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -338,7 +337,7 @@ func (m *ManagementRessource) disablePKCEForApplication(w http.ResponseWriter, r
 	var req *clientIDRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -354,7 +353,7 @@ func (m *ManagementRessource) disablePKCEForApplication(w http.ResponseWriter, r
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
@@ -362,7 +361,7 @@ func (m *ManagementRessource) updateSecretOfApplication(w http.ResponseWriter, r
 	var req *setApplicationSecretRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		m.log.Info("invalid payload data", zap.Error(err))
+		m.log.Info("invalid payload data", "err", err)
 		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
 		return
 	}
@@ -379,6 +378,6 @@ func (m *ManagementRessource) updateSecretOfApplication(w http.ResponseWriter, r
 		Message: message,
 	})
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }

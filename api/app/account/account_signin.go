@@ -8,13 +8,12 @@ import (
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/go-chi/render"
 	"github.com/gorilla/csrf"
-	"go.uber.org/zap"
 )
 
 func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		a.log.Error("signin: ParseForm failed", zap.Error(err))
+		a.log.Error("signin: ParseForm failed", "err", err)
 	}
 	email := r.FormValue("email")
 	password := r.FormValue("password")
@@ -38,7 +37,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(user.ErrMFARequired, err) {
 			err = a.userSignIn.InitializeMFA(r.Context(), email)
 			if err != nil {
-				a.log.Error("unable prepare MFA", zap.Error(err))
+				a.log.Error("unable prepare MFA", "err", err)
 			}
 			//mfa
 			a.view(r.Context(), a.loginTmpl, &signinViewModel{
@@ -53,7 +52,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(user.ErrInvalidOTP, err) {
 			err = a.userSignIn.InitializeMFA(r.Context(), email)
 			if err != nil {
-				a.log.Error("unable prepare MFA", zap.Error(err))
+				a.log.Error("unable prepare MFA", "err", err)
 			}
 			a.view(r.Context(), a.loginTmpl, &signinViewModel{
 				CsrfToken: csrf.Token(r),
@@ -92,7 +91,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			Email:     email,
 		}, w)
 		//everything below here is unexepcted
-		a.log.Info("failed signin due to unexpected error", zap.Error(err))
+		a.log.Info("failed signin due to unexpected error", "err", err)
 		return
 	}
 
@@ -100,12 +99,12 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 	if err != nil && errors.Is(authorization.ErrUngrantedImplicitAutoGrant, err) {
 		auth, err = a.autService.ImplicitAuthorization(r.Context(), res.UserID, gotrxxClientID, "")
 		if err != nil {
-			a.log.Error("user login page: grantig implicit authorization failed", zap.Error(err))
+			a.log.Error("user login page: grantig implicit authorization failed", "err", err)
 			render.Respond(w, r, http.StatusInternalServerError)
 			return
 		}
 	} else if err != nil {
-		a.log.Error("user login page: verifing authorization failed", zap.Error(err))
+		a.log.Error("user login page: verifing authorization failed", "err", err)
 		render.Respond(w, r, http.StatusInternalServerError)
 		return
 	}

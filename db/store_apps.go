@@ -12,7 +12,6 @@ import (
 	"github.com/jmoiron/sqlx"
 
 	"github.com/eisenwinter/gotrxx/db/tables"
-	"go.uber.org/zap"
 )
 
 func (d *DataStore) whereFromAdapater(
@@ -79,10 +78,6 @@ func (d *DataStore) Applications(
 	offset := (opts.Page - 1) * opts.PageSize
 	if c < int(offset) {
 		return []*tables.ApplicationTable{}, c, nil
-	}
-
-	if err != nil {
-		return nil, 0, err
 	}
 
 	var entities []*tables.ApplicationTable
@@ -217,7 +212,7 @@ func (d *DataStore) CreateApplication(ctx context.Context,
 		if strings.Contains(err.Error(), "UNIQUE") {
 			return 0, ErrAlreadyExists
 		}
-		d.log.Error("could not insert app", zap.Error(err))
+		d.log.Error("could not insert app", "err", err)
 		return 0, err
 	}
 	return id, nil
@@ -324,6 +319,6 @@ func (d *DataStore) RetireApplication(ctx context.Context, id int) (int64, int64
 
 func rollBack(tx *sqlx.Tx, d *DataStore) {
 	if rerr := tx.Rollback(); rerr != nil {
-		d.log.Error("couldnt rollback", zap.Error(rerr))
+		d.log.Error("couldnt rollback", "err", rerr)
 	}
 }

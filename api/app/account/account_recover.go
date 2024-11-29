@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/csrf"
-	"go.uber.org/zap"
 )
 
 func (a *AccountRessource) forgottenPassword(w http.ResponseWriter, r *http.Request) {
@@ -16,7 +15,7 @@ func (a *AccountRessource) forgottenPassword(w http.ResponseWriter, r *http.Requ
 func (a *AccountRessource) triggerPasswordRecovery(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		a.log.Error("triggerPasswordRecovery: ParseForm failed", zap.Error(err))
+		a.log.Error("triggerPasswordRecovery: ParseForm failed", "err", err)
 	}
 	email := r.FormValue("email")
 	if email == "" {
@@ -36,7 +35,7 @@ func (a *AccountRessource) triggerPasswordRecovery(w http.ResponseWriter, r *htt
 	}
 	err = a.userService.TriggerPasswordRecovery(r.Context(), id)
 	if err != nil {
-		a.log.Error("TriggerPasswordRecovery failed", zap.Error(err))
+		a.log.Error("`TriggerPasswordRecovery` failed", "err", err)
 		a.view(r.Context(), a.requestRecoverTmpl, &triggerPasswordRecoveryViewModel{
 			CsrfToken: csrf.Token(r),
 			Error:     "unknown",
@@ -76,7 +75,7 @@ func (a *AccountRessource) recover(w http.ResponseWriter, r *http.Request) {
 func (a *AccountRessource) recoverPassword(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		a.log.Error("recoverPassword: ParseForm failed", zap.Error(err))
+		a.log.Error("recoverPassword: ParseForm failed", "err", err)
 	}
 	rtoken := r.FormValue("recovery_token")
 	email := r.FormValue("email")

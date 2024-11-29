@@ -10,7 +10,6 @@ import (
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/go-chi/render"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"go.uber.org/zap"
 )
 
 //password grant flow
@@ -23,7 +22,7 @@ func (c *ConnnectRessource) PasswordGrant(
 ) {
 	app, err := c.appService.ApplicationByClientID(r.Context(), req.ClientID)
 	if err != nil {
-		c.logger.Error("password flow: failed to get application", zap.Error(err))
+		c.logger.Error("password flow: failed to get application", "err", err)
 		render.Status(r, http.StatusInternalServerError)
 		render.Respond(
 			w,
@@ -66,7 +65,7 @@ func (c *ConnnectRessource) PasswordGrant(
 	}
 	res, err := c.userSignIn.SignIn(r.Context(), req.Username, req.Password)
 	if err != nil {
-		c.logger.Debug("password flow: login failed", zap.Error(err))
+		c.logger.Debug("password flow: login failed", "err", err)
 		if errors.Is(err, user.ErrEntityDoesNotExist) ||
 			errors.Is(err, user.ErrInvalidCredentials) {
 			render.Status(r, http.StatusBadRequest)
@@ -94,7 +93,7 @@ func (c *ConnnectRessource) PasswordGrant(
 			)
 			return
 		}
-		c.logger.Error("password flow: login failed due to unexpected error", zap.Error(err))
+		c.logger.Error("password flow: login failed due to unexpected error", "err", err)
 		return
 	}
 
@@ -107,7 +106,7 @@ func (c *ConnnectRessource) PasswordGrant(
 			req.Scope,
 		)
 		if err != nil {
-			c.logger.Error("password flow: grantig implicit authorization failed", zap.Error(err))
+			c.logger.Error("password flow: grantig implicit authorization failed", "err", err)
 			render.Status(r, http.StatusInternalServerError)
 			render.Respond(
 				w,
@@ -117,7 +116,7 @@ func (c *ConnnectRessource) PasswordGrant(
 			return
 		}
 	} else if err != nil {
-		c.logger.Error("password flow: verifing authorization failed", zap.Error(err))
+		c.logger.Error("password flow: verifing authorization failed", "err", err)
 		render.Status(r, http.StatusInternalServerError)
 		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
 		return
@@ -134,7 +133,7 @@ func (c *ConnnectRessource) PasswordGrant(
 		if err != nil {
 			c.logger.Error(
 				"password flow: failed to issue a new netlify access token",
-				zap.Error(err),
+				"err", err,
 			)
 			render.Status(r, http.StatusInternalServerError)
 			render.Respond(
@@ -148,7 +147,7 @@ func (c *ConnnectRessource) PasswordGrant(
 	} else {
 		t, err = c.issuer.IssueAccessTokenForUser(res, auth.ID(), auth.Application().ClientID(), auth.Scopes())
 		if err != nil {
-			c.logger.Error("password flow: failed to issue a new access token", zap.Error(err))
+			c.logger.Error("password flow: failed to issue a new access token", "err", err)
 			render.Status(r, http.StatusInternalServerError)
 			render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
 			return
@@ -157,7 +156,7 @@ func (c *ConnnectRessource) PasswordGrant(
 
 	signed, err := c.issuer.Sign(t)
 	if err != nil {
-		c.logger.Error("password flow: failed to sign a access token", zap.Error(err))
+		c.logger.Error("password flow: failed to sign a access token", "err", err)
 		render.Status(r, http.StatusInternalServerError)
 		render.Respond(
 			w,
@@ -170,7 +169,7 @@ func (c *ConnnectRessource) PasswordGrant(
 	if app.IsFlowAllowed(application.RefreshTokenFlow) {
 		refreshToken, err = c.issuer.IssueRefreshToken(r.Context(), auth.ID())
 		if err != nil {
-			c.logger.Error("password flow: failed to issue refresh token", zap.Error(err))
+			c.logger.Error("password flow: failed to issue refresh token", "err", err)
 			render.Status(r, http.StatusInternalServerError)
 			render.Respond(
 				w,

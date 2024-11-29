@@ -12,14 +12,13 @@ import (
 
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/db/tables"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/suite"
-	"go.uber.org/zap"
-	"go.uber.org/zap/zaptest"
 
 	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/jackc/pgx/stdlib"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/mattn/go-sqlite3"
 )
 
@@ -35,7 +34,7 @@ func (s *DatabaseIntegrationTestSuite) SetupTest() {
 	switch s.dbType {
 	case "sqlite":
 		//just reopen for :memory:
-		dataStore, err := NewSqliteStore(zap.NewNop(), &config.DatabaseConfiguration{
+		dataStore, err := NewSqliteStore(logging.NewNoOpLogger(), &config.DatabaseConfiguration{
 			Type: s.dbType,
 			DSN:  s.dsn,
 		})
@@ -1157,7 +1156,7 @@ func TestDatabaseSuite(t *testing.T) {
 		t.Skip("Skipping database integration tests")
 	}
 	s := &DatabaseIntegrationTestSuite{}
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dbType := os.Getenv("INTEGRATION_TEST_DB_TYPE")
 	dsn := os.Getenv("INTEGRATION_TEST_DB_DSN")
 	switch dbType {

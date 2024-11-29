@@ -10,8 +10,8 @@ import (
 	"github.com/eisenwinter/gotrxx/db/tables"
 	"github.com/eisenwinter/gotrxx/events"
 	"github.com/eisenwinter/gotrxx/events/event"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 var (
@@ -53,13 +53,13 @@ type ApplicationSupplier interface {
 }
 
 type Service struct {
-	log        *zap.Logger
+	log        logging.Logger
 	store      AuthorizationStorer
 	dispatcher *events.Dispatcher
 	supplier   ApplicationSupplier
 }
 
-func NewAuthorizationService(log *zap.Logger,
+func NewAuthorizationService(log logging.Logger,
 	store AuthorizationStorer,
 	dispatcher *events.Dispatcher,
 	supplier ApplicationSupplier) *Service {
@@ -100,13 +100,13 @@ func (s *Service) AuthorizationByCommonToken(
 		if errors.Is(db.ErrNotFound, err) {
 			return nil, ErrNotFound
 		}
-		s.log.Error("error fetching authorization by client id and user id", zap.Error(err))
+		s.log.Error("error fetching authorization by client id and user id", "err", err)
 		return nil, err
 	}
 
 	auth, err := s.build(ctx, authTable)
 	if err != nil {
-		s.log.Error("error fetching application for authorization", zap.Error(err))
+		s.log.Error("error fetching application for authorization", "err", err)
 		return nil, err
 	}
 
@@ -131,13 +131,13 @@ func (s *Service) VerifyUserAuthorization(
 				return nil, ErrUngrantedImplicitAutoGrant
 			}
 		}
-		s.log.Error("error fetching authorization by client id and user id", zap.Error(err))
+		s.log.Error("error fetching authorization by client id and user id", "err", err)
 		return nil, err
 	}
 
 	auth, err := s.build(ctx, authTable)
 	if err != nil {
-		s.log.Error("error fetching application for authorization", zap.Error(err))
+		s.log.Error("error fetching application for authorization", "err", err)
 		return nil, err
 	}
 
@@ -179,7 +179,7 @@ func (s *Service) ImplicitAuthorization(
 	})
 	r, err := s.store.AuthorizationByID(ctx, a)
 	if err != nil {
-		s.log.Error("Unable to fetch just created authorization", zap.Error(err))
+		s.log.Error("unable to fetch just created authorization", "err", err)
 		return nil, err
 	}
 	return s.build(ctx, r)

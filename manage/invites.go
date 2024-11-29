@@ -5,13 +5,13 @@ import (
 
 	"github.com/eisenwinter/gotrxx/db"
 	"github.com/eisenwinter/gotrxx/events"
-	"go.uber.org/zap"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 )
 
 // InviteService is used to managed invitations
 type InviteService struct {
 	store      *db.DataStore
-	log        *zap.Logger
+	log        logging.Logger
 	dispatcher *events.Dispatcher
 }
 
@@ -47,7 +47,7 @@ func (i *InviteService) List(
 
 // NewInviteService returns a new invite service
 func NewInviteService(store *db.DataStore,
-	log *zap.Logger,
+	log logging.Logger,
 	dispatcher *events.Dispatcher) *InviteService {
 
 	return &InviteService{

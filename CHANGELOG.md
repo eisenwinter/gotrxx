@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.0.19](https://github.com/eisenwinter/gotrxx/compare/0.0.18...0.0.19) (2024-11-29)
+
+
+### Features
+
+* command to list all users ([4963096](https://github.com/eisenwinter/gotrxx/commit/4963096d1cb2298d508510f2123dc3fab5d1d607))
+
+
+### Bug Fixes
+
+* smtp enable naming consolidated ([39522b7](https://github.com/eisenwinter/gotrxx/commit/39522b743e6bc6c30f2860e71f2a2171b38b85ef))
+
 ## [0.0.18](https://github.com/eisenwinter/gotrxx/compare/0.0.17...0.0.18) (2023-03-11)
 
 

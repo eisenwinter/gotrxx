@@ -8,7 +8,6 @@ import (
 
 	sq "github.com/Masterminds/squirrel"
 	"github.com/eisenwinter/gotrxx/db/tables"
-	"go.uber.org/zap"
 )
 
 func (d *DataStore) InviteUser(
@@ -168,13 +167,13 @@ func (d *DataStore) InviteData(ctx context.Context, inviteCode string) (*UserInv
 
 	err = d.selectStatement(ctx, &inviteData.PreApplicationAuthorization, a, nil)
 	if err != nil {
-		d.log.Error("invalid application fetching in datastore", zap.Error(err))
+		d.log.Error("invalid application fetching in datastore", "err", err)
 	}
 
 	var roleSlice []tables.RoleTable
 	err = d.selectStatement(ctx, &roleSlice, r, nil)
 	if err != nil {
-		d.log.Error("invalid role fetching in datastore", zap.Error(err))
+		d.log.Error("invalid role fetching in datastore", "err", err)
 	} else {
 		inviteData.Roles = make([]string, len(roleSlice))
 		for i, v := range roleSlice {

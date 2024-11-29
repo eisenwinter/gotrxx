@@ -7,7 +7,6 @@ import (
 
 	"github.com/eisenwinter/gotrxx/manage"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 var roles []string
@@ -31,14 +30,14 @@ var seedInviteCommand = cobra.Command{
 		//setup base service
 		baseService := manage.NewUserService(
 			dataStore,
-			TopLevelLogger.Named("gotrxx"),
+			TopLevelLogger.WithGroup("gotrxx"),
 			LoadedConfig,
 			mailer,
 			dispatcher,
 		)
 		inviteToken, err := baseService.InviteUser(context.Background(), nil, roles, []int{1})
 		if err != nil {
-			log.Fatal("could not generate invite", zap.Error(err))
+			log.Fatal("could not generate invite", "err", err)
 		}
 		fmt.Printf("Your new invite token is %s", inviteToken)
 	},
