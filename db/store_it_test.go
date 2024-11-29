@@ -18,7 +18,7 @@ import (
 	"github.com/stretchr/testify/suite"
 
 	_ "github.com/go-sql-driver/mysql"
-	_ "github.com/jackc/pgx/stdlib"
+	_ "github.com/jackc/pgx/v4/stdlib"
 	_ "github.com/mattn/go-sqlite3"
 )
 
