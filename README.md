@@ -59,7 +59,7 @@ version of decap CMS. And things did not go as I wanted. Fast-forward - we are h
 
 ### Building from source
 
-gotrxx is written and tested against Go 1~~.19~~.23+
+gotrxx is written and tested against Go 1.23+
 
 ```
 git clone https://github.com/eisenwinter/gotrxx.git
