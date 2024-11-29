@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.20](https://github.com/eisenwinter/gotrxx/compare/0.0.19...0.0.20) (2024-11-29)
+
+
+### Bug Fixes
+
+* dockerfile upddated ([daa9158](https://github.com/eisenwinter/gotrxx/commit/daa9158b7aea0a85b63c3ca1ff9ab400f02b17c4))
+
 ## [0.0.19](https://github.com/eisenwinter/gotrxx/compare/0.0.18...0.0.19) (2024-11-29)
 
 
