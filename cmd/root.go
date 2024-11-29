@@ -62,6 +62,7 @@ func init() {
 	userCommand.AddCommand(&unbanUserCommand)
 	userCommand.AddCommand(&unlockUserCommand)
 	userCommand.AddCommand(&userCreateCommand)
+	userCommand.AddCommand(&listUsersCommand)
 
 	inviteCommand.AddCommand(&seedInviteCommand)
 	inviteCommand.AddCommand(&listInvitesCommand)

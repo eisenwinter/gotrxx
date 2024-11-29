@@ -166,3 +166,10 @@ func NewMailer(
 	}
 	return s, nil
 }
+
+func NewNoOpMailer() *Mailer {
+	s := &Mailer{
+		noop: true,
+	}
+	return s
+}
