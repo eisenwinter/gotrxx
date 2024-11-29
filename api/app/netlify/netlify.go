@@ -4,20 +4,19 @@ import (
 	"net/http"
 
 	"github.com/eisenwinter/gotrxx/api/app/connect"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
-
-	"go.uber.org/zap"
 )
 
 const NetlifyClientID = "netlify-gotrue"
 
 type NetlifyRessource struct {
-	logger    *zap.Logger
+	logger    logging.Logger
 	tokenAuth *jwtauth.JWTAuth
 	//nelitfy ressource just wraps the underlying connect ressource
 	uc      *connect.ConnnectRessource
@@ -102,7 +101,7 @@ func (n *NetlifyRessource) token(w http.ResponseWriter, r *http.Request) {
 			},
 		)
 		if err != nil {
-			n.logger.Error("unable to render response", zap.Error(err))
+			n.logger.Error("unable to render response", "err", err)
 		}
 	}
 }
@@ -120,7 +119,7 @@ func (n *NetlifyRessource) refreshTokenGrant(r *http.Request, w http.ResponseWri
 			},
 		)
 		if err != nil {
-			n.logger.Error("unable to render response", zap.Error(err))
+			n.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -150,7 +149,7 @@ func (n *NetlifyRessource) passwordGrant(r *http.Request, w http.ResponseWriter)
 			},
 		)
 		if err != nil {
-			n.logger.Error("unable to render response", zap.Error(err))
+			n.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -166,7 +165,7 @@ func (n *NetlifyRessource) passwordGrant(r *http.Request, w http.ResponseWriter)
 			},
 		)
 		if err != nil {
-			n.logger.Error("unable to render response", zap.Error(err))
+			n.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -202,7 +201,7 @@ func (n *NetlifyRessource) user(w http.ResponseWriter, r *http.Request) {
 		UserMetaData: map[string]string{},
 	})
 	if err != nil {
-		n.logger.Error("unable to render response", zap.Error(err))
+		n.logger.Error("unable to render response", "err", err)
 	}
 }
 
@@ -229,8 +228,8 @@ func (n *NetlifyRessource) logout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		n.logger.Error(
 			"Could not revoked all common tokens for authorization",
-			zap.Error(err),
-			zap.String("authorization_id", id.String()),
+			"err", err,
+			"authorization_id", id.String(),
 		)
 	}
 	w.WriteHeader(http.StatusNoContent)
@@ -242,7 +241,7 @@ func (*NetlifyRessource) settings(w http.ResponseWriter, r *http.Request) {
 }
 
 func NewNetlifyRessource(
-	logger *zap.Logger,
+	logger logging.Logger,
 	tokenAuth *jwtauth.JWTAuth,
 	c *connect.ConnnectRessource,
 	rotator *tokens.TokenRotator,

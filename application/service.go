@@ -6,7 +6,7 @@ import (
 
 	"github.com/eisenwinter/gotrxx/db"
 	"github.com/eisenwinter/gotrxx/db/tables"
-	"go.uber.org/zap"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 )
 
 // ErrNotFound indicates the requested entity was not found
@@ -22,11 +22,11 @@ type ApplicationStorer interface {
 }
 
 type Service struct {
-	log   *zap.Logger
+	log   logging.Logger
 	store ApplicationStorer
 }
 
-func NewApplicationSevice(log *zap.Logger,
+func NewApplicationSevice(log logging.Logger,
 	store ApplicationStorer) *Service {
 	return &Service{
 		log:   log,

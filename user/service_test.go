@@ -8,16 +8,16 @@ import (
 
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/db"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/eisenwinter/gotrxx/user/mocks"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
-	"go.uber.org/zap/zaptest"
 )
 
 func TestEmailToIDNotFound(t *testing.T) {
 	assert := assert.New(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dataStore := mocks.NewUserStorer(t)
 	mailer := mocks.NewMailer(t)
 	dispatcher := mocks.NewDispatcher(t)
@@ -31,7 +31,7 @@ func TestEmailToIDNotFound(t *testing.T) {
 
 func TestEmailToIDFalseOnErrr(t *testing.T) {
 	assert := assert.New(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dataStore := mocks.NewUserStorer(t)
 	mailer := mocks.NewMailer(t)
 	dispatcher := mocks.NewDispatcher(t)
@@ -44,7 +44,7 @@ func TestEmailToIDFalseOnErrr(t *testing.T) {
 }
 func TestEmailToID(t *testing.T) {
 	assert := assert.New(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dataStore := mocks.NewUserStorer(t)
 	mailer := mocks.NewMailer(t)
 	dispatcher := mocks.NewDispatcher(t)
@@ -60,7 +60,7 @@ func TestEmailToID(t *testing.T) {
 
 func TestRegisterUser(t *testing.T) {
 	assert := assert.New(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dataStore := mocks.NewUserStorer(t)
 	mailer := mocks.NewMailer(t)
 	dispatcher := mocks.NewDispatcher(t)
@@ -94,7 +94,7 @@ func TestRegisterUser(t *testing.T) {
 
 func TestRegisterUserPasswordViolation(t *testing.T) {
 	assert := assert.New(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dataStore := mocks.NewUserStorer(t)
 	mailer := mocks.NewMailer(t)
 	dispatcher := mocks.NewDispatcher(t)
@@ -117,7 +117,7 @@ func TestRegisterUserPasswordViolation(t *testing.T) {
 
 func TestRegisterUserAlreadyExists(t *testing.T) {
 	assert := assert.New(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dataStore := mocks.NewUserStorer(t)
 	mailer := mocks.NewMailer(t)
 	dispatcher := mocks.NewDispatcher(t)
@@ -140,7 +140,7 @@ func TestRegisterUserAlreadyExists(t *testing.T) {
 
 func TestRegisterFromInvite(t *testing.T) {
 	assert := assert.New(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dataStore := mocks.NewUserStorer(t)
 	mailer := mocks.NewMailer(t)
 	dispatcher := mocks.NewDispatcher(t)
@@ -181,7 +181,7 @@ func TestRegisterFromInvite(t *testing.T) {
 
 func TestRegisterFromInviteInvalidInvite(t *testing.T) {
 	assert := assert.New(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dataStore := mocks.NewUserStorer(t)
 	mailer := mocks.NewMailer(t)
 	dispatcher := mocks.NewDispatcher(t)

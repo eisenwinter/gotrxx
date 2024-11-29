@@ -7,17 +7,16 @@ import (
 	"github.com/eisenwinter/gotrxx/api/auth"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/go-chi/render"
-	"go.uber.org/zap"
 )
 
 // https://datatracker.ietf.org/doc/html/rfc7662
 func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		c.logger.Error("error on parsing form in retrospection endpoint", zap.Error(err))
+		c.logger.Error("error on parsing form in retrospection endpoint", "err", err)
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -29,7 +28,7 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 			createStdError(stdUnauthorziedClient, http.StatusUnauthorized, ""),
 		)
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -64,7 +63,7 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 					Active: false,
 				})
 				if err != nil {
-					c.logger.Error("unable to render introspectionResponse", zap.Error(err))
+					c.logger.Error("unable to render introspectionResponse", "err", err)
 				}
 				return
 			}
@@ -75,7 +74,7 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 					createStdError(stdInvalidRequest, http.StatusBadRequest, ""),
 				)
 				if err != nil {
-					c.logger.Error("unable to render response", zap.Error(err))
+					c.logger.Error("unable to render response", "err", err)
 				}
 				return
 			}
@@ -85,7 +84,7 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 		if !isEligble(refreshToken) {
 			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
+				c.logger.Error("unable to render response", "err", err)
 			}
 			return
 		}
@@ -100,14 +99,14 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 				Active: false,
 			})
 			if err != nil {
-				c.logger.Error("unable to render introspectionResponse", zap.Error(err))
+				c.logger.Error("unable to render introspectionResponse", "err", err)
 			}
 			return
 		}
 		if !isEligble(refreshToken) {
 			err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
+				c.logger.Error("unable to render response", "err", err)
 			}
 			return
 		}
@@ -117,7 +116,7 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 	if !isEligble(jwtoken) {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -153,7 +152,7 @@ func (c *ConnnectRessource) renderIntrospectResult(
 		AuthorizationID: jwtoken.AuthorizationID(),
 	})
 	if err != nil {
-		c.logger.Error("unable to render introspectionResponse", zap.Error(err))
+		c.logger.Error("unable to render introspectionResponse", "err", err)
 	}
 
 }

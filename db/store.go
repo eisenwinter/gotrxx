@@ -12,9 +12,8 @@ import (
 	"github.com/adlio/schema"
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/db/tables"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/jmoiron/sqlx"
-
-	"go.uber.org/zap"
 
 	sq "github.com/Masterminds/squirrel"
 	fq "github.com/eisenwinter/fiql-sql-adapter"
@@ -33,7 +32,7 @@ var (
 )
 
 type DataStore struct {
-	log      *zap.Logger
+	log      logging.Logger
 	db       *sqlx.DB
 	adapters map[string]*fq.Adapter
 	migrate  func() error
@@ -73,10 +72,10 @@ func (d *DataStore) getStatement(
 ) error {
 	q, a, err := statement.ToSql()
 	if err != nil {
-		d.log.Error("Unable to construct sql", zap.Error(err))
+		d.log.Error("unable to construct sql", "err", err)
 		return err
 	}
-	//d.log.Debug("SQL statement built", zap.String("sql", q))
+	//d.log.Debug("SQL statement built", "sql", q)
 	if tx != nil {
 		return tx.GetContext(ctx, dest, q, a...)
 	}
@@ -91,7 +90,7 @@ func (d *DataStore) returningInsertStatement(
 ) error {
 	q, a, err := statement.ToSql()
 	if err != nil {
-		d.log.Error("Unable to construct sql", zap.Error(err))
+		d.log.Error("unable to construct sql", "err", err)
 		return err
 	}
 	if tx != nil {
@@ -108,7 +107,7 @@ func (d *DataStore) selectStatement(
 ) error {
 	q, a, err := statement.ToSql()
 	if err != nil {
-		d.log.Error("Unable to construct sql", zap.Error(err))
+		d.log.Error("unable to construct sql", "err", err)
 		return err
 	}
 	if tx != nil {
@@ -124,7 +123,7 @@ func (d *DataStore) deleteStatement(
 ) (sql.Result, error) {
 	q, a, err := statement.ToSql()
 	if err != nil {
-		d.log.Error("Unable to construct sql", zap.Error(err))
+		d.log.Error("unable to construct sql", "err", err)
 		return nil, err
 	}
 	if tx != nil {
@@ -140,7 +139,7 @@ func (d *DataStore) insertStatement(
 ) (sql.Result, error) {
 	q, a, err := statement.ToSql()
 	if err != nil {
-		d.log.Error("Unable to construct sql", zap.Error(err))
+		d.log.Error("unable to construct sql", "err", err)
 		return nil, err
 	}
 	if tx != nil {
@@ -156,7 +155,7 @@ func (d *DataStore) updateStatement(
 ) (sql.Result, error) {
 	q, a, err := statement.ToSql()
 	if err != nil {
-		d.log.Error("Unable to construct sql", zap.Error(err))
+		d.log.Error("unable to construct sql", "err", err)
 		return nil, err
 	}
 	if tx != nil {
@@ -165,20 +164,20 @@ func (d *DataStore) updateStatement(
 	return d.db.ExecContext(ctx, q, a...)
 }
 
-func NewStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
+func NewStore(logger logging.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
 	switch cfg.Type {
 	case "sqlite":
-		return NewSqliteStore(logger.Named("database"), cfg)
+		return NewSqliteStore(logger.WithGroup("database"), cfg)
 	case "mysql":
-		return NewMysqlStore(logger.Named("database"), cfg)
+		return NewMysqlStore(logger.WithGroup("database"), cfg)
 	case "pg":
-		return NewPostgrestore(logger.Named("database"), cfg)
+		return NewPostgrestore(logger.WithGroup("database"), cfg)
 	default:
 		return nil, errors.New("unknown datastore")
 	}
 }
 
-func NewMysqlStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
+func NewMysqlStore(logger logging.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
 	adaptedDsn := cfg.DSN
 	if strings.Contains(adaptedDsn, "?") {
 		adaptedDsn += "&parseTime=true"
@@ -187,14 +186,14 @@ func NewMysqlStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*Data
 	}
 	db, err := sqlx.Open("mysql", adaptedDsn)
 	if err != nil {
-		logger.Error("Could open database", zap.Error(err))
+		logger.Error("could open database", "err", err)
 		return nil, err
 	}
 
 	migrate := func() error {
 		migdb, err := sqlx.Open("mysql", cfg.DSN+"?multiStatements=True")
 		if err != nil {
-			logger.Error("Could open database", zap.Error(err))
+			logger.Error("could open database", "err", err)
 			return err
 		}
 
@@ -218,10 +217,10 @@ func NewMysqlStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*Data
 
 }
 
-func NewPostgrestore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
+func NewPostgrestore(logger logging.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
 	db, err := sqlx.Open("pgx", cfg.DSN)
 	if err != nil {
-		logger.Error("Could open database", zap.Error(err))
+		logger.Error("could open database", "err", err)
 		return nil, err
 	}
 
@@ -247,10 +246,10 @@ func NewPostgrestore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*Da
 
 }
 
-func NewSqliteStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
+func NewSqliteStore(logger logging.Logger, cfg *config.DatabaseConfiguration) (*DataStore, error) {
 	db, err := sqlx.Open("sqlite3", cfg.DSN)
 	if err != nil {
-		logger.Error("Could open database", zap.Error(err))
+		logger.Error("could open database", "err", err)
 		return nil, err
 	}
 
@@ -260,10 +259,10 @@ func NewSqliteStore(logger *zap.Logger, cfg *config.DatabaseConfiguration) (*Dat
 		striped := strings.TrimPrefix(split[0], "file:")
 		dir := filepath.Dir(striped)
 		if _, err := os.Stat(dir); os.IsNotExist(err) {
-			logger.Warn("Trying to create directory", zap.String("directory", dir))
+			logger.Warn("trying to create directory", "directory", dir)
 			err = os.Mkdir(dir, 0650)
 			if err != nil {
-				logger.Error("Could open database", zap.Error(err))
+				logger.Error("could open database", "err", err)
 				return nil, err
 			}
 		}

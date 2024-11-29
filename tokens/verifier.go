@@ -9,9 +9,9 @@ import (
 	"github.com/eisenwinter/gotrxx/authorization"
 	"github.com/eisenwinter/gotrxx/db"
 	"github.com/eisenwinter/gotrxx/db/tables"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/google/uuid"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"go.uber.org/zap"
 )
 
 type TokenFetcher interface {
@@ -24,7 +24,7 @@ type TokenFetcher interface {
 	ApplicationByClientID(ctx context.Context, clientID string) (*tables.ApplicationTable, error)
 }
 
-func NewTokenVerifier(log *zap.Logger,
+func NewTokenVerifier(log logging.Logger,
 	issuer *TokenIssuer,
 	loader TokenFetcher,
 	authService *authorization.Service) *TokenVerifier {
@@ -37,7 +37,7 @@ func NewTokenVerifier(log *zap.Logger,
 }
 
 type TokenVerifier struct {
-	log         *zap.Logger
+	log         logging.Logger
 	issuer      *TokenIssuer
 	loader      TokenFetcher
 	authService *authorization.Service
@@ -55,7 +55,7 @@ func (t *TokenVerifier) ParseAndValidateAccessToken(accessToken string) (jwt.Tok
 		case errors.Is(err, jwt.ErrTokenExpired()):
 			return nil, errors.New("expired access token")
 		default:
-			t.log.Error("unexpected access token parsing error", zap.Error(err))
+			t.log.Error("unexpected access token parsing error", "err", err)
 			return nil, errors.New("failed to parse access token")
 		}
 

@@ -12,10 +12,10 @@ import (
 	"github.com/eisenwinter/gotrxx/events/event"
 	"github.com/eisenwinter/gotrxx/generator"
 	"github.com/eisenwinter/gotrxx/i18n"
-	"github.com/eisenwinter/gotrxx/sanitize"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
+	"github.com/eisenwinter/gotrxx/pkg/sanitize"
 	"github.com/google/uuid"
 	"github.com/xlzd/gotp"
-	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -96,7 +96,7 @@ type UserManager interface {
 }
 
 func New(store UserStorer,
-	logger *zap.Logger,
+	logger logging.Logger,
 	cfg *config.Configuration,
 	mailer Mailer,
 	dispatcher Dispatcher,
@@ -113,7 +113,7 @@ func New(store UserStorer,
 
 type Service struct {
 	store      UserStorer
-	log        *zap.Logger
+	log        logging.Logger
 	cfg        *config.Configuration
 	mailer     Mailer
 	dispatcher Dispatcher
@@ -138,7 +138,7 @@ func (g *Service) getUserByID(ctx context.Context, id uuid.UUID) (*db.UserData, 
 		if errors.Is(err, db.ErrNotFound) {
 			return nil, ErrEntityDoesNotExist
 		}
-		g.log.Error("Unable to get user by id", zap.Error(err))
+		g.log.Error("unable to get user by id", "err", err)
 		return nil, err
 	}
 	return provider, nil
@@ -158,7 +158,7 @@ func (g *Service) RegisterFromInvite(
 		if errors.Is(err, db.ErrNotFound) {
 			return uuid.UUID{}, ErrEntityDoesNotExist
 		}
-		g.log.Error("could not fetch invite data", zap.Error(err))
+		g.log.Error("could not fetch invite data", "err", err)
 		return uuid.UUID{}, err
 	}
 	if invite.Expires.Before(time.Now().UTC()) {
@@ -166,7 +166,7 @@ func (g *Service) RegisterFromInvite(
 	}
 	id, err := g.register(ctx, email, password, phone)
 	if err != nil {
-		g.log.Error("unable to register from invite", zap.Error(err))
+		g.log.Error("unable to register from invite", "err", err)
 		return uuid.UUID{}, err
 	}
 	for _, v := range invite.Roles {
@@ -174,9 +174,9 @@ func (g *Service) RegisterFromInvite(
 		if err != nil {
 			g.log.Error(
 				"could not add user to role",
-				zap.String("role", v),
-				zap.String("user_id", id.String()),
-				zap.Error(err),
+				"role", v,
+				"user_id", id.String(),
+				"err", err,
 			)
 		}
 	}
@@ -199,9 +199,9 @@ func (g *Service) RegisterFromInvite(
 		if err != nil {
 			g.log.Error(
 				"could not auto grant user auth for invite application",
-				zap.Int("app", v.ApplicationID),
-				zap.String("user_id", id.String()),
-				zap.Error(err),
+				"app", v.ApplicationID,
+				"user_id", id.String(),
+				"err", err,
 			)
 		} else {
 			g.dispatcher.Dispatch(&event.AuthorizationGranted{
@@ -218,8 +218,8 @@ func (g *Service) RegisterFromInvite(
 	if err != nil {
 		g.log.Warn(
 			"could not consume invite code",
-			sanitize.UserInputString("invite_code", inviteCode),
-			zap.Error(err),
+			"invite_code", sanitize.UserInputString(inviteCode),
+			"err", err,
 		)
 	} else {
 		g.dispatcher.Dispatch(&event.UserInviteConsumed{
@@ -258,8 +258,8 @@ func (g *Service) register(
 	if err != nil {
 		g.log.Error(
 			"Could not check registration in data store",
-			sanitize.UserInputString("email", email),
-			zap.Error(err),
+			"email", sanitize.UserInputString(email),
+			"err", err,
 		)
 		return uuid.UUID{}, err
 	}
@@ -277,7 +277,7 @@ func (g *Service) register(
 			token := gen.CreateSecureToken()
 			exists, err = g.store.ConfirmTokenExists(ctx, string(token))
 			if err != nil {
-				g.log.Error("Could not check if confirm token already exists", zap.Error(err))
+				g.log.Error("could not check if confirm token already exists", "err", err)
 				return uuid.UUID{}, err
 			}
 			timeout++
@@ -312,17 +312,16 @@ func (g *Service) register(
 		t := *confirmToken
 		err = g.mailer.SendConfirmMail(email, t, g.currentLocale(ctx))
 		if err != nil {
-			g.log.Error("Registration mail could not be sent", zap.Error(err))
+			g.log.Error("registration mail could not be sent", "err", err)
 		} else {
-
 			g.dispatcher.Dispatch(&event.EmailSignupConfirmSent{
 				UserID:       id,
 				ConfirmToken: t,
 				Sent:         time.Now(),
 				Email:        email,
 			})
-			if confirmToken != nil {
-				g.log.Debug("Confirm code sent", zap.String("confirm_token", *confirmToken))
+			if t != "" {
+				g.log.Debug("confirm code sent", "confirm_token", *confirmToken)
 			}
 
 		}
@@ -337,8 +336,8 @@ func (g *Service) ConfirmUser(ctx context.Context, token string) error {
 	if err != nil {
 		g.log.Error(
 			"Could not confirm in data store",
-			sanitize.UserInputString("token", token),
-			zap.Error(err),
+			"token", sanitize.UserInputString(token),
+			"err", err,
 		)
 		return err
 	}
@@ -356,7 +355,7 @@ func (g *Service) ConfirmUser(ctx context.Context, token string) error {
 func (g *Service) EmailToID(ctx context.Context, email string) (uuid.UUID, bool) {
 	found, id, err := g.store.IDFromEmail(ctx, email)
 	if err != nil {
-		g.log.Error("Unable to get matching user from store", zap.Error(err))
+		g.log.Error("unable to get matching user from store", "err", err)
 		return uuid.UUID{}, false
 	}
 	return id, found
@@ -423,7 +422,7 @@ func (g *Service) TriggerPasswordRecovery(ctx context.Context, id uuid.UUID) err
 	token := gen.CreateSecureToken()
 	ok, err := g.store.SetRecoveryToken(ctx, id, string(token))
 	if err != nil {
-		g.log.Error("Unable to set recovery token in store", zap.Error(err))
+		g.log.Error("unable to set recovery token in store", "err", err)
 		return err
 	}
 	if !ok {
@@ -438,7 +437,7 @@ func (g *Service) TriggerPasswordRecovery(ctx context.Context, id uuid.UUID) err
 	}
 	err = g.mailer.SendPasswordRecoverMail(ud.Email, string(token), g.currentLocale(ctx))
 	if err != nil {
-		g.log.Error("Unable to send recovery email", zap.Error(err))
+		g.log.Error("unable to send recovery email", "err", err)
 		return err
 	}
 	g.dispatcher.Dispatch(&event.EmailPasswordRecoverySent{
@@ -503,7 +502,7 @@ func (g *Service) ChangePassword(ctx context.Context, id uuid.UUID, password str
 func (g *Service) ChangeEmail(ctx context.Context, id uuid.UUID, email string) error {
 	exists, err := g.store.IsRegistred(ctx, email)
 	if err != nil {
-		g.log.Error("could not check registred status from store", zap.Error(err))
+		g.log.Error("could not check registred status from store", "err", err)
 		return err
 	}
 	if exists {

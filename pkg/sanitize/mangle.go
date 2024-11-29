@@ -2,16 +2,12 @@ package sanitize
 
 import (
 	"strings"
-
-	"go.uber.org/zap"
-	"go.uber.org/zap/zapcore"
 )
 
 // UserInputString is used to strip value of any \r \n to
 // avoiding log injection / CWE-117
-func UserInputString(key string, value string) zapcore.Field {
-	esc := NoLineBreaks(value)
-	return zap.String(key, esc)
+func UserInputString(value string) string {
+	return NoLineBreaks(value)
 }
 
 // NoLineBreaks removes linebreaks and carrage returns from string

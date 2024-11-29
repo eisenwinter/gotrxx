@@ -33,6 +33,13 @@ tasks:
       - go install github.com/evilmartians/lefthook@latest
       - go install github.com/siderolabs/conform/cmd/conform@latest
 
+  dev:provision:all:
+    desc: "sets up the workspace, linters, git tooling and gets dependecies"
+    cmds:
+      - task: dev:git-tooling
+      - task: dev:install-linters
+      - task: dev:provision
+
   build:
     desc: "build the compiled binary"
     cmds:
@@ -90,6 +97,15 @@ tasks:
     cmds:
       - golines -w -m 100 . 
     silent: true
+
+  lint:all:
+    desc: "runs all linters"
+    cmds:
+      - task: lint:gofmt
+      - task: lint:golangci
+      - task: lint:goreportcard
+      - task: lint:staticcheck
+      - task: lint:golines
 
   templates:dev:
     desc: "Runs 11ty dev server for template styling"

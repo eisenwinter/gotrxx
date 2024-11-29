@@ -4,7 +4,7 @@ import (
 	"github.com/eisenwinter/gotrxx/db/tables"
 	"github.com/eisenwinter/gotrxx/events"
 	"github.com/eisenwinter/gotrxx/events/event"
-	"go.uber.org/zap"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 )
 
 // Auditor is a way to write audit log events into a persistent store
@@ -13,7 +13,7 @@ type Auditor interface {
 }
 
 // BootstrapListeners registers all the event listeners from this package
-func BootstrapListeners(store Auditor, log *zap.Logger) []events.EventListener {
+func BootstrapListeners(store Auditor, log logging.Logger) []events.EventListener {
 	return []events.EventListener{
 		&userIniviteListener{
 			log:   log,
@@ -132,7 +132,7 @@ func BootstrapListeners(store Auditor, log *zap.Logger) []events.EventListener {
 
 type userIniviteListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userIniviteListener) ForEvent() events.EventName {
@@ -146,14 +146,14 @@ func (l *userIniviteListener) Handle(ev events.Event) error {
 		"code":  e.InviteCode,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type userInviteConsumedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userInviteConsumedListener) ForEvent() events.EventName {
@@ -167,7 +167,7 @@ func (l *userInviteConsumedListener) Handle(ev events.Event) error {
 		"user_id":     e.UserID.String(),
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
@@ -181,7 +181,7 @@ func toString(b bool) string {
 
 type userConfirmedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userConfirmedListener) ForEvent() events.EventName {
@@ -196,14 +196,14 @@ func (l *userConfirmedListener) Handle(ev events.Event) error {
 		"confirm_code": e.ConfirmCode,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type userSignupListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userSignupListener) ForEvent() events.EventName {
@@ -217,14 +217,14 @@ func (l *userSignupListener) Handle(ev events.Event) error {
 		"email":   e.Email,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type userLockedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userLockedListener) ForEvent() events.EventName {
@@ -238,7 +238,7 @@ func (l *userLockedListener) Handle(ev events.Event) error {
 		"locked_until": e.LockedUntil.Format("2006-02-01 03:04:05"),
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 
 	return nil
@@ -246,7 +246,7 @@ func (l *userLockedListener) Handle(ev events.Event) error {
 
 type userUnlockedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userUnlockedListener) ForEvent() events.EventName {
@@ -259,7 +259,7 @@ func (l *userUnlockedListener) Handle(ev events.Event) error {
 		"user_id": e.UserID.String(),
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 
 	return nil
@@ -267,7 +267,7 @@ func (l *userUnlockedListener) Handle(ev events.Event) error {
 
 type userBannedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userBannedListener) ForEvent() events.EventName {
@@ -280,7 +280,7 @@ func (l *userBannedListener) Handle(ev events.Event) error {
 		"user_id": e.UserID.String(),
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 
 	return nil
@@ -288,7 +288,7 @@ func (l *userBannedListener) Handle(ev events.Event) error {
 
 type userUnbannedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userUnbannedListener) ForEvent() events.EventName {
@@ -301,7 +301,7 @@ func (l *userUnbannedListener) Handle(ev events.Event) error {
 		"user_id": e.UserID.String(),
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 
 	return nil
@@ -309,7 +309,7 @@ func (l *userUnbannedListener) Handle(ev events.Event) error {
 
 type userLoginListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userLoginListener) ForEvent() events.EventName {
@@ -322,7 +322,7 @@ func (l *userLoginListener) Handle(ev events.Event) error {
 		"user_id": e.UserID.String(),
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 
 	return nil
@@ -330,7 +330,7 @@ func (l *userLoginListener) Handle(ev events.Event) error {
 
 type userPasswordRecoveryRequestedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userPasswordRecoveryRequestedListener) ForEvent() events.EventName {
@@ -343,7 +343,7 @@ func (l *userPasswordRecoveryRequestedListener) Handle(ev events.Event) error {
 		"user_id": e.UserID.String(),
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 
 	return nil
@@ -351,7 +351,7 @@ func (l *userPasswordRecoveryRequestedListener) Handle(ev events.Event) error {
 
 type userPasswordRecoveryUsedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userPasswordRecoveryUsedListener) ForEvent() events.EventName {
@@ -366,7 +366,7 @@ func (l *userPasswordRecoveryUsedListener) Handle(ev events.Event) error {
 		"token":   e.Token,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 
 	return nil
@@ -374,7 +374,7 @@ func (l *userPasswordRecoveryUsedListener) Handle(ev events.Event) error {
 
 type userEmailChangedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userEmailChangedListener) ForEvent() events.EventName {
@@ -388,7 +388,7 @@ func (l *userEmailChangedListener) Handle(ev events.Event) error {
 		"new_email": e.Email,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 
 	return nil
@@ -396,7 +396,7 @@ func (l *userEmailChangedListener) Handle(ev events.Event) error {
 
 type userPasswordChangedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userPasswordChangedListener) ForEvent() events.EventName {
@@ -409,14 +409,14 @@ func (l *userPasswordChangedListener) Handle(ev events.Event) error {
 		"user_id": e.UserID.String(),
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type userRemovedFromRoleListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userRemovedFromRoleListener) ForEvent() events.EventName {
@@ -430,14 +430,14 @@ func (l *userRemovedFromRoleListener) Handle(ev events.Event) error {
 		"role":    e.Role,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type userAddedToRoleListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userAddedToRoleListener) ForEvent() events.EventName {
@@ -451,14 +451,14 @@ func (l *userAddedToRoleListener) Handle(ev events.Event) error {
 		"role":    e.Role,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type emailSignupConfirmSentListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*emailSignupConfirmSentListener) ForEvent() events.EventName {
@@ -473,14 +473,14 @@ func (l *emailSignupConfirmSentListener) Handle(ev events.Event) error {
 		"token":   e.ConfirmToken,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type emailPasswordRecoverySentListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*emailPasswordRecoverySentListener) ForEvent() events.EventName {
@@ -496,14 +496,14 @@ func (l *emailPasswordRecoverySentListener) Handle(ev events.Event) error {
 		"token":   e.ConfirmToken,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type emailInviteSentListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*emailInviteSentListener) ForEvent() events.EventName {
@@ -518,14 +518,14 @@ func (l *emailInviteSentListener) Handle(ev events.Event) error {
 		"invite_code": e.InviteCode,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type securityAuthorizationGrantedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*securityAuthorizationGrantedListener) ForEvent() events.EventName {
@@ -541,14 +541,14 @@ func (l *securityAuthorizationGrantedListener) Handle(ev events.Event) error {
 		"application_id": e.ApplicationID,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type securityAuthorizationRevokedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*securityAuthorizationRevokedListener) ForEvent() events.EventName {
@@ -564,14 +564,14 @@ func (l *securityAuthorizationRevokedListener) Handle(ev events.Event) error {
 		"affected_tokens": e.TokensAffected,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type tokenRevokedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*tokenRevokedListener) ForEvent() events.EventName {
@@ -588,14 +588,14 @@ func (l *tokenRevokedListener) Handle(ev events.Event) error {
 		"token_type": e.TokenType,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type mfaEnabledListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*mfaEnabledListener) ForEvent() events.EventName {
@@ -608,14 +608,14 @@ func (l *mfaEnabledListener) Handle(ev events.Event) error {
 		"user_id": e.UserID.String(),
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type mfaDisabledListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*mfaDisabledListener) ForEvent() events.EventName {
@@ -628,14 +628,14 @@ func (l *mfaDisabledListener) Handle(ev events.Event) error {
 		"user_id": e.UserID.String(),
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type applicationCreatedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*applicationCreatedListener) ForEvent() events.EventName {
@@ -649,14 +649,14 @@ func (l *applicationCreatedListener) Handle(ev events.Event) error {
 		"client_id":      e.ClientID,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type applicationRetiredListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*applicationRetiredListener) ForEvent() events.EventName {
@@ -670,14 +670,14 @@ func (l *applicationRetiredListener) Handle(ev events.Event) error {
 		"client_id":      e.ClientID,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type applicationPurgeListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*applicationPurgeListener) ForEvent() events.EventName {
@@ -690,14 +690,14 @@ func (l *applicationPurgeListener) Handle(ev events.Event) error {
 		"affected_client_ids": e.AffectedClientIDs,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type userSignedInByTokenListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*userSignedInByTokenListener) ForEvent() events.EventName {
@@ -711,14 +711,14 @@ func (l *userSignedInByTokenListener) Handle(ev events.Event) error {
 		"token_type": e.TokenType,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type roleCreatedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*roleCreatedListener) ForEvent() events.EventName {
@@ -731,14 +731,14 @@ func (l *roleCreatedListener) Handle(ev events.Event) error {
 		"role": e.Role,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }
 
 type roleDeletedListener struct {
 	store Auditor
-	log   *zap.Logger
+	log   logging.Logger
 }
 
 func (*roleDeletedListener) ForEvent() events.EventName {
@@ -751,7 +751,7 @@ func (l *roleDeletedListener) Handle(ev events.Event) error {
 		"role": e.Role,
 	})
 	if err != nil {
-		l.log.Warn("Could not persist event to audit log", zap.Error(err))
+		l.log.Warn("could not persist event to audit log", "err", err)
 	}
 	return nil
 }

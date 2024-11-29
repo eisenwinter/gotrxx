@@ -11,8 +11,8 @@ import (
 	"github.com/eisenwinter/gotrxx/db"
 	"github.com/eisenwinter/gotrxx/events"
 	"github.com/eisenwinter/gotrxx/events/event"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -22,7 +22,7 @@ var ErrInvalidSecret = errors.New("invalid secret")
 
 type ApplicationService struct {
 	store      *db.DataStore
-	log        *zap.Logger
+	log        logging.Logger
 	cfg        *config.Configuration
 	dispatcher *events.Dispatcher
 }
@@ -428,7 +428,7 @@ func (a *ApplicationService) ByClientID(
 }
 
 func NewApplicationSevice(store *db.DataStore,
-	log *zap.Logger,
+	log logging.Logger,
 	cfg *config.Configuration,
 	dispatcher *events.Dispatcher) *ApplicationService {
 

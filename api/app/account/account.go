@@ -14,6 +14,7 @@ import (
 	"github.com/eisenwinter/gotrxx/authorization"
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/i18n"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/go-chi/chi/v5"
@@ -21,7 +22,6 @@ import (
 	"github.com/google/uuid"
 	"github.com/gorilla/csrf"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"go.uber.org/zap"
 )
 
 const gotrxxClientID = "$.gotrxx"
@@ -45,7 +45,7 @@ type AccountRessource struct {
 
 	registry *i18n.TranslationRegistry
 
-	log         *zap.Logger
+	log         logging.Logger
 	userSignIn  SignIner
 	userService UserService
 	autService  AuthorizationService
@@ -135,10 +135,10 @@ func (a *AccountRessource) getTranslatorFor(ctx context.Context, page string) *i
 	t, err := a.registry.TranslatorFor(locale, res)
 	if err != nil {
 		if errors.Is(i18n.ErrLanguageDoesntExist, err) {
-			a.log.Error("[i18n] languages doesnt exist", zap.String("iso", locale))
+			a.log.Error("[i18n] languages doesnt exist", "iso", locale)
 		}
 		if errors.Is(i18n.ErrRessourceDoesNotExist, err) {
-			a.log.Error("[i18n] ressource doesnt exist", zap.String("ressource", res))
+			a.log.Error("[i18n] ressource doesnt exist", "ressource", res)
 		}
 		return a.registry.CreateVoidTranslator(locale, res)
 	}
@@ -149,7 +149,7 @@ func (a *AccountRessource) signedInUser(w http.ResponseWriter, r *http.Request) 
 	tokenCookie, err := r.Cookie(jwtCookie)
 	if err != nil {
 		if errors.Is(http.ErrNoCookie, err) {
-			a.log.Debug("account ressource: no jwt cookie", zap.Error(err))
+			a.log.Debug("account ressource: no jwt cookie", "err", err)
 			rememberMe, err := r.Cookie(rememberMeCookie)
 			if err != nil {
 				return false, nil
@@ -160,7 +160,7 @@ func (a *AccountRessource) signedInUser(w http.ResponseWriter, r *http.Request) 
 			}
 			return true, token
 		}
-		a.log.Debug("account ressource: error reading cookie", zap.Error(err))
+		a.log.Debug("account ressource: error reading cookie", "err", err)
 		return false, nil
 	}
 	a.log.Debug("account ressource: reading jwt")
@@ -202,7 +202,7 @@ func (a *AccountRessource) signedInUser(w http.ResponseWriter, r *http.Request) 
 				return true, token
 			}
 		}
-		a.log.Error("account ressrouce: unexpected JWT error after reading cookie", zap.Error(err))
+		a.log.Error("account ressrouce: unexpected JWT error after reading cookie", "err", err)
 		clearCookie()
 		return false, nil
 	}
@@ -257,12 +257,12 @@ func (a *AccountRessource) issueUserCookie(
 		auth.Scopes(),
 	)
 	if err != nil {
-		a.log.Error("user login page: failed to issue a new access token", zap.Error(err))
+		a.log.Error("user login page: failed to issue a new access token", "err", err)
 		return nil, err
 	}
 	signed, err := a.issuer.Sign(t)
 	if err != nil {
-		a.log.Error("user login page: failed to sign a access token", zap.Error(err))
+		a.log.Error("user login page: failed to sign a access token", "err", err)
 		return nil, err
 	}
 	expires := int(t.Expiration().Sub(time.Now().UTC()).Seconds())
@@ -322,8 +322,8 @@ func (a *AccountRessource) view(
 	if err != nil {
 		a.log.Error(
 			"unable to render template for page",
-			zap.String("template", name),
-			zap.Error(err),
+			"template", name,
+			"err", err,
 		)
 	}
 }
@@ -331,7 +331,7 @@ func (a *AccountRessource) view(
 func (a *AccountRessource) changeLanguage(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		a.log.Error("change lang: ParseForm failed", zap.Error(err))
+		a.log.Error("change lang: ParseForm failed", "err", err)
 	}
 	returnURL := r.FormValue("return_url")
 	lang := strings.ToLower(r.FormValue("lang"))
@@ -352,7 +352,7 @@ func (a *AccountRessource) changeLanguage(w http.ResponseWriter, r *http.Request
 func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		a.log.Error("signin: ParseForm failed", zap.Error(err))
+		a.log.Error("signin: ParseForm failed", "err", err)
 	}
 
 	jwtc, err := r.Cookie(jwtCookie)
@@ -416,7 +416,7 @@ func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(tokens.ErrTokenNotFound, err) {
 			a.log.Warn("could not find remember me token to revoke")
 		} else {
-			a.log.Error("could not revoke remember me token on sign out", zap.Error(err))
+			a.log.Error("could not revoke remember me token on sign out", "err", err)
 		}
 
 	}
@@ -433,7 +433,7 @@ func sanitizeReturnURL(returnURL string, fallback string) string {
 	return parsed.RequestURI()
 }
 
-func NewAccountRessource(log *zap.Logger,
+func NewAccountRessource(log logging.Logger,
 	userSignIn SignIner,
 	cfg *config.BehaviourConfiguration,
 	userService UserService,
@@ -447,35 +447,39 @@ func NewAccountRessource(log *zap.Logger,
 
 	loginTmpl, err := mustLoadTemplate(fsConfig.Pages, "signin.html", log)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "signin.html"),
-			zap.Error(err),
+			"file", "signin.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 	signUpTmpl, err := mustLoadTemplate(fsConfig.Pages, "signup.html", log)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "signup.html"),
-			zap.Error(err),
+			"file", "signup.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 	userPageTmpl, err := mustLoadTemplate(fsConfig.Pages, "user.html", log)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "user.html"),
-			zap.Error(err),
+			"file", "user.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 	confirmTemplate, err := mustLoadTemplate(fsConfig.Pages, "confirm.html", log)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "confirm.html"),
-			zap.Error(err),
+			"file", "confirm.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 	recoverTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
@@ -483,11 +487,12 @@ func NewAccountRessource(log *zap.Logger,
 		log,
 	)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "recover_password.html"),
-			zap.Error(err),
+			"file", "recover_password.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 	requestRecoverTmpl, err := mustLoadTemplate(
 		fsConfig.Pages,
@@ -495,19 +500,21 @@ func NewAccountRessource(log *zap.Logger,
 		log,
 	)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "request_password_recovery.html"),
-			zap.Error(err),
+			"file", "request_password_recovery.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 	errorTemplate, err := mustLoadTemplate(fsConfig.Pages, "error.html", log)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "error.html"),
-			zap.Error(err),
+			"file", "error.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 	changePasswordTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
@@ -515,11 +522,12 @@ func NewAccountRessource(log *zap.Logger,
 		log,
 	)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "change_password.html"),
-			zap.Error(err),
+			"file", "change_password.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 	changeEmailTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
@@ -527,20 +535,22 @@ func NewAccountRessource(log *zap.Logger,
 		log,
 	)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "change_email.html"),
-			zap.Error(err),
+			"file", "change_email.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 
 	changeMfaTemplate, err := mustLoadTemplate(fsConfig.Pages, "change_mfa.html", log)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "change_mfa.html"),
-			zap.Error(err),
+			"file", "change_mfa.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 
 	provisionMfaTemplate, err := mustLoadTemplate(
@@ -549,29 +559,32 @@ func NewAccountRessource(log *zap.Logger,
 		log,
 	)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "provision_mfa.html"),
-			zap.Error(err),
+			"file", "provision_mfa.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 
 	inviteTemplate, err := mustLoadTemplate(fsConfig.Pages, "invite.html", log)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "invite.html"),
-			zap.Error(err),
+			"file", "invite.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 
 	fourOFour, err := mustLoadTemplate(fsConfig.Pages, "404.html", log)
 	if err != nil {
-		log.Fatal(
+		log.Error(
 			"unable to load required template file",
-			zap.String("file", "404.html"),
-			zap.Error(err),
+			"file", "404.html",
+			"err", err,
 		)
+		panic("unable to load required template file")
 	}
 
 	return &AccountRessource{

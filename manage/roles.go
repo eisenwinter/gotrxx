@@ -6,12 +6,12 @@ import (
 	"github.com/eisenwinter/gotrxx/db"
 	"github.com/eisenwinter/gotrxx/events"
 	"github.com/eisenwinter/gotrxx/events/event"
-	"go.uber.org/zap"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 )
 
 type RoleService struct {
 	store      *db.DataStore
-	log        *zap.Logger
+	log        logging.Logger
 	dispatcher *events.Dispatcher
 }
 
@@ -58,7 +58,7 @@ func (r *RoleService) DeleteRole(ctx context.Context, name string) error {
 }
 
 func NewRoleService(store *db.DataStore,
-	log *zap.Logger,
+	log logging.Logger,
 	dispatcher *events.Dispatcher) *RoleService {
 
 	return &RoleService{
