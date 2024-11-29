@@ -7,8 +7,11 @@ import (
 	"log"
 	"os"
 
+	"log/slog"
+
 	"github.com/eisenwinter/gotrxx/cmd"
 	"github.com/eisenwinter/gotrxx/config"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/google/safehtml/template"
 	_ "github.com/jackc/pgx/v4"
@@ -16,7 +19,6 @@ import (
 	_ "github.com/mattn/go-sqlite3"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 //go:embed templates/static
@@ -57,31 +59,31 @@ func main() {
 		return
 	}
 	logger := bootstrap()
-	defer func() {
-		_ = logger.Sync()
-
-	}()
 	cmd.TopLevelLogger = logger
 	cmd.Execute()
 }
 
-func bootstrap() *zap.Logger {
+func bootstrap() logging.Logger {
 	if _, err := os.Stat(".env"); err == nil {
 		err := godotenv.Load()
 		if err != nil {
 			log.Fatal("Error loading .env file")
 		}
 	}
-	cfg := zap.NewProductionConfig()
+
+	opts := &slog.HandlerOptions{}
 	if r := os.Getenv("DEBUG_LOG"); r == "true" {
-		cfg = zap.NewDevelopmentConfig()
+		// non versioned are assumed to be debug builds
+		opts.Level = slog.LevelDebug
 	}
-	logger, err := cfg.Build(zap.AddStacktrace(zap.ErrorLevel))
-	if err != nil {
-		log.Fatal(err)
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, opts))
+	slog.SetDefault(logger)
+	if opts.Level == slog.LevelDebug {
+		logger.Debug("debug logging enabled")
 	}
+	wrapped := logging.NewFromSlog(logger)
 	cobra.OnInitialize(func() { initConfig(logger) })
-	return logger
+	return wrapped
 }
 
 func setDefaults() {
@@ -102,15 +104,15 @@ func setDefaults() {
 	viper.SetDefault("manage-endpoint.enable", false)
 }
 
-func initConfig(logger *zap.Logger) {
+func initConfig(logger *slog.Logger) {
 	bind := func(from string, to string) {
 		err := viper.BindEnv(to, from)
 		if err != nil {
 			logger.Error(
 				"unable to bindenv",
-				zap.String("from", from),
-				zap.String(to, to),
-				zap.Error(err),
+				"from", from,
+				"to", to,
+				"err", err,
 			)
 		}
 
@@ -174,14 +176,14 @@ func initConfig(logger *zap.Logger) {
 
 	if cmd.ConfigFileLocation != "" {
 		logger.Debug(
-			"Using supplied config file",
-			zap.String("file", string(cmd.ConfigFileLocation)),
+			"using supplied config file",
+			"file", string(cmd.ConfigFileLocation),
 		)
 		viper.SetConfigFile(string(cmd.ConfigFileLocation))
 	} else {
 		path, err := os.Getwd()
 		if err != nil {
-			logger.Warn("Unable to get current working dir", zap.Error(err))
+			logger.Warn("unable to get current working dir", "err", err)
 		}
 		cobra.CheckErr(err)
 		viper.AddConfigPath(path)
@@ -193,41 +195,47 @@ func initConfig(logger *zap.Logger) {
 	viper.AutomaticEnv()
 
 	if err := viper.ReadInConfig(); err != nil {
-		logger.Debug("No confg file loaded")
+		logger.Debug("no confg file loaded")
 	} else {
-		logger.Debug("Config file loaded", zap.String("file", viper.ConfigFileUsed()))
+		logger.Debug("config file loaded", "file", viper.ConfigFileUsed())
 	}
 
 	conf := &config.Configuration{}
 	err := viper.Unmarshal(conf)
 	if err != nil {
-		logger.Fatal("Unable to unmarshall config", zap.Error(err))
+		logger.Error("unable to unmarshal config", "err", err)
+		panic("unable to unmarshal config")
 	}
-	logger.Debug("Config loaded", zap.Any("config", conf))
-	logger.Debug("Validating final config")
+	logger.Debug("config loaded", "config", conf)
+	logger.Debug("validating final config")
 	if err = conf.Validate(); err != nil {
-		logger.Fatal("Invalid configuration", zap.Error(err))
+		logger.Error("invalid configuration", "err", err)
+		panic("invalid configuration")
 	}
 	cmd.LoadedConfig = conf
 
 	if cmd.LoadedConfig.Server.LoadTemplateFolder {
 		if _, err := os.Stat("templates"); os.IsNotExist(err) {
-			logger.Fatal(
-				"You need to add the templates folder when using  `server.load-template-folder:true`",
+			logger.Error(
+				"you need to add the templates folder when using `server.load-template-folder:true`",
 			)
+			panic("`server.load-template-folder:true` without template folder")
 		}
 		templates := os.DirFS("templates")
 		statics, err := fs.Sub(templates, "static")
 		if err != nil {
-			logger.Fatal("Unable to open templates/static folder")
+			logger.Error("unable to open templates/static folder")
+			panic("unable to open templates/static")
 		}
 		i18n, err := fs.Sub(templates, "i18n")
 		if err != nil {
-			logger.Fatal("Unable to open templates/i18n folder")
+			logger.Error("unable to open templates/i18n folder")
+			panic("unable to open templates/i18n")
 		}
 		email, err := fs.Sub(templates, "email")
 		if err != nil {
-			logger.Fatal("Unable to open templates/email folder")
+			logger.Error("unable to open templates/email folder")
+			panic("unable to open templates/email")
 		}
 
 		src, err := template.TrustedSourceFromConstantDir(
@@ -236,7 +244,8 @@ func initConfig(logger *zap.Logger) {
 			``,
 		)
 		if err != nil {
-			logger.Fatal("Unable to open templates/pages folder")
+			logger.Error("unable to open templates/pages folder")
+			panic("unable to open templates/pages")
 		}
 
 		trustfs := template.TrustedFSFromTrustedSource(src)
@@ -250,19 +259,23 @@ func initConfig(logger *zap.Logger) {
 
 		statics, err := fs.Sub(templateContent, "templates/static")
 		if err != nil {
-			logger.Fatal("Unable to open templates/static folder")
+			logger.Error("unable to open templates/static folder")
+			panic("unable to open templates/static")
 		}
 		i18n, err := fs.Sub(templateContent, "templates/i18n")
 		if err != nil {
-			logger.Fatal("Unable to open templates/i18n folder")
+			logger.Error("unable to open templates/i18n folder")
+			panic("unable to open templates/i18n")
 		}
 		email, err := fs.Sub(templateContent, "templates/email")
 		if err != nil {
-			logger.Fatal("Unable to open templates/email folder")
+			logger.Error("unable to open templates/email folder")
+			panic("unable to open templates/email")
 		}
 		pages, err := template.TrustedFSFromEmbed(templatePages).Sub(template.TrustedSourceFromConstant(`templates/pages`))
 		if err != nil {
-			logger.Fatal("Unable to open templates/pages folder")
+			logger.Error("unable to open templates/pages folder")
+			panic("unable to open templates/pages")
 		}
 		cmd.FileSystemsConfig = &config.FileSystems{
 			StaticFolder: statics,

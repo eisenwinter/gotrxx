@@ -7,19 +7,19 @@ import (
 
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/db"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/eisenwinter/gotrxx/user/mocks"
 	"github.com/google/uuid"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/mock"
 	"github.com/xlzd/gotp"
-	"go.uber.org/zap/zaptest"
 	"golang.org/x/crypto/bcrypt"
 )
 
 func TestValidateUnknownUserID(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -43,7 +43,7 @@ func TestValidateUnknownUserID(t *testing.T) {
 func TestValidateUserNotEligbleToLoginBecauseLocked(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -72,7 +72,7 @@ func TestValidateUserNotEligbleToLoginBecauseLocked(t *testing.T) {
 func TestValidateUserNotEligbleToLoginBecauseBanned(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -101,7 +101,7 @@ func TestValidateUserNotEligbleToLoginBecauseBanned(t *testing.T) {
 func TestValidateUserNotEligbleToLoginBecauseUnconfirmed(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -128,7 +128,7 @@ func TestValidateUserNotEligbleToLoginBecauseUnconfirmed(t *testing.T) {
 func TestValidateInvalidPassword(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -158,7 +158,7 @@ func TestValidateInvalidPassword(t *testing.T) {
 func TestCanLoginNotFound(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -181,7 +181,7 @@ func TestCanLoginNotFound(t *testing.T) {
 func TestCanLogin(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -209,7 +209,7 @@ func TestCanLogin(t *testing.T) {
 func TestUserFromSubject(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -237,7 +237,7 @@ func TestUserFromSubject(t *testing.T) {
 func TestSignInByIDFromToken(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -266,7 +266,7 @@ func TestSignInByIDFromToken(t *testing.T) {
 func TestInitializeMFA(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -294,7 +294,7 @@ func TestInitializeMFA(t *testing.T) {
 func TestInitializeMFNotEnabled(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -322,7 +322,7 @@ func TestInitializeMFNotEnabled(t *testing.T) {
 func TestSignInInvalidPassword(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -353,7 +353,7 @@ func TestSignInInvalidPassword(t *testing.T) {
 func TestSignInLockoutThresholdCrossed(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -387,7 +387,7 @@ func TestSignInLockoutThresholdCrossed(t *testing.T) {
 func TestSignIn(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -418,7 +418,7 @@ func TestSignIn(t *testing.T) {
 func TestSignInMFAInvalidOTP(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(
@@ -451,7 +451,7 @@ func TestSignInMFAInvalidOTP(t *testing.T) {
 func TestSignInMFA(t *testing.T) {
 	assert := assert.New(t)
 	dataStore := mocks.NewLoginStorer(t)
-	logger := zaptest.NewLogger(t)
+	logger := logging.NewNoOpLogger()
 	dispatcher := mocks.NewDispatcher(t)
 	locker := mocks.NewUserLocker(t)
 	service := NewSignInService(

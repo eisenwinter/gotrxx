@@ -12,7 +12,6 @@ import (
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/spf13/cobra"
 	"github.com/spf13/viper"
-	"go.uber.org/zap"
 )
 
 var autoSeedAdminInvite string
@@ -31,7 +30,7 @@ var serveCommand = cobra.Command{
 
 		//setup token issuer
 		issuer := tokens.NewIssuer(
-			TopLevelLogger.Named("token_issuer"),
+			TopLevelLogger.WithGroup("token_issuer"),
 			LoadedConfig.JWT,
 			dataStore,
 		)
@@ -45,7 +44,7 @@ var serveCommand = cobra.Command{
 		//setup management services
 		userManager := manage.NewUserService(
 			dataStore,
-			TopLevelLogger.Named("user_manager"),
+			TopLevelLogger.WithGroup("user_manager"),
 			LoadedConfig,
 			mailer,
 			dispatcher,
@@ -65,43 +64,43 @@ var serveCommand = cobra.Command{
 				[]int{},
 			)
 			if err != nil {
-				TopLevelLogger.Error("unable to seed initial admin invite", zap.Error(err))
+				TopLevelLogger.Error("unable to seed initial admin invite", "err", err)
 			}
 		}
 
 		authanager := manage.NewAuthorizationService(
 			dataStore,
-			TopLevelLogger.Named("authorization_manager"),
+			TopLevelLogger.WithGroup("authorization_manager"),
 			LoadedConfig,
 			dispatcher,
 		)
 		appManager := manage.NewApplicationSevice(
 			dataStore,
-			TopLevelLogger.Named("application_manager"),
+			TopLevelLogger.WithGroup("application_manager"),
 			LoadedConfig,
 			dispatcher,
 		)
 		inviteManager := manage.NewInviteService(
 			dataStore,
-			TopLevelLogger.Named("invite_manager"),
+			TopLevelLogger.WithGroup("invite_manager"),
 			dispatcher,
 		)
 		roleManager := manage.NewRoleService(
 			dataStore,
-			TopLevelLogger.Named("role_manager"),
+			TopLevelLogger.WithGroup("role_manager"),
 			dispatcher,
 		)
 		//setup business services
 		signInService := user.NewSignInService(
 			dataStore,
-			TopLevelLogger.Named("signin_service"),
+			TopLevelLogger.WithGroup("signin_service"),
 			LoadedConfig.Behaviour,
 			dispatcher,
 			userManager,
 		)
 		userService := user.New(
 			dataStore,
-			TopLevelLogger.Named("user_service"),
+			TopLevelLogger.WithGroup("user_service"),
 			LoadedConfig,
 			mailer,
 			dispatcher,
@@ -109,15 +108,15 @@ var serveCommand = cobra.Command{
 		)
 
 		//setup token rotator
-		rotator := tokens.NewRotator(dataStore, dispatcher, TopLevelLogger.Named("token_rotator"))
+		rotator := tokens.NewRotator(dataStore, dispatcher, TopLevelLogger.WithGroup("token_rotator"))
 
 		appService := application.NewApplicationSevice(
-			TopLevelLogger.Named("application_service"),
+			TopLevelLogger.WithGroup("application_service"),
 			dataStore,
 		)
 
 		authService := authorization.NewAuthorizationService(
-			TopLevelLogger.Named("authorization_service"),
+			TopLevelLogger.WithGroup("authorization_service"),
 			dataStore,
 			dispatcher,
 			appService,
@@ -125,13 +124,13 @@ var serveCommand = cobra.Command{
 
 		//setup token verifier
 		verifier := tokens.NewTokenVerifier(
-			TopLevelLogger.Named("token_verifier"),
+			TopLevelLogger.WithGroup("token_verifier"),
 			issuer,
 			dataStore,
 			authService,
 		)
 
-		server, err := api.NewServer(LoadedConfig, TopLevelLogger.Named("server"),
+		server, err := api.NewServer(LoadedConfig, TopLevelLogger.WithGroup("server"),
 			issuer,
 			rotator,
 			signInService,
@@ -148,10 +147,11 @@ var serveCommand = cobra.Command{
 			inviteManager,
 		)
 		if err != nil {
-			TopLevelLogger.Fatal("Failed to create server", zap.Error(err))
+			TopLevelLogger.Error("failed to create server", "err", err)
+			panic("failed to create server")
 		}
 		server.Start()
-		TopLevelLogger.Info("Shutdown complete")
+		TopLevelLogger.Info("shutdown complete")
 	},
 }
 

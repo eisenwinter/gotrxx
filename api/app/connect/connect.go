@@ -5,17 +5,17 @@ import (
 	"net/http"
 
 	"github.com/eisenwinter/gotrxx/api/auth"
-	"github.com/eisenwinter/gotrxx/sanitize"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
+	"github.com/eisenwinter/gotrxx/pkg/sanitize"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 type ConnnectRessource struct {
-	logger    *zap.Logger
+	logger    logging.Logger
 	tokenAuth *jwtauth.JWTAuth
 	issuer    TokenIssuer
 	rotator   TokenRotator
@@ -78,7 +78,7 @@ func (c *ConnnectRessource) fieldValidationNotEmpty(
 			),
 		)
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return false
 	}
@@ -89,10 +89,10 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 	//issues accessTokenResponse
 	err := r.ParseForm()
 	if err != nil {
-		c.logger.Error("could not parse form on token endpoint", zap.Error(err))
+		c.logger.Error("could not parse form on token endpoint", "err", err)
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -113,7 +113,7 @@ func (c *ConnnectRessource) token(w http.ResponseWriter, r *http.Request) {
 	default:
 		err = render.Render(w, r, createStdError(stdUnspportedGrantType, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 	}
 
@@ -157,7 +157,7 @@ func (c *ConnnectRessource) tokenClientCredentialsGrant(r *http.Request, w http.
 	if clientID == "" {
 		id, suppliedSecret, err := auth.ClientIDFromBasicAuth(r, c.appService)
 		if err != nil {
-			c.logger.Info("unable to get client_id from basic auth", zap.Error(err))
+			c.logger.Info("unable to get client_id from basic auth", "err", err)
 			err = render.Render(
 				w,
 				r,
@@ -168,7 +168,7 @@ func (c *ConnnectRessource) tokenClientCredentialsGrant(r *http.Request, w http.
 				),
 			)
 			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
+				c.logger.Error("unable to render response", "err", err)
 			}
 			return
 		}
@@ -217,7 +217,7 @@ func (c *ConnnectRessource) tokenAuthorizationCodeGrant(r *http.Request, w http.
 		//https://datatracker.ietf.org/doc/html/rfc7636
 		c.logger.Warn(
 			"no code verifier for PKCE AND no client secret!",
-			sanitize.UserInputString("client_id", clientID),
+			"client_id", sanitize.UserInputString(clientID),
 		)
 	}
 
@@ -262,7 +262,7 @@ func (c *ConnnectRessource) tokenPasswordGrant(r *http.Request, w http.ResponseW
 func (c *ConnnectRessource) authorize(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		c.logger.Error("error on parsing form in authorize endpoint", zap.Error(err))
+		c.logger.Error("error on parsing form in authorize endpoint", "err", err)
 	}
 	responseType := r.FormValue("response_type")
 	switch responseType {
@@ -279,7 +279,7 @@ func (c *ConnnectRessource) authorize(w http.ResponseWriter, r *http.Request) {
 				),
 			)
 			if err != nil {
-				c.logger.Error("unable to render response", zap.Error(err))
+				c.logger.Error("unable to render response", "err", err)
 			}
 			return
 		}
@@ -306,7 +306,7 @@ func (c *ConnnectRessource) authorize(w http.ResponseWriter, r *http.Request) {
 			createStdError(stdUnspportedResponseType, http.StatusBadRequest, ""),
 		)
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -318,7 +318,7 @@ func (c *ConnnectRessource) userinfo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("errors getting jwt in userinfo endpoint")
 		return
@@ -328,7 +328,7 @@ func (c *ConnnectRessource) userinfo(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("errors parsing subjet in userinfo endpoint")
 		return
@@ -341,7 +341,7 @@ func (c *ConnnectRessource) userinfo(w http.ResponseWriter, r *http.Request) {
 			createStdError(stdInternalServerError, http.StatusInternalServerError, ""),
 		)
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("errors loading user from subjet in userinfo endpoint")
 		return
@@ -352,7 +352,7 @@ func (c *ConnnectRessource) userinfo(w http.ResponseWriter, r *http.Request) {
 		Roles:   user.Roles,
 	})
 	if err != nil {
-		c.logger.Error("unable to render response", zap.Error(err))
+		c.logger.Error("unable to render response", "err", err)
 	}
 }
 
@@ -373,7 +373,7 @@ func validateRequiredField(field string, name string, w http.ResponseWriter,
 	return true
 }
 
-func NewConnnectRessource(logger *zap.Logger,
+func NewConnnectRessource(logger logging.Logger,
 	tokenAuth *jwtauth.JWTAuth,
 	issuer TokenIssuer,
 	rotator TokenRotator,

@@ -15,6 +15,7 @@ import (
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/i18n"
 	"github.com/eisenwinter/gotrxx/manage"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/go-chi/chi/v5"
@@ -22,13 +23,11 @@ import (
 	"github.com/go-chi/jwtauth/v5"
 
 	ar "github.com/eisenwinter/gotrxx/api/app/account"
-
-	"go.uber.org/zap"
 )
 
 var tokenAuth *jwtauth.JWTAuth
 
-func compose(logger *zap.Logger,
+func compose(logger logging.Logger,
 	cfg *config.Configuration,
 	issuer *tokens.TokenIssuer,
 	signInService *user.SigninService,
@@ -74,7 +73,7 @@ func compose(logger *zap.Logger,
 	}
 
 	connectRessource := connect.NewConnnectRessource(
-		logger.Named("connect_ressource"),
+		logger.WithGroup("connect_ressource"),
 		tokenAuth,
 		issuer,
 		rotator,
@@ -84,13 +83,13 @@ func compose(logger *zap.Logger,
 		verifier,
 	)
 	netlifyRessource := netlify.NewNetlifyRessource(
-		logger.Named("netlify_ressource"),
+		logger.WithGroup("netlify_ressource"),
 		tokenAuth,
 		connectRessource,
 		rotator,
 	)
 	accountRessource := ar.NewAccountRessource(
-		logger.Named("account_ressource"),
+		logger.WithGroup("account_ressource"),
 		signInService,
 		cfg.Behaviour,
 		userService,
@@ -102,11 +101,11 @@ func compose(logger *zap.Logger,
 		fileSystems,
 		verifier,
 	)
-	metaRessource := meta.NewMetaRessource(logger.Named("meta_ressource"), cfg.Behaviour, issuer)
+	metaRessource := meta.NewMetaRessource(logger.WithGroup("meta_ressource"), cfg.Behaviour, issuer)
 
 	if cfg.ManageEndpoint.Enable {
 		manageRessource := management.NewManagementRessource(
-			logger.Named("management_ressource"),
+			logger.WithGroup("management_ressource"),
 			*cfg,
 			tokenAuth,
 			manageUserService,
@@ -135,17 +134,17 @@ func compose(logger *zap.Logger,
 				buffer := make([]byte, s.Size())
 				_, err = favicon.Read(buffer)
 				if err != nil {
-					logger.Warn("Unable to load favicon", zap.Error(err))
+					logger.Warn("Unable to load favicon", "err", err)
 				}
 				_, err = w.Write(buffer)
 				if err != nil {
-					logger.Warn("Unable to write favicon", zap.Error(err))
+					logger.Warn("Unable to write favicon", "err", err)
 				}
 				return
 			}
 
 		}
-		logger.Warn("No favicon found", zap.Error(err))
+		logger.Warn("no favicon found", "err", err)
 	})
 
 	r.Get("/robots.txt", func(w http.ResponseWriter, r *http.Request) {

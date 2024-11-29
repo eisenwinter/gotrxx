@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/go-chi/render"
-	"go.uber.org/zap"
 )
 
 func (m *ManagementRessource) listRoles(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +14,7 @@ func (m *ManagementRessource) listRoles(w http.ResponseWriter, r *http.Request) 
 
 	roles, err := m.roleService.List(r.Context(), page, pageSize, query, sort)
 	if err != nil {
-		m.log.Error("error listing roles", zap.Error(err))
+		m.log.Error("error listing roles", "err", err)
 
 		return
 	}

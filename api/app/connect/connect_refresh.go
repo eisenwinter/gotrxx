@@ -9,7 +9,6 @@ import (
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/go-chi/render"
 	"github.com/lestrrat-go/jwx/v2/jwt"
-	"go.uber.org/zap"
 )
 
 // RefreshTokenGrant handles the refresh_token grant, public because it used in netlify api as well
@@ -24,7 +23,7 @@ func (c *ConnnectRessource) RefreshTokenGrant(
 		req.RefreshToken,
 	)
 	if err != nil {
-		c.logger.Error("refresh token flow: failed to get application", zap.Error(err))
+		c.logger.Error("refresh token flow: failed to get application", "err", err)
 		render.Status(r, http.StatusInternalServerError)
 		render.Respond(
 			w,
@@ -100,12 +99,12 @@ func (c *ConnnectRessource) RefreshTokenGrant(
 	)
 	if err != nil {
 		if errors.Is(tokens.ErrTokenInvalidClientId, err) {
-			c.logger.Error("refresh token flow: failed to rotate refresh token", zap.Error(err))
+			c.logger.Error("refresh token flow: failed to rotate refresh token", "err", err)
 			render.Status(r, http.StatusBadRequest)
 			render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, ""))
 			return
 		}
-		c.logger.Error("refresh token flow: failed to rotate refresh token", zap.Error(err))
+		c.logger.Error("refresh token flow: failed to rotate refresh token", "err", err)
 		render.Status(r, http.StatusInternalServerError)
 		render.Respond(
 			w,
@@ -120,7 +119,7 @@ func (c *ConnnectRessource) RefreshTokenGrant(
 		string(tokens.RefreshTokenType),
 	)
 	if err != nil {
-		c.logger.Error("refresh token flow: failed to sign in user", zap.Error(err))
+		c.logger.Error("refresh token flow: failed to sign in user", "err", err)
 		render.Status(r, http.StatusInternalServerError)
 		render.Respond(
 			w,
@@ -148,7 +147,7 @@ func (c *ConnnectRessource) RefreshTokenGrant(
 	}
 
 	if err != nil {
-		c.logger.Error("refresh token flow: failed to issue a new access token", zap.Error(err))
+		c.logger.Error("refresh token flow: failed to issue a new access token", "err", err)
 		render.Status(r, http.StatusInternalServerError)
 		render.Respond(
 			w,
@@ -159,7 +158,7 @@ func (c *ConnnectRessource) RefreshTokenGrant(
 	}
 	signed, err := c.issuer.Sign(t)
 	if err != nil {
-		c.logger.Error("refresh token flow: failed to sign a access token", zap.Error(err))
+		c.logger.Error("refresh token flow: failed to sign a access token", "err", err)
 		render.Status(r, http.StatusInternalServerError)
 		render.Respond(
 			w,
@@ -170,7 +169,7 @@ func (c *ConnnectRessource) RefreshTokenGrant(
 	}
 	refresh, err := c.issuer.IssueRefreshToken(r.Context(), auth.ID())
 	if err != nil {
-		c.logger.Error("refresh token flow: failed to issue a new refresh token", zap.Error(err))
+		c.logger.Error("refresh token flow: failed to issue a new refresh token", "err", err)
 		render.Status(r, http.StatusInternalServerError)
 		render.Respond(
 			w,

@@ -7,7 +7,6 @@ import (
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
@@ -15,7 +14,7 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("errors getting jwt in revoke endpoint")
 		return
@@ -23,10 +22,10 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 	err = r.ParseForm()
 	//we gonna look for https://datatracker.ietf.org/doc/html/rfc7009#section-2.1
 	if err != nil {
-		c.logger.Error("error on parsing form in revoke endpoint", zap.Error(err))
+		c.logger.Error("error on parsing form in revoke endpoint", "err", err)
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -34,7 +33,7 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("no client_id in JWT")
 		return
@@ -43,7 +42,7 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("unable to get app from client_id")
 		return
@@ -75,7 +74,7 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 			),
 		)
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -84,7 +83,7 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 
 		err = render.Render(w, r, createStdError(stdUnspportedTokenType, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -92,7 +91,7 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("no authorization id in JWT")
 		return
@@ -101,7 +100,7 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("malformed authorization id in JWT")
 		return
@@ -114,7 +113,7 @@ func (c *ConnnectRessource) revoke(w http.ResponseWriter, r *http.Request) {
 			createStdError(stdInvalidRequest, http.StatusBadRequest, "invalid revocation"),
 		)
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}

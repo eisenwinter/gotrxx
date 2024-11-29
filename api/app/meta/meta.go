@@ -6,15 +6,15 @@ import (
 	"net/http"
 
 	"github.com/eisenwinter/gotrxx/config"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/cors"
 	"github.com/go-chi/render"
-	"go.uber.org/zap"
 )
 
 // MetaRessource contains the .well-known endpoints
 type MetaRessource struct {
-	log    *zap.Logger
+	log    logging.Logger
 	cfg    *config.BehaviourConfiguration
 	issuer JwkSupplier
 }
@@ -78,12 +78,12 @@ func (m *MetaRessource) openidConfiguration(w http.ResponseWriter, r *http.Reque
 	}
 	err := render.Render(w, r, oidc)
 	if err != nil {
-		m.log.Error("unable to render response", zap.Error(err))
+		m.log.Error("unable to render response", "err", err)
 	}
 }
 
 func NewMetaRessource(
-	log *zap.Logger,
+	log logging.Logger,
 	cfg *config.BehaviourConfiguration,
 	issuer JwkSupplier,
 ) *MetaRessource {

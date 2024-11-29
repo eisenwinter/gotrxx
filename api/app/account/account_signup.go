@@ -6,13 +6,12 @@ import (
 
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/gorilla/csrf"
-	"go.uber.org/zap"
 )
 
 func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
 	if err != nil {
-		a.log.Error("signup ParseForm failed", zap.Error(err))
+		a.log.Error("signup ParseForm failed", "err", err)
 	}
 	invite := r.FormValue("invite_code")
 	email := r.FormValue("email")
@@ -98,7 +97,7 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 			}, w)
 			return
 		}
-		a.log.Error("unexpected user sign up error", zap.Error(err))
+		a.log.Error("unexpected user sign up error", "err", err)
 	}
 	successMessage := "user_needs_confirm"
 	if a.cfg.AutoConfirmUsers {

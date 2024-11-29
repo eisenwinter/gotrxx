@@ -9,7 +9,6 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	"github.com/eisenwinter/gotrxx/db/tables"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 func (d *DataStore) Users(ctx context.Context, opts ListOptions) ([]*tables.UserTable, int, error) {
@@ -75,7 +74,7 @@ func (d *DataStore) User(ctx context.Context, userID uuid.UUID) (*tables.UserTab
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
-		d.log.Error("Unable to query database", zap.Error(err))
+		d.log.Error("unable to query database", "err", err)
 		return nil, err
 	}
 	return &userEntity, nil
@@ -103,7 +102,7 @@ func (d *DataStore) UserByID(ctx context.Context, id uuid.UUID) (*UserData, erro
 		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
-		d.log.Error("Unable to query database", zap.Error(err))
+		d.log.Error("unable to query database", "err", err)
 		return nil, err
 	}
 	provider := &UserData{}
@@ -478,7 +477,7 @@ func (d *DataStore) InsertUser(
 	var id uuid.UUID
 	err := d.returningInsertStatement(ctx, &id, insert, nil)
 	if err != nil {
-		d.log.Error("could not insert user", zap.Error(err))
+		d.log.Error("could not insert user", "err", err)
 		return uuid.UUID{}, err
 	}
 	return id, nil

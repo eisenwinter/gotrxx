@@ -5,15 +5,15 @@ import (
 	"os"
 
 	"github.com/eisenwinter/gotrxx/config"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/spf13/cobra"
-	"go.uber.org/zap"
 )
 
 // ConfigFileLocation is of the config to load
 var ConfigFileLocation string
 
 // TopLevelLogger is the logger all loggers come from
-var TopLevelLogger *zap.Logger
+var TopLevelLogger logging.Logger
 
 // LoadedConfig is the currently loaded configuration after initial bootstrapping
 var LoadedConfig *config.Configuration

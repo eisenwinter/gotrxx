@@ -4,7 +4,6 @@ import (
 	"net/http"
 
 	"github.com/gorilla/csrf"
-	"go.uber.org/zap"
 )
 
 func (a *AccountRessource) sendInvite(w http.ResponseWriter, r *http.Request) {
@@ -29,7 +28,7 @@ func (a *AccountRessource) sendInvite(w http.ResponseWriter, r *http.Request) {
 	}
 	err := a.userService.InviteUser(r.Context(), email)
 	if err != nil {
-		a.log.Error("could not invite user", zap.Error(err))
+		a.log.Error("could not invite user", "err", err)
 		a.view(r.Context(), a.inviteTmpl, &sendInviteViewModel{
 			CsrfToken: csrf.Token(r),
 			Error:     "unknown",

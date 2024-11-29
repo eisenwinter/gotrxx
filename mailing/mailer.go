@@ -10,15 +10,15 @@ import (
 
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/i18n"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/go-mail/mail"
 	"github.com/jaytaylor/html2text"
-	"go.uber.org/zap"
 )
 
 type Mailer struct {
 	noop          bool
 	client        *mail.Dialer
-	log           *zap.Logger
+	log           logging.Logger
 	cfg           *config.Configuration
 	registry      *i18n.TranslationRegistry
 	emailTemplate *template.Template
@@ -36,7 +36,7 @@ func (m *Mailer) baseModel(title string, message string) map[string]interface{} 
 
 func (m *Mailer) SendInviteMail(email string, code string, language string) error {
 	if m.noop {
-		m.log.Info("Skipping email `Invite` because noop is configured", zap.String("code", code))
+		m.log.Info("skipping email `Invite` because noop is configured", "code", code)
 		return nil
 	}
 	t, err := m.registry.TranslatorFor(language, "email.invite")
@@ -58,15 +58,15 @@ func (m *Mailer) SendInviteMail(email string, code string, language string) erro
 
 func (m *Mailer) SendConfirmMail(email string, code string, language string) error {
 	if m.noop {
-		m.log.Info("Skipping email `Confirm` because noop is configured", zap.String("code", code))
+		m.log.Info("skipping email `Confirm` because noop is configured", "code", code)
 		return nil
 	}
 	t, err := m.registry.TranslatorFor(language, "email.confirm")
 	if err != nil {
 		m.log.Error(
 			"[i18n] unable to load translation for `email.confirm`",
-			zap.String("ressource", "email.confirm"),
-			zap.String("language", language),
+			"ressource", "email.confirm",
+			"language", language,
 		)
 		t = m.registry.CreateVoidTranslator(language, "email.confirm")
 	}
@@ -86,8 +86,8 @@ func (m *Mailer) SendConfirmMail(email string, code string, language string) err
 func (m *Mailer) SendPasswordRecoverMail(email string, code string, language string) error {
 	if m.noop {
 		m.log.Info(
-			"Skipping email `PasswordRecovery` because noop is configured",
-			zap.String("code", code),
+			"skipping email `PasswordRecovery` because noop is configured",
+			"code", code,
 		)
 		return nil
 	}
@@ -139,7 +139,7 @@ func (m *Mailer) send(email string, subject string, viewModel map[string]interfa
 }
 
 func NewMailer(
-	log *zap.Logger,
+	log logging.Logger,
 	cfg *config.Configuration,
 	registry *i18n.TranslationRegistry,
 	files fs.FS,

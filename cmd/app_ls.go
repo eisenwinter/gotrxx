@@ -20,7 +20,7 @@ var listApplicationsCommand = cobra.Command{
 		dispatcher := bootstrapDispatcher(dataStore.Auditor())
 		service := manage.NewApplicationSevice(
 			dataStore,
-			TopLevelLogger.Named("manage_application_service"),
+			TopLevelLogger.WithGroup("manage_application_service"),
 			LoadedConfig,
 			dispatcher)
 		lst, err := service.List(context.Background(), 1, math.MaxInt, "", "")

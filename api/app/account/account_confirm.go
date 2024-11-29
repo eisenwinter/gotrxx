@@ -5,7 +5,6 @@ import (
 	"net/http"
 
 	"github.com/eisenwinter/gotrxx/user"
-	"go.uber.org/zap"
 )
 
 func (a *AccountRessource) confirm(w http.ResponseWriter, r *http.Request) {
@@ -30,7 +29,7 @@ func (a *AccountRessource) confirm(w http.ResponseWriter, r *http.Request) {
 			)
 			return
 		}
-		a.log.Error("confirm user: unexpected error on conrfirm", zap.Error(err))
+		a.log.Error("confirm user: unexpected error on conrfirm", "err", err)
 		a.view(r.Context(), a.confirmTemplate, &confirmViewModel{Error: "unknown"}, w)
 		return
 	}

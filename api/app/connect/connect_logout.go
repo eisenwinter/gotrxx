@@ -10,7 +10,6 @@ import (
 	"github.com/go-chi/jwtauth/v5"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
@@ -18,7 +17,7 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("errors getting jwt in logout endpoint")
 		return
@@ -27,7 +26,7 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 	if !ok {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("no authorization id in JWT")
 		return
@@ -36,7 +35,7 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		c.logger.Error("malformed authorization id in JWT")
 		return
@@ -44,10 +43,10 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 
 	err = r.ParseForm()
 	if err != nil {
-		c.logger.Error("error on parsing form in logout endpoint", zap.Error(err))
+		c.logger.Error("error on parsing form in logout endpoint", "err", err)
 		err = render.Render(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, ""))
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -63,7 +62,7 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 			),
 		)
 		if err != nil {
-			c.logger.Error("unable to render response", zap.Error(err))
+			c.logger.Error("unable to render response", "err", err)
 		}
 		return
 	}
@@ -77,7 +76,7 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 			)
 			return
 		}
-		c.logger.Error("logout: unexpected error getting application", zap.Error(err))
+		c.logger.Error("logout: unexpected error getting application", "err", err)
 		render.Respond(
 			w,
 			r,
@@ -102,8 +101,8 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		c.logger.Error(
 			"Could not revoked all common tokens for authorization",
-			zap.Error(err),
-			zap.String("authorization_id", id.String()),
+			"err", err,
+			"authorization_id", id.String(),
 		)
 	}
 	co := &http.Cookie{

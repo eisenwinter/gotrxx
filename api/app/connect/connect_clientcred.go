@@ -7,7 +7,6 @@ import (
 
 	"github.com/eisenwinter/gotrxx/application"
 	"github.com/go-chi/render"
-	"go.uber.org/zap"
 )
 
 func (c *ConnnectRessource) clientCredentialsGrant(
@@ -33,7 +32,7 @@ func (c *ConnnectRessource) clientCredentialsGrant(
 	}
 	app, err := c.appService.ApplicationByClientID(r.Context(), req.clientID)
 	if err != nil {
-		c.logger.Error("client credentials flow: failed to get application", zap.Error(err))
+		c.logger.Error("client credentials flow: failed to get application", "err", err)
 		render.Respond(
 			w,
 			r,
@@ -69,7 +68,7 @@ func (c *ConnnectRessource) clientCredentialsGrant(
 	if err != nil {
 		c.logger.Error(
 			"client credentials flow: failed to issue a new access token",
-			zap.Error(err),
+			"err", err,
 		)
 		render.Respond(
 			w,
@@ -80,7 +79,7 @@ func (c *ConnnectRessource) clientCredentialsGrant(
 	}
 	signed, err := c.issuer.Sign(t)
 	if err != nil {
-		c.logger.Error("client credentials flow: failed to sign a access token", zap.Error(err))
+		c.logger.Error("client credentials flow: failed to sign a access token", "err", err)
 		render.Respond(
 			w,
 			r,

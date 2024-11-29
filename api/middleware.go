@@ -7,9 +7,9 @@ import (
 	"time"
 
 	"github.com/eisenwinter/gotrxx/i18n"
-	"github.com/eisenwinter/gotrxx/sanitize"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
+	"github.com/eisenwinter/gotrxx/pkg/sanitize"
 	"github.com/go-chi/chi/v5/middleware"
-	"go.uber.org/zap"
 	"golang.org/x/text/language"
 )
 
@@ -44,19 +44,19 @@ func languageMiddleware(
 // and how long it took to return.
 // bluntly stolen from https://github.com/treastech/logger/blob/master/logger.go
 
-func loggerMiddleware(l *zap.Logger) func(next http.Handler) http.Handler {
+func loggerMiddleware(l logging.Logger) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		fn := func(w http.ResponseWriter, r *http.Request) {
 			ww := middleware.NewWrapResponseWriter(w, r.ProtoMajor)
 			t1 := time.Now()
 			defer func() {
 				l.Info(fmt.Sprintf("[%s] %s", r.Method, sanitize.NoLineBreaks(r.URL.Path)),
-					zap.String("proto", r.Proto),
-					sanitize.UserInputString("path", r.URL.Path),
-					zap.Duration("latency", time.Since(t1)),
-					zap.Int("status", ww.Status()),
-					zap.Int("size", ww.BytesWritten()),
-					zap.String("requestID", middleware.GetReqID(r.Context())))
+					"proto", r.Proto,
+					"path", sanitize.UserInputString(r.URL.Path),
+					"latency", time.Since(t1),
+					"status", ww.Status(),
+					"size", ww.BytesWritten(),
+					"requestID", middleware.GetReqID(r.Context()))
 			}()
 
 			next.ServeHTTP(ww, r)

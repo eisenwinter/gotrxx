@@ -13,9 +13,9 @@ import (
 	"github.com/eisenwinter/gotrxx/generator"
 	"github.com/eisenwinter/gotrxx/i18n"
 	"github.com/eisenwinter/gotrxx/mailing"
-	"github.com/eisenwinter/gotrxx/sanitize"
+	"github.com/eisenwinter/gotrxx/pkg/logging"
+	"github.com/eisenwinter/gotrxx/pkg/sanitize"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -50,7 +50,7 @@ var (
 
 // NewUserService returns a new user service
 func NewUserService(store *db.DataStore,
-	log *zap.Logger,
+	log logging.Logger,
 	cfg *config.Configuration,
 	mailer *mailing.Mailer,
 	dispatcher *events.Dispatcher) *UserService {
@@ -66,7 +66,7 @@ func NewUserService(store *db.DataStore,
 // UserService is used to manage user data
 type UserService struct {
 	store      *db.DataStore
-	log        *zap.Logger
+	log        logging.Logger
 	cfg        *config.Configuration
 	mailer     *mailing.Mailer
 	dispatcher *events.Dispatcher
@@ -130,7 +130,7 @@ func (g *UserService) currentLocale(ctx context.Context) string {
 func (g *UserService) EmailToID(ctx context.Context, email string) (uuid.UUID, error) {
 	found, id, err := g.store.IDFromEmail(ctx, email)
 	if err != nil {
-		g.log.Error("Unable to get matching user from store", zap.Error(err))
+		g.log.Error("unable to get matching user from store", "err", err)
 		return uuid.UUID{}, ErrNotFound
 	}
 	if !found {
@@ -269,7 +269,7 @@ func (g *UserService) InitialUserInvite(
 		if r != "" {
 			_, err = g.store.AddRole(ctx, r)
 			if err != nil && !errors.Is(err, db.ErrAlreadyExists) {
-				g.log.Error("Could not create role for user invite", zap.Error(err))
+				g.log.Error("could not create role for user invite", "err", err)
 				return err
 			}
 		}
@@ -277,7 +277,7 @@ func (g *UserService) InitialUserInvite(
 	expiryDate := time.Now().Add(g.cfg.Behaviour.InviteExpiry).UTC()
 	err = g.store.InviteUser(ctx, expiryDate, nil, string(inviteCode), roles, appIds...)
 	if err != nil {
-		g.log.Error("Could not persist user invite", zap.Error(err))
+		g.log.Error("could not persist user invite", "err", err)
 		return err
 	}
 	g.dispatcher.Dispatch(&event.UserInvited{
@@ -298,21 +298,21 @@ func (g *UserService) InviteUser(
 	inviteCode := tokenGen.CreatePINLikeToken()
 	exists, err := g.store.InviteCodeExists(ctx, string(inviteCode))
 	if err != nil {
-		g.log.Error("Unable to check invite code against datastore", zap.Error(err))
+		g.log.Error("unable to check invite code against datastore", "err", err)
 		return "", err
 	}
 	timeout := 0
 	for exists {
 		exists, err = g.store.InviteCodeExists(ctx, string(inviteCode))
 		if err != nil {
-			g.log.Error("Unable to check invite code against datastore", zap.Error(err))
+			g.log.Error("unable to check invite code against datastore", "err", err)
 			return "", err
 		}
 		if exists {
 			timeout++
 		}
 		if timeout >= maxIterationCycles {
-			g.log.Error("Unable to generate new invite code")
+			g.log.Error("unable to generate new invite code - timeout reached")
 			return "", ErrTokenGenTimeout
 		}
 		inviteCode = tokenGen.CreatePINLikeToken()
@@ -328,14 +328,14 @@ func (g *UserService) InviteUser(
 	for _, r := range roles {
 		_, err = g.store.AddRole(ctx, r)
 		if err != nil && !errors.Is(err, db.ErrAlreadyExists) {
-			g.log.Error("Could not create role for user invite", zap.Error(err))
+			g.log.Error("could not create role for user invite", "err", err)
 			return "", err
 		}
 	}
 	expiryDate := time.Now().Add(g.cfg.Behaviour.InviteExpiry).UTC()
 	err = g.store.InviteUser(ctx, expiryDate, email, string(inviteCode), roles, appIds...)
 	if err != nil {
-		g.log.Error("Could not persist user invite", zap.Error(err))
+		g.log.Error("could not persist user invite", "err", err)
 		return "", err
 	}
 	e := ""
@@ -359,13 +359,13 @@ func (g *UserService) sendInviteMail(
 	if err != nil {
 		g.log.Error(
 			"Could not send invite email to user",
-			sanitize.UserInputString("email", email),
-			zap.Error(err),
+			"email", sanitize.UserInputString(email),
+			"err", err,
 		)
 	} else {
 		err = g.store.SetInviteSent(ctx, email, string(inviteCode))
 		if err != nil {
-			g.log.Error("Could not persist sent date for invite email to user", sanitize.UserInputString("email", email), zap.Error(err))
+			g.log.Error("could not persist sent date for invite email to user", "email", sanitize.UserInputString(email), "err", err)
 		}
 		g.dispatcher.Dispatch(&event.EmailInviteSent{
 			InviteCode: string(inviteCode),
@@ -388,7 +388,7 @@ func (g *UserService) InsertUser(ctx context.Context,
 
 	id, err := g.store.InsertUser(ctx, email, string(pw), phone, confirmToken)
 	if err != nil {
-		g.log.Error("Inserting user into store failed", zap.Error(err))
+		g.log.Error("inserting user into store failed", "err", err)
 		return uuid.UUID{}, err
 	}
 	return id, nil

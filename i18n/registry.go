@@ -9,8 +9,8 @@ import (
 	"strings"
 	"text/template"
 
+	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/jeremywohl/flatten/v2"
-	"go.uber.org/zap"
 	"golang.org/x/text/language"
 )
 
@@ -28,7 +28,7 @@ var ErrRessourceDoesNotExist = errors.New("ressource does not exist")
 type TranslationRegistry struct {
 	dir      fs.FS //"templates/i18n"
 	registry localeDictionary
-	log      *zap.Logger
+	log      logging.Logger
 	matcher  language.Matcher
 }
 
@@ -41,7 +41,7 @@ func (t *TranslationRegistry) buildMatcher() {
 	for _, k := range t.Languages() {
 		lang, err := language.Parse(k)
 		if err != nil {
-			t.log.Error("unable to parse language", zap.String("language", k))
+			t.log.Error("unable to parse language", "language", k)
 			continue
 		}
 		tags = append(tags, lang)
@@ -66,7 +66,7 @@ func (t *TranslationRegistry) ContainsLanguage(language string) bool {
 	return false
 }
 
-func NewTranslationRegistry(dir fs.FS, log *zap.Logger) (*TranslationRegistry, error) {
+func NewTranslationRegistry(dir fs.FS, log logging.Logger) (*TranslationRegistry, error) {
 	reg := TranslationRegistry{
 		dir:      dir,
 		log:      log,
@@ -111,10 +111,10 @@ func (t *TranslationRegistry) TranslatorFor(
 func (t *TranslationRegistry) autoLoad() error {
 	matches, err := fs.Glob(t.dir, "*.*.json")
 	if err != nil {
-		t.log.Error("could not load i18n files", zap.Error(err))
+		t.log.Error("could not load i18n files", "err", err)
 		return err
 	}
-	t.log.Debug("loaded i18n files", zap.Strings("files", matches))
+	t.log.Debug("loaded i18n files", "files", matches)
 	return t.process(matches)
 }
 
@@ -122,7 +122,7 @@ var jsonRegex = regexp.MustCompile(`[a-zA-Z]{2}\.json$`)
 
 func (t *TranslationRegistry) process(files []string) error {
 	for _, v := range files {
-		t.log.Debug("processing language file", zap.String("file", v))
+		t.log.Debug("processing language file", "file", v)
 		_, file := filepath.Split(v)
 		locale := jsonRegex.FindString(v)
 		if locale != "" {
@@ -138,8 +138,8 @@ func (t *TranslationRegistry) process(files []string) error {
 			if err != nil {
 				t.log.Error(
 					"could not read translation file",
-					zap.Error(err),
-					zap.String("file", v),
+					"err", err,
+					"file", v,
 				)
 				return err
 			}
@@ -148,9 +148,9 @@ func (t *TranslationRegistry) process(files []string) error {
 			if err != nil {
 				t.log.Error(
 					"skipping unparseable translation file",
-					zap.Error(err),
-					zap.String("content", string(file)),
-					zap.String("file", v),
+					"err", err,
+					"content", string(file),
+					"file", v,
 				)
 				return err
 			}
@@ -159,8 +159,8 @@ func (t *TranslationRegistry) process(files []string) error {
 			if err != nil {
 				t.log.Error(
 					"could not unmarshall translation file",
-					zap.Error(err),
-					zap.String("file", v),
+					"err", err,
+					"file", v,
 				)
 				return err
 			}
@@ -168,7 +168,7 @@ func (t *TranslationRegistry) process(files []string) error {
 			for k, v := range tr {
 				parsed, err := template.New(k).Parse(v)
 				if err != nil {
-					t.log.Error("unable to parse template", zap.Error(err), zap.String("file", v))
+					t.log.Error("unable to parse template", "err", err, "file", v)
 					return err
 				}
 				final[k] = parsed
@@ -176,8 +176,8 @@ func (t *TranslationRegistry) process(files []string) error {
 			res[name] = final
 			t.log.Debug(
 				"added translations",
-				zap.String("ressource", name),
-				zap.String("lang", locale),
+				"ressource", name,
+				"lang", locale,
 			)
 		}
 	}

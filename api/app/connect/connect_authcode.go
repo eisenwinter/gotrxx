@@ -11,11 +11,10 @@ import (
 
 	"github.com/eisenwinter/gotrxx/application"
 	"github.com/eisenwinter/gotrxx/authorization"
-	"github.com/eisenwinter/gotrxx/sanitize"
+	"github.com/eisenwinter/gotrxx/pkg/sanitize"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/go-chi/render"
 	"github.com/google/uuid"
-	"go.uber.org/zap"
 )
 
 func (c *ConnnectRessource) authorizeAuthorizationCode(
@@ -30,7 +29,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 	if !ok {
 		return
 	}
-	c.logger.Debug("using redirect_uri", sanitize.UserInputString("redirect_uri", redirectToUse))
+	c.logger.Debug("using redirect_uri", "redirect_uri", sanitize.UserInputString(redirectToUse))
 
 	redirect := func() {
 		// Query params
@@ -62,7 +61,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 		}
 		c.logger.Error(
 			"authorization code flow: (authorize) unexpected cookie error",
-			zap.Error(err),
+			"err", err,
 		)
 		render.Respond(
 			w,
@@ -74,7 +73,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 
 	t, err := c.verifier.ParseAndValidateAccessToken(tokenCookie.Value)
 	if err != nil {
-		c.logger.Debug("authorization code flow: (authorize) invalid access token", zap.Error(err))
+		c.logger.Debug("authorization code flow: (authorize) invalid access token", "err", err)
 		c := &http.Cookie{
 			Name:     "__gotrxx",
 			Value:    "",
@@ -91,7 +90,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 	if err != nil {
 		c.logger.Error(
 			"authorization code flow: (authorize) invalid user id issued",
-			zap.Error(err),
+			"err", err,
 		)
 		render.Respond(
 			w,
@@ -107,7 +106,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 		if err != nil {
 			c.logger.Error(
 				"authorization code flow: (authorize) grantig implicit authorization failed",
-				zap.Error(err),
+				"err", err,
 			)
 			render.Respond(
 				w,
@@ -117,7 +116,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 			return
 		}
 	} else if err != nil {
-		c.logger.Error("authorization code flow: (authorize) verifing authorization failed", zap.Error(err))
+		c.logger.Error("authorization code flow: (authorize) verifing authorization failed", "err", err)
 		render.Respond(w, r, createStdError(stdInternalServerError, http.StatusInternalServerError, ""))
 		return
 	}
@@ -174,7 +173,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCodeCheckApplication(
 		}
 		c.logger.Error(
 			"authorization code flow: (authorize) unexpected error getting application",
-			zap.Error(err),
+			"err", err,
 		)
 		render.Respond(
 			w,
@@ -231,7 +230,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCodeCheckApplication(
 	} else if len(app.Properties().RedirectURIs()) > 0 {
 		redirectToUse = app.Properties().RedirectURIs()[0]
 	} else {
-		c.logger.Error("authorization code flow: (authorize) no redirect uri aborting", sanitize.UserInputString("client_id", req.clientID))
+		c.logger.Error("authorization code flow: (authorize) no redirect uri aborting", "client_id", sanitize.UserInputString(req.clientID))
 		render.Respond(w, r, createStdError(stdInvalidRequest, http.StatusBadRequest, "no redirect_uri"))
 		return false, ""
 	}
@@ -366,7 +365,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCodeQuery(
 	qs.Add("state", req.state)
 	rurl.RawQuery = qs.Encode()
 	res := rurl.String()
-	c.logger.Debug("query mode redirect", sanitize.UserInputString("url", res))
+	c.logger.Debug("query mode redirect", "url", sanitize.UserInputString(res))
 	http.Redirect(w, r, res, http.StatusFound)
 }
 
@@ -390,7 +389,7 @@ func (c *ConnnectRessource) authorizationCodeGrant(
 		string(tokens.AuthorizationCodeType),
 	)
 	if err != nil {
-		c.logger.Error("authorization code flow: failed to sign in user", zap.Error(err))
+		c.logger.Error("authorization code flow: failed to sign in user", "err", err)
 		render.Respond(
 			w,
 			r,
@@ -407,7 +406,7 @@ func (c *ConnnectRessource) authorizationCodeGrant(
 	if err != nil {
 		c.logger.Error(
 			"authorization code flow: failed to issue a new access token",
-			zap.Error(err),
+			"err", err,
 		)
 		render.Respond(
 			w,
@@ -418,7 +417,7 @@ func (c *ConnnectRessource) authorizationCodeGrant(
 	}
 	signed, err := c.issuer.Sign(t)
 	if err != nil {
-		c.logger.Error("authorization code flow: failed to sign a access token", zap.Error(err))
+		c.logger.Error("authorization code flow: failed to sign a access token", "err", err)
 		render.Respond(
 			w,
 			r,
@@ -432,7 +431,7 @@ func (c *ConnnectRessource) authorizationCodeGrant(
 		if err != nil {
 			c.logger.Error(
 				"authorization code flow: failed to issue a new refresh token",
-				zap.Error(err),
+				"err", err,
 			)
 			render.Respond(
 				w,
@@ -464,7 +463,7 @@ func (c *ConnnectRessource) authorizationCodeGrantCheckAuth(
 		req.code,
 	)
 	if err != nil {
-		c.logger.Error("authorization code flow: failed to get application", zap.Error(err))
+		c.logger.Error("authorization code flow: failed to get application", "err", err)
 		render.Respond(
 			w,
 			r,
@@ -508,8 +507,8 @@ func (c *ConnnectRessource) authorizationCodeGrantCheckAuth(
 	if !app.IsAllowedRedirectURI(req.redirectURI) {
 		c.logger.Debug(
 			"invalid redirect uri for application",
-			sanitize.UserInputString("supplied_uri", req.redirectURI),
-			zap.Strings("accepted_uris", app.Properties().RedirectURIs()),
+			"supplied_uri", sanitize.UserInputString(req.redirectURI),
+			"accepted_uris", app.Properties().RedirectURIs(),
 		)
 		render.Respond(
 			w,
@@ -555,7 +554,7 @@ func (c *ConnnectRessource) authorizationCodeGrantCheckAuth(
 				)
 				return false, nil
 			}
-			c.logger.Error("unexpected PKCE code verification error", zap.Error(err))
+			c.logger.Error("unexpected PKCE code verification error", "err", err)
 			return false, nil
 		}
 	}
@@ -568,10 +567,10 @@ func (c *ConnnectRessource) authorizationCodeGrantCheckAuth(
 	)
 	if err != nil {
 		if errors.Is(tokens.ErrTokenInvalidClientId, err) {
-			c.logger.Error("authorization code flow: failed to rotate code", zap.Error(err))
+			c.logger.Error("authorization code flow: failed to rotate code", "err", err)
 			render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, ""))
 		}
-		c.logger.Error("authorization code flow: failed to rotate code", zap.Error(err))
+		c.logger.Error("authorization code flow: failed to rotate code", "err", err)
 		render.Respond(
 			w,
 			r,

@@ -64,7 +64,6 @@ This is an overview of all the used packages and their licensing.
 |github.com/xlzd/gotp|https://github.com/xlzd/gotp/blob/v0.1.0/LICENSE|MIT    |
 |go.uber.org/atomic|https://github.com/uber-go/atomic/blob/v1.10.0/LICENSE.txt|MIT    |
 |go.uber.org/multierr|https://github.com/uber-go/multierr/blob/v1.8.0/LICENSE.txt|MIT    |
-|go.uber.org/zap|https://github.com/uber-go/zap/blob/v1.23.0/LICENSE.txt|MIT    |
 |golang.org/x/crypto|https://cs.opensource.google/go/x/crypto/+/v0.3.0:LICENSE|BSD-3-Clause|
 |golang.org/x/net/html|https://cs.opensource.google/go/x/net/+/v0.2.0:LICENSE|BSD-3-Clause|
 |golang.org/x/sys|https://cs.opensource.google/go/x/sys/+/v0.2.0:LICENSE|BSD-3-Clause|
