@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.0.23](https://github.com/eisenwinter/gotrxx/compare/0.0.22...0.0.23) (2025-10-11)
+
+
+### Bug Fixes
+
+* more rigid sanitizeReturnURL ([a04234a](https://github.com/eisenwinter/gotrxx/commit/a04234a3eeab8b56004a74d238b77feb7a3a4921))
+* moved away from problematic csrf package ([0ab71de](https://github.com/eisenwinter/gotrxx/commit/0ab71de80922b8b045bbde0f35791281459c9fac))
+* typo on variable ([d69a936](https://github.com/eisenwinter/gotrxx/commit/d69a936573d4744171bb2ec0aaa1d74e5f7633e9))
+
 ## [0.0.22](https://github.com/eisenwinter/gotrxx/compare/0.0.21...0.0.22) (2025-10-11)
 
 
