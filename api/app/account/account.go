@@ -426,11 +426,15 @@ func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 }
 
 func sanitizeReturnURL(returnURL string, fallback string) string {
-	parsed, err := url.ParseRequestURI(returnURL)
+	safeURL := strings.ReplaceAll(returnURL, "\\", "/")
+	parsed, err := url.Parse(safeURL)
 	if err != nil {
 		return fallback
 	}
-	return parsed.RequestURI()
+	if parsed.Scheme == "" && parsed.Host == "" && strings.HasPrefix(parsed.Path, "/") {
+		return parsed.RequestURI()
+	}
+	return fallback
 }
 
 func NewAccountRessource(log logging.Logger,
