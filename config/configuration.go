@@ -90,7 +90,7 @@ type CORSConfiguration struct {
 // ManageEndpointConfirugation habours the manage endpoitn configuration
 type ManageEndpointConfirugation struct {
 	Enable                    bool
-	AdminPasswordResetEnabled bool
+	AdminPasswordResetEnabled bool `mapstructure:"admin-password-reset-enabled"`
 	CORS                      *CORSConfiguration
 }
 
