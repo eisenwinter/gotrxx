@@ -426,11 +426,17 @@ func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 }
 
 func sanitizeReturnURL(returnURL string, fallback string) string {
-	parsed, err := url.ParseRequestURI(returnURL)
+	// Prevent tricks with backslashes: browsers treat them as slashes in URLs
+	safeURL := strings.ReplaceAll(returnURL, "\\", "/")
+	parsed, err := url.Parse(safeURL)
 	if err != nil {
 		return fallback
 	}
-	return parsed.RequestURI()
+	// Only accept local URLs (no scheme or host, path starts with "/")
+	if parsed.Scheme == "" && parsed.Host == "" && strings.HasPrefix(parsed.Path, "/") {
+		return parsed.Path + "?" + parsed.RawQuery
+	}
+	return fallback
 }
 
 func NewAccountRessource(log logging.Logger,
