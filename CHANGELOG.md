@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.22](https://github.com/eisenwinter/gotrxx/compare/0.0.21...0.0.22) (2025-10-11)
+
+
+### Features
+
+* optional opt-in feature to reset passwort due to popular demand, updated dependencies ([e40aec7](https://github.com/eisenwinter/gotrxx/commit/e40aec7587507b45b697c13a5703ccc8764c72ec))
+
 ## [0.0.21](https://github.com/eisenwinter/gotrxx/compare/0.0.20...0.0.21) (2024-11-29)
 
 
