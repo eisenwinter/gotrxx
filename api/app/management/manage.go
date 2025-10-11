@@ -108,6 +108,9 @@ func (m *ManagementRessource) Router() *chi.Mux {
 			r.Put("/confirm", m.confirmUser)
 			r.Put("/unban", m.unbanUser)
 			r.Put("/unlock", m.unlockUser)
+			if m.cfg.ManageEndpoint.AdminPasswordResetEnabled {
+				r.Put("/set-password", m.setPassword)
+			}
 		})
 		gr.Route("/roles", func(r chi.Router) {
 			r.With(pageinate).Get("/", m.listRoles)

@@ -69,18 +69,19 @@ func (s *DatabaseIntegrationTestSuite) TestSeededApplications() {
 	assert.Equal(s.T(), 2, total)
 	if assert.NotNil(s.T(), tables) {
 		for i := range tables {
-			if tables[i].ClientID == "$.gotrxx" {
+			switch tables[i].ClientID {
+			case "$.gotrxx":
 				assert.Equal(s.T(), "$.gotrxx", tables[i].ClientID)
 				assert.Equal(s.T(), "Gotrxx itself", tables[i].Name)
 				assert.Equal(s.T(), 1, tables[i].ApplicationType)
 				assert.Equal(s.T(), "private", tables[i].Confidentiality)
 
-			} else if tables[i].ClientID == "netlify-gotrue" {
+			case "netlify-gotrue":
 				assert.Equal(s.T(), "netlify-gotrue", tables[i].ClientID)
 				assert.Equal(s.T(), "Gotrue Wrapper", tables[i].Name)
 				assert.Equal(s.T(), 1, tables[i].ApplicationType)
 				assert.Equal(s.T(), "public", tables[i].Confidentiality)
-			} else {
+			default:
 				assert.FailNow(s.T(), "unknown application seeded")
 			}
 		}

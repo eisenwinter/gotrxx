@@ -8,5 +8,5 @@
 	},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-	"postCreateCommand": "go version"
+	"postCreateCommand": "task dev:provision:all"
 }

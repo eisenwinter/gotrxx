@@ -117,4 +117,5 @@ type UserService interface {
 	UnbanUser(ctx context.Context, id uuid.UUID) error
 	UnlockUser(ctx context.Context, id uuid.UUID) error
 	VerifyUserInRole(ctx context.Context, userID uuid.UUID, role string) error
+	SetPassword(ctx context.Context, id uuid.UUID, password string) error
 }

@@ -133,7 +133,8 @@ type UserEmailChanged struct {
 func (*UserEmailChanged) Name() events.EventName { return UserEmailChangedEvent }
 
 type UserPasswordChanged struct {
-	UserID uuid.UUID
+	UserID           uuid.UUID
+	ForcedAdminReset bool
 }
 
 func (*UserPasswordChanged) Name() events.EventName { return UserPasswordChangedEvent }

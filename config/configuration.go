@@ -89,8 +89,9 @@ type CORSConfiguration struct {
 
 // ManageEndpointConfirugation habours the manage endpoitn configuration
 type ManageEndpointConfirugation struct {
-	Enable bool
-	CORS   *CORSConfiguration
+	Enable                    bool
+	AdminPasswordResetEnabled bool
+	CORS                      *CORSConfiguration
 }
 
 // Configuration habours the entire gotrxx configuration

@@ -43,6 +43,7 @@ jwt:
   remember-me-duration: 168h
 manage-endpoint:
   enable: true
+  admin-password-reset-enabled: false
   cors:
     allowed-origins: 
       - https://*

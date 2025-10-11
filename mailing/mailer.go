@@ -12,7 +12,7 @@ import (
 	"github.com/eisenwinter/gotrxx/i18n"
 	"github.com/eisenwinter/gotrxx/pkg/logging"
 	"github.com/go-mail/mail"
-	"github.com/jaytaylor/html2text"
+	"jaytaylor.com/html2text"
 )
 
 type Mailer struct {

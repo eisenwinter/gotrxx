@@ -183,3 +183,27 @@ func (m *ManagementRessource) unlockUser(w http.ResponseWriter, r *http.Request)
 		m.log.Error("unable to render response", "err", err)
 	}
 }
+
+func (m *ManagementRessource) setPassword(w http.ResponseWriter, r *http.Request) {
+	var req *userIDPasswordRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		m.log.Info("invalid payload data for set password", "err", err)
+		render.Respond(w, r, createError("invalid payload", http.StatusBadRequest))
+		return
+	}
+	err = m.userService.SetPassword(r.Context(), req.ID, req.Password)
+	success := true
+	message := "Successfully set user password"
+	if err != nil {
+		success = false
+		message = "Unable to set user password"
+	}
+	err = render.Render(w, r, &genericSuccessResponse{
+		Success: success,
+		Message: message,
+	})
+	if err != nil {
+		m.log.Error("unable to render response", "err", err)
+	}
+}

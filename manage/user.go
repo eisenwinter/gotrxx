@@ -197,6 +197,29 @@ func (g *UserService) VerifyUserInRole(ctx context.Context, userID uuid.UUID, ro
 	return nil
 }
 
+// SetPassword sets a new password for the supplied user id, this is for adminstrative use only
+func (g *UserService) SetPassword(ctx context.Context, id uuid.UUID, password string) error {
+	if len(password) < g.cfg.Behaviour.PasswordMinLength {
+		return ErrPasswordGuidelines
+	}
+	pw, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+	ok, err := g.store.SetPassword(ctx, id, string(pw))
+	if err != nil {
+		return err
+	}
+	if !ok {
+		return ErrNotFound
+	}
+	g.dispatcher.Dispatch(&event.UserPasswordChanged{
+		UserID:           id,
+		ForcedAdminReset: true,
+	})
+	return nil
+}
+
 func (g *UserService) LockUser(ctx context.Context, id uuid.UUID, until time.Time) error {
 	ok, err := g.store.LockUser(ctx, id, until)
 	if err != nil {

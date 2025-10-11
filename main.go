@@ -102,6 +102,7 @@ func setDefaults() {
 	viper.SetDefault("jwt.refresh-token-expiry", "3600s")
 	viper.SetDefault("jwt.jwt.no-roles-claim", true)
 	viper.SetDefault("manage-endpoint.enable", false)
+	viper.SetDefault("manage-endpoint.admin-password-reset-enabled", false)
 }
 
 func initConfig(logger *slog.Logger) {
@@ -170,6 +171,8 @@ func initConfig(logger *slog.Logger) {
 	bind("TRXX_JWT_REMEMBER_ME_DURATION", "jwt.remember-me-duration")
 
 	bind("TRXX_MANAGE_ENDPOINT_ENABLE", "manage-endpoint.enable")
+	bind("TRXX_MANAGE_ENDPOINT_ADMIN_PASSWORD_RESET_ENABLED", "admin-password-reset-enabled")
+
 	bind("TRXX_MANAGE_ENDPOINT_CORS_ALLOWED_ORIGINS", "manage-endpoint.cors.allowed-origins")
 	bind("TRXX_MANAGE_ENDPOINT_CORS_ALLOWED_METHODS", "manage-endpoint.cors.allowed-methods")
 	bind("TRXX_MANAGE_ENDPOINT_CORS_ALLOW_CREDENTIALS", "manage-endpoint.cors.allow-credentials")

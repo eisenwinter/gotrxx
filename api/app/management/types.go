@@ -53,6 +53,11 @@ type userIDRoleRequest struct {
 	Role string    `json:"role"`
 }
 
+type userIDPasswordRequest struct {
+	ID       uuid.UUID `json:"id"`
+	Password string    `json:"password"`
+}
+
 type createInviteRequest struct {
 	Email        *string  `json:"email"`
 	Roles        []string `json:"roles"`
