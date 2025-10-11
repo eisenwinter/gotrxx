@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.25](https://github.com/eisenwinter/gotrxx/compare/0.0.24...0.0.25) (2025-10-11)
+
+
+### Bug Fixes
+
+* explicitly set name in config ([c7699ab](https://github.com/eisenwinter/gotrxx/commit/c7699aba3d1a01aef63c563758c835db56bb03f3))
+
 ## [0.0.24](https://github.com/eisenwinter/gotrxx/compare/0.0.23...0.0.24) (2025-10-11)
 
 
