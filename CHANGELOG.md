@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.0.24](https://github.com/eisenwinter/gotrxx/compare/0.0.23...0.0.24) (2025-10-11)
+
+
+### Features
+
+* allow password reset from cli as well ([5bc20e9](https://github.com/eisenwinter/gotrxx/commit/5bc20e97d0ec76bc5ad0cc56c07cb3d1d9c1c81e))
+
 ## [0.0.23](https://github.com/eisenwinter/gotrxx/compare/0.0.22...0.0.23) (2025-10-11)
 
 
