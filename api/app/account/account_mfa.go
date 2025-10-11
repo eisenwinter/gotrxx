@@ -5,8 +5,8 @@ import (
 	"net/http"
 	"net/url"
 
+	csrf "filippo.io/csrf/gorilla"
 	"github.com/google/uuid"
-	"github.com/gorilla/csrf"
 	qrcode "github.com/skip2/go-qrcode"
 )
 

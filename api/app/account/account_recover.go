@@ -3,7 +3,7 @@ package account
 import (
 	"net/http"
 
-	"github.com/gorilla/csrf"
+	csrf "filippo.io/csrf/gorilla"
 )
 
 func (a *AccountRessource) forgottenPassword(w http.ResponseWriter, r *http.Request) {

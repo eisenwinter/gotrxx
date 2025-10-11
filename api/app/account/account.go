@@ -11,6 +11,7 @@ import (
 	"strings"
 	"time"
 
+	csrf "filippo.io/csrf/gorilla"
 	"github.com/eisenwinter/gotrxx/authorization"
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/i18n"
@@ -20,7 +21,6 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/google/safehtml/template"
 	"github.com/google/uuid"
-	"github.com/gorilla/csrf"
 	"github.com/lestrrat-go/jwx/v2/jwt"
 )
 

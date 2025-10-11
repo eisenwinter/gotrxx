@@ -19,7 +19,6 @@ This is an overview of all the used packages and their licensing.
 |github.com/go-playground/universal-translator|https://github.com/go-playground/universal-translator/blob/v0.18.0/LICENSE|MIT    |
 |github.com/go-sql-driver/mysql|https://github.com/go-sql-driver/mysql/blob/v1.6.0/LICENSE|MPL-2.0|
 |github.com/google/uuid|https://github.com/google/uuid/blob/v1.3.0/LICENSE|BSD-3-Clause|
-|github.com/gorilla/csrf|https://github.com/gorilla/csrf/blob/v1.7.1/LICENSE|BSD-3-Clause|
 |github.com/gorilla/securecookie|https://github.com/gorilla/securecookie/blob/v1.1.1/LICENSE|BSD-3-Clause|
 |github.com/hashicorp/hcl|https://github.com/hashicorp/hcl/blob/v1.0.0/LICENSE|MPL-2.0|
 |github.com/inconshreveable/mousetrap|https://github.com/inconshreveable/mousetrap/blob/v1.0.1/LICENSE|Apache-2.0|

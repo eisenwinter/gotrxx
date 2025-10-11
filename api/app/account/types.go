@@ -3,9 +3,9 @@ package account
 import (
 	"fmt"
 
+	csrf "filippo.io/csrf/gorilla"
 	"github.com/google/safehtml"
 	"github.com/google/safehtml/template"
-	"github.com/gorilla/csrf"
 )
 
 var csrfTokenField = template.Must(

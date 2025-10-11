@@ -4,8 +4,8 @@ import (
 	"errors"
 	"net/http"
 
+	csrf "filippo.io/csrf/gorilla"
 	"github.com/eisenwinter/gotrxx/user"
-	"github.com/gorilla/csrf"
 )
 
 func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {

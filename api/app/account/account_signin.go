@@ -4,10 +4,10 @@ import (
 	"errors"
 	"net/http"
 
+	csrf "filippo.io/csrf/gorilla"
 	"github.com/eisenwinter/gotrxx/authorization"
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/go-chi/render"
-	"github.com/gorilla/csrf"
 )
 
 func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {

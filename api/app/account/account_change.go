@@ -5,10 +5,10 @@ import (
 	"net/http"
 	"regexp"
 
+	csrf "filippo.io/csrf/gorilla"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/google/uuid"
-	"github.com/gorilla/csrf"
 )
 
 // https://www.w3.org/TR/2016/REC-html51-20161101/sec-forms.html#email-state-typeemail

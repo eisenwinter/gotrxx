@@ -3,6 +3,7 @@ module github.com/eisenwinter/gotrxx
 go 1.25
 
 require (
+	filippo.io/csrf v0.2.1
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/adlio/schema v1.3.9
 	github.com/eisenwinter/fiql-sql-adapter v0.0.5
@@ -13,7 +14,6 @@ require (
 	github.com/go-mail/mail v2.3.1+incompatible
 	github.com/google/safehtml v0.1.0
 	github.com/google/uuid v1.6.0
-	github.com/gorilla/csrf v1.7.3
 	github.com/jeremywohl/flatten/v2 v2.0.0-20211013061545-07e4a09fb8e4
 	github.com/jmoiron/sqlx v1.4.0
 	github.com/joho/godotenv v1.5.1
@@ -53,7 +53,6 @@ require (
 	github.com/fsnotify/fsnotify v1.9.0 // indirect
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/goccy/go-json v0.10.5 // indirect
-	github.com/gorilla/securecookie v1.1.2 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.14.3 // indirect
