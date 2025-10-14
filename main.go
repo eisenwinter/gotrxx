@@ -26,19 +26,8 @@ import (
 //go:embed templates/email/template.html
 var templateContent embed.FS
 
-//go:embed templates/pages/404.html
-//go:embed templates/pages/change_email.html
-//go:embed templates/pages/change_password.html
-//go:embed templates/pages/change_mfa.html
-//go:embed templates/pages/provision_mfa.html
-//go:embed templates/pages/confirm.html
-//go:embed templates/pages/error.html
-//go:embed templates/pages/recover_password.html
-//go:embed templates/pages/request_password_recovery.html
-//go:embed templates/pages/signin.html
-//go:embed templates/pages/signup.html
-//go:embed templates/pages/user.html
-//go:embed templates/pages/invite.html
+//go:embed templates/pages/*.gohtml
+//go:embed templates/pages/components/*.gohtml
 var templatePages embed.FS
 
 var (

@@ -54,11 +54,11 @@ tasks:
   assets:sass:
     desc: "Rebuilds the sass unminified"
     cmds:
-      - sass templates/static/sass/main.sass templates/static/css/main.css
+      - sass  templates/sass/main.sass templates/static/css/main.css
   assets:sass:minified:
     desc: "Rebuilds the sass minified"
     cmds:
-      - sass templates/static/sass/main.sass templates/static/css/main.css --style compressed
+      - sass templates/sass/main.sass templates/static/css/main.css --style compressed
 
   lint:golangci:
     desc: "Runs golang ci linter"
@@ -99,18 +99,6 @@ tasks:
       - task: lint:staticcheck
       - task: lint:golines
 
-  templates:dev:
-    desc: "Runs 11ty dev server for template styling"
-    dir: template_dev
-    cmds:
-      - yarn dev
-    silent: true
-
-  templates:restore:
-    desc: "restores node deps"
-    dir: template_dev
-    cmds:
-      - yarn
 
   docs:serve:
     desc: "Serves the docs"
