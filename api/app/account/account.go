@@ -315,8 +315,9 @@ func (a *AccountRessource) view(
 	viewModel viewModeler,
 	w http.ResponseWriter,
 ) {
-	name := strings.TrimSuffix(path.Base(tmpl.Name()), ".html")
+	name := strings.TrimSuffix(path.Base(tmpl.Name()), ".gohtml")
 	viewData := viewModel.ViewData()
+	a.log.Debug("loading template", "name", name)
 	viewData["i18n"] = a.getTranslatorFor(ctx, name)
 	err := tmpl.Execute(w, viewData)
 	if err != nil {
@@ -345,7 +346,11 @@ func (a *AccountRessource) changeLanguage(w http.ResponseWriter, r *http.Request
 		}
 		http.SetCookie(w, cookie)
 	}
-
+	if returnURL == "" {
+		if referer := r.Header.Get("Referer"); referer != "" {
+			returnURL = referer
+		}
+	}
 	http.Redirect(w, r, sanitizeReturnURL(returnURL, "/account/"), http.StatusFound)
 }
 
@@ -449,109 +454,109 @@ func NewAccountRessource(log logging.Logger,
 	fsConfig *config.FileSystems,
 	verifier TokenVerifier) *AccountRessource {
 
-	loginTmpl, err := mustLoadTemplate(fsConfig.Pages, "signin.html", log)
+	loginTmpl, err := mustLoadTemplate(fsConfig.Pages, "signin.gohtml", log)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "signin.html",
+			"file", "signin.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
-	signUpTmpl, err := mustLoadTemplate(fsConfig.Pages, "signup.html", log)
+	signUpTmpl, err := mustLoadTemplate(fsConfig.Pages, "signup.gohtml", log)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "signup.html",
+			"file", "signup.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
-	userPageTmpl, err := mustLoadTemplate(fsConfig.Pages, "user.html", log)
+	userPageTmpl, err := mustLoadTemplate(fsConfig.Pages, "user.gohtml", log)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "user.html",
+			"file", "user.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
-	confirmTemplate, err := mustLoadTemplate(fsConfig.Pages, "confirm.html", log)
+	confirmTemplate, err := mustLoadTemplate(fsConfig.Pages, "confirm.gohtml", log)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "confirm.html",
+			"file", "confirm.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
 	recoverTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
-		"recover_password.html",
+		"recover_password.gohtml",
 		log,
 	)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "recover_password.html",
+			"file", "recover_password.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
 	requestRecoverTmpl, err := mustLoadTemplate(
 		fsConfig.Pages,
-		"request_password_recovery.html",
+		"request_password_recovery.gohtml",
 		log,
 	)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "request_password_recovery.html",
+			"file", "request_password_recovery.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
-	errorTemplate, err := mustLoadTemplate(fsConfig.Pages, "error.html", log)
+	errorTemplate, err := mustLoadTemplate(fsConfig.Pages, "error.gohtml", log)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "error.html",
+			"file", "error.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
 	changePasswordTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
-		"change_password.html",
+		"change_password.gohtml",
 		log,
 	)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "change_password.html",
+			"file", "change_password.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
 	changeEmailTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
-		"change_email.html",
+		"change_email.gohtml",
 		log,
 	)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "change_email.html",
+			"file", "change_email.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
 
-	changeMfaTemplate, err := mustLoadTemplate(fsConfig.Pages, "change_mfa.html", log)
+	changeMfaTemplate, err := mustLoadTemplate(fsConfig.Pages, "change_mfa.gohtml", log)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "change_mfa.html",
+			"file", "change_mfa.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
@@ -559,29 +564,29 @@ func NewAccountRessource(log logging.Logger,
 
 	provisionMfaTemplate, err := mustLoadTemplate(
 		fsConfig.Pages,
-		"provision_mfa.html",
+		"provision_mfa.gohtml",
 		log,
 	)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "provision_mfa.html",
+			"file", "provision_mfa.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
 
-	inviteTemplate, err := mustLoadTemplate(fsConfig.Pages, "invite.html", log)
+	inviteTemplate, err := mustLoadTemplate(fsConfig.Pages, "invite.gohtml", log)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",
-			"file", "invite.html",
+			"file", "invite.gohtml",
 			"err", err,
 		)
 		panic("unable to load required template file")
 	}
 
-	fourOFour, err := mustLoadTemplate(fsConfig.Pages, "404.html", log)
+	fourOFour, err := mustLoadTemplate(fsConfig.Pages, "404.gohtml", log)
 	if err != nil {
 		log.Error(
 			"unable to load required template file",

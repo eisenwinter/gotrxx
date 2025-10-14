@@ -17,6 +17,11 @@ func (t *Translator) Registry() *TranslationRegistry {
 	return t.registry
 }
 
+// Locale returns the current locale of the translator
+func (t *Translator) Locale() string {
+	return t.locale
+}
+
 // T retrives the translation for the supplied key
 func (t *Translator) T(key ...string) string {
 	k := strings.Join(key, ".")

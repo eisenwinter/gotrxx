@@ -145,9 +145,6 @@ go-mail ... for mails
 adlio for the migrations
 - github.com/adlio/schema
 
-11ty - for making me not regret my static template choice twice
-- https://www.11ty.dev/
-
 AnandChowdhary for the language icons
 - github.com/AnandChowdhary/language-icons
 
