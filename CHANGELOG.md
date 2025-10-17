@@ -1,5 +1,19 @@
 # Changelog
 
+## [0.0.26](https://github.com/eisenwinter/gotrxx/compare/0.0.25...0.0.26) (2025-10-17)
+
+
+### Features
+
+* reworked template handling to use native golang html templates ([9b04e41](https://github.com/eisenwinter/gotrxx/commit/9b04e41496891f5c39c3573001bba9b185ccfc4b))
+* Template rework ([#23](https://github.com/eisenwinter/gotrxx/issues/23)) ([718517d](https://github.com/eisenwinter/gotrxx/commit/718517d7a26581fcd21fea1e0d629d2b51ca5bb7))
+
+
+### Bug Fixes
+
+* minor codes smells removed ([f3ccfef](https://github.com/eisenwinter/gotrxx/commit/f3ccfef4f54cc025c86fd6d337432687b7ef8926))
+* use net/http CrossOriginProtection directly ([b3b3bc2](https://github.com/eisenwinter/gotrxx/commit/b3b3bc22013c800c577c34c2377641595bb2e2b7))
+
 ## [0.0.25](https://github.com/eisenwinter/gotrxx/compare/0.0.24...0.0.25) (2025-10-11)
 
 
