@@ -52,7 +52,7 @@ func (s *Service) ApplicationByClientID(
 ) (*Application, error) {
 	entry, err := s.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
-		if errors.Is(db.ErrNotFound, err) {
+		if errors.Is(err, db.ErrNotFound) {
 			return nil, ErrNotFound
 		}
 		return nil, err

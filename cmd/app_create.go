@@ -63,7 +63,7 @@ var createApplicationCommand = cobra.Command{
 			applicationCreatePKCE)
 		if err != nil {
 			fmt.Printf("Could not create new application: %s\r\n", err)
-			if applicationCrateSkipIfExists && errors.Is(manage.ErrApplicationClientIDExists, err) {
+			if applicationCrateSkipIfExists && errors.Is(err, manage.ErrApplicationClientIDExists) {
 				return
 			}
 			os.Exit(1)

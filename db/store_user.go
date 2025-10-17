@@ -85,7 +85,7 @@ func (d *DataStore) UserByEmail(ctx context.Context, email string) (*UserData, e
 	var id uuid.UUID
 	err := userQuery.RunWith(d.db).QueryRow().Scan(&id)
 	if err != nil {
-		if errors.Is(sql.ErrNoRows, err) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
 		return nil, err

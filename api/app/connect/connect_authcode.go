@@ -55,7 +55,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 
 	tokenCookie, err := r.Cookie("__gotrxx")
 	if err != nil {
-		if errors.Is(http.ErrNoCookie, err) {
+		if errors.Is(err, http.ErrNoCookie) {
 			redirect()
 			return
 		}
@@ -100,7 +100,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCode(
 		return
 	}
 	auth, err := c.autService.VerifyUserAuthorization(r.Context(), userID, req.clientID)
-	if err != nil && errors.Is(authorization.ErrUngrantedImplicitAutoGrant, err) {
+	if err != nil && errors.Is(err, authorization.ErrUngrantedImplicitAutoGrant) {
 		c.logger.Debug("authorization code flow: (authorize) grantig implicit authorization")
 		auth, err = c.autService.ImplicitAuthorization(r.Context(), userID, req.clientID, req.scope)
 		if err != nil {
@@ -163,7 +163,7 @@ func (c *ConnnectRessource) authorizeAuthorizationCodeCheckApplication(
 ) (bool, string) {
 	app, err := c.appService.ApplicationByClientID(r.Context(), req.clientID)
 	if err != nil {
-		if errors.Is(application.ErrNotFound, err) {
+		if errors.Is(err, application.ErrNotFound) {
 			render.Respond(
 				w,
 				r,
@@ -544,7 +544,7 @@ func (c *ConnnectRessource) authorizationCodeGrantCheckAuth(
 	if app.Properties().PKCE() {
 		err = c.rotator.PreRotationChallenge(r.Context(), req.code, req.codeVerifier)
 		if err != nil {
-			if errors.Is(tokens.ErrChallengeFailed, err) {
+			if errors.Is(err, tokens.ErrChallengeFailed) {
 				c.logger.Info("PKCE code validation failed")
 				//https://datatracker.ietf.org/doc/html/rfc7636#section-4.6
 				render.Respond(
@@ -566,7 +566,7 @@ func (c *ConnnectRessource) authorizationCodeGrantCheckAuth(
 		app.ClientID(),
 	)
 	if err != nil {
-		if errors.Is(tokens.ErrTokenInvalidClientId, err) {
+		if errors.Is(err, tokens.ErrTokenInvalidClientId) {
 			c.logger.Error("authorization code flow: failed to rotate code", "err", err)
 			render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, ""))
 		}

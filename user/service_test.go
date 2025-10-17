@@ -38,7 +38,8 @@ func TestEmailToIDFalseOnErrr(t *testing.T) {
 	manager := mocks.NewUserManager(t)
 	ctx := context.Background()
 	service := New(dataStore, logger, &config.Configuration{}, mailer, dispatcher, manager)
-	dataStore.On("IDFromEmail", ctx, "test@example.com").Return(false, uuid.New(), errors.New("dummy"))
+	dataStore.On("IDFromEmail", ctx, "test@example.com").
+		Return(false, uuid.New(), errors.New("dummy"))
 	_, found := service.EmailToID(ctx, "test@example.com")
 	assert.False(found)
 }
@@ -165,7 +166,8 @@ func TestRegisterFromInvite(t *testing.T) {
 	dataStore.On("ConsumeInvite", ctx, inviteCode).Return(nil)
 	dataStore.On("IsRegistred", ctx, email).Return(false, nil)
 	dataStore.On("ConfirmTokenExists", ctx, mock.Anything).Return(false, nil)
-	dataStore.On("GrantAuthorization", ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).Return(uuid.New(), nil)
+	dataStore.On("GrantAuthorization", ctx, mock.Anything, mock.Anything, mock.Anything, mock.Anything).
+		Return(uuid.New(), nil)
 
 	manager.On("InsertUser", ctx, email, password, mock.Anything, mock.Anything).Return(userID, nil)
 	manager.On("AddUserToRole", ctx, mock.Anything, "tester").Return(nil)

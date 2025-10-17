@@ -98,7 +98,7 @@ func (c *ConnnectRessource) PasswordGrant(
 	}
 
 	auth, err := c.autService.VerifyUserAuthorization(r.Context(), res.UserID, req.ClientID)
-	if err != nil && errors.Is(authorization.ErrUngrantedImplicitAutoGrant, err) {
+	if err != nil && errors.Is(err, authorization.ErrUngrantedImplicitAutoGrant) {
 		auth, err = c.autService.ImplicitAuthorization(
 			r.Context(),
 			res.UserID,

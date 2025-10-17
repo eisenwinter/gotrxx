@@ -141,7 +141,7 @@ func (g *UserService) EmailToID(ctx context.Context, email string) (uuid.UUID, e
 
 func (g *UserService) ConfirmUser(ctx context.Context, id uuid.UUID) error {
 	err := g.store.ManualConfirmUser(ctx, id)
-	if err != nil && errors.Is(db.ErrNotFound, err) {
+	if err != nil && errors.Is(err, db.ErrNotFound) {
 		return ErrNotFound
 	}
 	if err != nil {

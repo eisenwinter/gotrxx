@@ -182,7 +182,7 @@ func (d *DataStore) ActiveApplicationsWithUserAuthorizations(
 	var entities []*tables.ApplicationTable
 	err := d.selectStatement(ctx, &entities, q, nil)
 	if err != nil {
-		if errors.Is(sql.ErrNoRows, err) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return []*tables.ApplicationTable{}, nil
 		}
 		return nil, err

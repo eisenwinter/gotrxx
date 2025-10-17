@@ -108,7 +108,11 @@ var serveCommand = cobra.Command{
 		)
 
 		//setup token rotator
-		rotator := tokens.NewRotator(dataStore, dispatcher, TopLevelLogger.WithGroup("token_rotator"))
+		rotator := tokens.NewRotator(
+			dataStore,
+			dispatcher,
+			TopLevelLogger.WithGroup("token_rotator"),
+		)
 
 		appService := application.NewApplicationSevice(
 			TopLevelLogger.WithGroup("application_service"),
@@ -150,7 +154,10 @@ var serveCommand = cobra.Command{
 			TopLevelLogger.Error("failed to create server", "err", err)
 			panic("failed to create server")
 		}
-		server.Start()
+		err = server.Start()
+		if err != nil {
+			TopLevelLogger.Error("server.Start() returned error", "err", err)
+		}
 		TopLevelLogger.Info("shutdown complete")
 	},
 }

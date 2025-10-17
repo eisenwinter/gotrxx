@@ -39,7 +39,10 @@ type DataStore struct {
 }
 
 func (d *DataStore) Close() {
-	d.db.Close()
+	err := d.db.Close()
+	if err != nil {
+		d.log.Error("unable to close database", "err", err)
+	}
 }
 
 func (d *DataStore) EnsureUsable() error {

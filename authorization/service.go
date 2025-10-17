@@ -97,7 +97,7 @@ func (s *Service) AuthorizationByCommonToken(
 	//guranteed to be for a not revoked, not redeemed, not expired token with a not revoked auth and a not retired application
 	authTable, err := s.store.ActiveAuthorizationByCommonToken(ctx, tokenType, token)
 	if err != nil {
-		if errors.Is(db.ErrNotFound, err) {
+		if errors.Is(err, db.ErrNotFound) {
 			return nil, ErrNotFound
 		}
 		s.log.Error("error fetching authorization by client id and user id", "err", err)
@@ -122,7 +122,7 @@ func (s *Service) VerifyUserAuthorization(
 	//guranteed to be non-revoked and application is non-retired
 	authTable, err := s.store.ActiveAuthorizationByUserAndClientID(ctx, clientID, userID)
 	if err != nil {
-		if errors.Is(db.ErrNotFound, err) {
+		if errors.Is(err, db.ErrNotFound) {
 			app, err := s.supplier.ApplicationByClientID(ctx, clientID)
 			if err != nil {
 				return nil, err

@@ -45,7 +45,7 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	}
 	if invite != "" {
 		_, err = a.userService.RegisterFromInvite(r.Context(), email, password, phoneNr, invite)
-		if errors.Is(user.ErrEntityDoesNotExist, err) {
+		if errors.Is(err, user.ErrEntityDoesNotExist) {
 			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
 				Error:          "invalid_invite_code",
 				ShowInviteCode: true,
@@ -55,7 +55,7 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 			}, w)
 			return
 		}
-		if errors.Is(user.ErrTokenExpired, err) {
+		if errors.Is(err, user.ErrTokenExpired) {
 			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
 				Error:          "invite_code_expired",
 				ShowInviteCode: true,
@@ -70,7 +70,7 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 		_, err = a.userService.RegisterUser(r.Context(), email, password, phoneNr)
 	}
 	if err != nil {
-		if errors.Is(user.ErrPasswordGuidelines, err) {
+		if errors.Is(err, user.ErrPasswordGuidelines) {
 			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
 				Error:          "password_guidlines",
 				ShowInviteCode: true,
@@ -80,7 +80,7 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 			}, w)
 			return
 		}
-		if errors.Is(user.ErrEntityAlreadyExists, err) {
+		if errors.Is(err, user.ErrEntityAlreadyExists) {
 			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
 				Error:          "email_already_used",
 				ShowInviteCode: true,

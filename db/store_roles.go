@@ -77,7 +77,7 @@ func (d *DataStore) DeleteRole(ctx context.Context, role string) error {
 	var roleID int
 	err := roleQuery.RunWith(d.db).QueryRow().Scan(&roleID)
 	if err != nil {
-		if errors.Is(sql.ErrNoRows, err) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return ErrNotFound
 		}
 		return err

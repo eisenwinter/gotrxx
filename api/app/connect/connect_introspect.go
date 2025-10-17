@@ -34,9 +34,10 @@ func (c *ConnnectRessource) introspect(w http.ResponseWriter, r *http.Request) {
 	}
 
 	isEligble := func(common *tokens.CommonToken) bool {
-		if ai.Source == auth.AuthorizationSourceBearer {
+		switch ai.Source {
+		case auth.AuthorizationSourceBearer:
 			return common.AuthorizationID() == *ai.AuthorizationID
-		} else if ai.Source == auth.AuthorizationSourceBasic {
+		case auth.AuthorizationSourceBasic:
 			return common.ClientID() == ai.ClientID
 		}
 		return false

@@ -53,7 +53,7 @@ func ConnectAuthenticator(as ApplicationQuerySource) func(http.Handler) http.Han
 func connectAuthenticatorHandler(ba *BasicAuth, next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		token, _, err := jwtauth.FromContext(r.Context())
-		if err != nil && !errors.Is(jwtauth.ErrNoTokenFound, err) {
+		if err != nil && !errors.Is(err, jwtauth.ErrNoTokenFound) {
 			http.Error(w, err.Error(), http.StatusUnauthorized)
 			return
 		}

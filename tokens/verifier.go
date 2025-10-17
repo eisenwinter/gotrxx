@@ -128,7 +128,7 @@ func (t *TokenVerifier) ValidateRefreshTokenDetails(
 ) (*CommonToken, error) {
 	d, err := t.loader.CommonTokenDetails(ctx, string(RefreshTokenType), refreshToken)
 	if err != nil {
-		if errors.Is(db.ErrNotFound, err) {
+		if errors.Is(err, db.ErrNotFound) {
 			return nil, ErrTokenNotFound
 		}
 		return nil, err

@@ -79,7 +79,7 @@ func (a *ApplicationService) CreateApplication(
 		props,
 	)
 	if err != nil {
-		if errors.Is(db.ErrAlreadyExists, err) {
+		if errors.Is(err, db.ErrAlreadyExists) {
 			return 0, ErrApplicationClientIDExists
 		}
 		return 0, err

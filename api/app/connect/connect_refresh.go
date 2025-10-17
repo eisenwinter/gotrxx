@@ -98,7 +98,7 @@ func (c *ConnnectRessource) RefreshTokenGrant(
 		app.ClientID(),
 	)
 	if err != nil {
-		if errors.Is(tokens.ErrTokenInvalidClientId, err) {
+		if errors.Is(err, tokens.ErrTokenInvalidClientId) {
 			c.logger.Error("refresh token flow: failed to rotate refresh token", "err", err)
 			render.Status(r, http.StatusBadRequest)
 			render.Respond(w, r, createStdError(stdInvalidClient, http.StatusBadRequest, ""))

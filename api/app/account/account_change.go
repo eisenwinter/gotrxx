@@ -69,7 +69,7 @@ func (a *AccountRessource) updateEmail(w http.ResponseWriter, r *http.Request) {
 
 	err = a.userService.ChangeEmail(r.Context(), id, email)
 	if err != nil {
-		if errors.Is(user.ErrEntityInvalidTransition, err) {
+		if errors.Is(err, user.ErrEntityInvalidTransition) {
 			a.view(r.Context(), a.changeEmailTemplate, &changeEmailViewModel{
 
 				Email: email,

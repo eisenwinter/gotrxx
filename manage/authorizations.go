@@ -67,7 +67,7 @@ func (a *AuthorizationService) GrantAuthorization(
 ) error {
 	app, err := a.store.ApplicationByClientID(ctx, clientID)
 	if err != nil {
-		if errors.Is(db.ErrNotFound, err) {
+		if errors.Is(err, db.ErrNotFound) {
 			return ErrNotFound
 		}
 		return err
@@ -101,7 +101,7 @@ func (a *AuthorizationService) RevokeAuthorizationByClientIDAndUserID(
 ) error {
 	auth, err := a.store.ActiveAuthorizationByUserAndClientID(ctx, clientID, userID)
 	if err != nil {
-		if errors.Is(db.ErrNotFound, err) {
+		if errors.Is(err, db.ErrNotFound) {
 			return ErrNotFound
 		}
 		return err
@@ -129,7 +129,7 @@ func (a *AuthorizationService) RevokeAuthorizationClientIDAndEmail(
 ) error {
 	found, userID, err := a.store.IDFromEmail(ctx, email)
 	if err != nil {
-		if errors.Is(db.ErrNotFound, err) {
+		if errors.Is(err, db.ErrNotFound) {
 			return ErrNotFound
 		}
 		return err

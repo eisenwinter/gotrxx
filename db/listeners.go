@@ -235,7 +235,7 @@ func (l *userLockedListener) Handle(ev events.Event) error {
 	e := ev.(*event.UserLocked)
 	err := l.store.addToAuditLog(string(l.ForEvent()), map[string]interface{}{
 		"user_id":      e.UserID.String(),
-		"locked_until": e.LockedUntil.Format("2006-02-01 03:04:05"),
+		"locked_until": e.LockedUntil.Format("2006-01-02 03:04:05"),
 	})
 	if err != nil {
 		l.log.Warn("could not persist event to audit log", "err", err)

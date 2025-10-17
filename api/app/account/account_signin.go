@@ -22,7 +22,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 
 	res, err := a.userSignIn.SignInMFA(r.Context(), email, password, otp)
 	if err != nil {
-		if errors.Is(user.ErrEntityOperationForbidden, err) {
+		if errors.Is(err, user.ErrEntityOperationForbidden) {
 			//locked or unconfirmed
 			a.view(r.Context(), a.loginTmpl, &signinViewModel{
 				ReturnURL: returnURL,
@@ -32,7 +32,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			}, w)
 			return
 		}
-		if errors.Is(user.ErrMFARequired, err) {
+		if errors.Is(err, user.ErrMFARequired) {
 			err = a.userSignIn.InitializeMFA(r.Context(), email)
 			if err != nil {
 				a.log.Error("unable prepare MFA", "err", err)
@@ -46,7 +46,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			}, w)
 			return
 		}
-		if errors.Is(user.ErrInvalidOTP, err) {
+		if errors.Is(err, user.ErrInvalidOTP) {
 			err = a.userSignIn.InitializeMFA(r.Context(), email)
 			if err != nil {
 				a.log.Error("unable prepare MFA", "err", err)
@@ -59,7 +59,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			}, w)
 			return
 		}
-		if errors.Is(user.ErrEntityDoesNotExist, err) {
+		if errors.Is(err, user.ErrEntityDoesNotExist) {
 			a.view(r.Context(), a.loginTmpl, &signinViewModel{
 				ReturnURL: returnURL,
 				Error:     "unknown_or_invalid",
@@ -68,7 +68,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			}, w)
 			return
 		}
-		if errors.Is(user.ErrInvalidCredentials, err) {
+		if errors.Is(err, user.ErrInvalidCredentials) {
 			a.view(r.Context(), a.loginTmpl, &signinViewModel{
 				ReturnURL: returnURL,
 				Error:     "unknown_or_invalid",
@@ -89,7 +89,7 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 	}
 
 	auth, err := a.autService.VerifyUserAuthorization(r.Context(), res.UserID, gotrxxClientID)
-	if err != nil && errors.Is(authorization.ErrUngrantedImplicitAutoGrant, err) {
+	if err != nil && errors.Is(err, authorization.ErrUngrantedImplicitAutoGrant) {
 		auth, err = a.autService.ImplicitAuthorization(r.Context(), res.UserID, gotrxxClientID, "")
 		if err != nil {
 			a.log.Error("user login page: grantig implicit authorization failed", "err", err)

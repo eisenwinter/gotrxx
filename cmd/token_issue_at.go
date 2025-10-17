@@ -26,7 +26,7 @@ var tokenIssueAccessTokenCommand = cobra.Command{
 
 		ud, err := dataStore.UserByEmail(cmd.Context(), args[1])
 		if err != nil {
-			if errors.Is(db.ErrNotFound, err) {
+			if errors.Is(err, db.ErrNotFound) {
 				fmt.Printf("User not found: %s\r\n", args[1])
 				return
 			}
@@ -81,7 +81,7 @@ var tokenIssueAccessTokenCommand = cobra.Command{
 		}
 		auth, err := service.VerifyUserAuthorization(cmd.Context(), signedIn.UserID, args[0])
 		if err != nil {
-			if errors.Is(authorization.ErrUngrantedImplicitAutoGrant, err) {
+			if errors.Is(err, authorization.ErrUngrantedImplicitAutoGrant) {
 				auth, err = service.ImplicitAuthorization(cmd.Context(), ud.ID, args[0], "")
 				if err != nil {
 					fmt.Printf("Grantig implicit authorization failed: %v\r\n", err)

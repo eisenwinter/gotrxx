@@ -101,7 +101,11 @@ func compose(logger logging.Logger,
 		fileSystems,
 		verifier,
 	)
-	metaRessource := meta.NewMetaRessource(logger.WithGroup("meta_ressource"), cfg.Behaviour, issuer)
+	metaRessource := meta.NewMetaRessource(
+		logger.WithGroup("meta_ressource"),
+		cfg.Behaviour,
+		issuer,
+	)
 
 	if cfg.ManageEndpoint.Enable {
 		manageRessource := management.NewManagementRessource(
@@ -128,7 +132,7 @@ func compose(logger logging.Logger,
 	r.Get("/favicon.ico", func(w http.ResponseWriter, r *http.Request) {
 		favicon, err := fileSystems.StaticFolder.Open("favicon.ico")
 		if err == nil {
-			defer favicon.Close()
+			defer func() { _ = favicon.Close() }()
 			s, err := favicon.Stat()
 			if err == nil {
 				buffer := make([]byte, s.Size())

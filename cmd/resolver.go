@@ -14,11 +14,20 @@ func mustResolveUsableDataStore() *db.DataStore {
 	var err error
 	switch LoadedConfig.Database.Type {
 	case "sqlite":
-		dataStore, err = db.NewSqliteStore(TopLevelLogger.WithGroup("database"), LoadedConfig.Database)
+		dataStore, err = db.NewSqliteStore(
+			TopLevelLogger.WithGroup("database"),
+			LoadedConfig.Database,
+		)
 	case "mysql":
-		dataStore, err = db.NewMysqlStore(TopLevelLogger.WithGroup("database"), LoadedConfig.Database)
+		dataStore, err = db.NewMysqlStore(
+			TopLevelLogger.WithGroup("database"),
+			LoadedConfig.Database,
+		)
 	case "pg":
-		dataStore, err = db.NewPostgrestore(TopLevelLogger.WithGroup("database"), LoadedConfig.Database)
+		dataStore, err = db.NewPostgrestore(
+			TopLevelLogger.WithGroup("database"),
+			LoadedConfig.Database,
+		)
 	default:
 		log.Fatal("unknown database type")
 	}

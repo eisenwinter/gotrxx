@@ -67,7 +67,7 @@ func (t *TokenRotator) PreRotationChallenge(
 		authorizationCode,
 	)
 	if err != nil {
-		if errors.Is(db.ErrNotFound, err) {
+		if errors.Is(err, db.ErrNotFound) {
 			return ErrTokenNotFound
 		}
 		return err
@@ -105,7 +105,7 @@ func (t *TokenRotator) RevokeCommonToken(
 ) error {
 	details, err := t.updater.CommonTokenDetails(ctx, string(tokenType), token)
 	if err != nil {
-		if errors.Is(db.ErrNotFound, err) {
+		if errors.Is(err, db.ErrNotFound) {
 			return ErrTokenNotFound
 		}
 		t.log.Error("could not load common token details", "err", err)

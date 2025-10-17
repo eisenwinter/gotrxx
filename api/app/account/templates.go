@@ -23,7 +23,13 @@ func mustLoadTemplate(
 			htmlLocation := location[:len(location)-7] + ".html"
 			t, err = template.New(plainName).ParseFS(fs, htmlLocation)
 			if err != nil {
-				logger.Error("unable to load template with either extension", "err", err, "location", location)
+				logger.Error(
+					"unable to load template with either extension",
+					"err",
+					err,
+					"location",
+					location,
+				)
 				return nil, err
 			}
 		} else {

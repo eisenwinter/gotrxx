@@ -126,7 +126,7 @@ func (d *DataStore) CommonTokenDetails(
 	var td CommonTokenDetails
 	err := d.getStatement(ctx, &td, s, nil)
 	if err != nil {
-		if errors.Is(sql.ErrNoRows, err) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
 		return nil, err

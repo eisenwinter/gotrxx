@@ -33,7 +33,7 @@ var listUsersCommand = cobra.Command{
 			return
 		}
 		w := tabwriter.NewWriter(os.Stdout, 1, 1, 1, ' ', 0)
-		fmt.Fprintf(
+		_, _ = fmt.Fprintf(
 			w,
 			"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\r\n",
 			"ID",
@@ -46,7 +46,7 @@ var listUsersCommand = cobra.Command{
 			"Mfa",
 		)
 		for _, v := range lst.Entries.([]*manage.UserDTO) {
-			fmt.Fprintf(
+			_, _ = fmt.Fprintf(
 				w,
 				"%s\t%s\t%s\t%v\t%s\t%s\t%s\t%v \r\n",
 				v.ID,
@@ -60,8 +60,8 @@ var listUsersCommand = cobra.Command{
 			)
 		}
 
-		fmt.Fprintf(w, "------------------------------------------------- \r\n")
-		fmt.Fprintf(w, "%d entries loaded", lst.Total)
-		w.Flush()
+		_, _ = fmt.Fprintf(w, "------------------------------------------------- \r\n")
+		_, _ = fmt.Fprintf(w, "%d entries loaded", lst.Total)
+		_ = w.Flush()
 	},
 }

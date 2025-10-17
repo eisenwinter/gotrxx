@@ -20,7 +20,7 @@ func (a *AccountRessource) confirm(w http.ResponseWriter, r *http.Request) {
 	}
 	err := a.userService.ConfirmUser(r.Context(), confirmToken)
 	if err != nil {
-		if errors.Is(user.ErrEntityDoesNotExist, err) {
+		if errors.Is(err, user.ErrEntityDoesNotExist) {
 			a.view(
 				r.Context(),
 				a.confirmTemplate,

@@ -76,7 +76,7 @@ func (d *DataStore) ActiveAuthorizationsByUserID(
 	var entities []*tables.AuthorizationTable
 	err := d.selectStatement(ctx, &entities, q, nil)
 	if err != nil {
-		if errors.Is(sql.ErrNoRows, err) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return []*tables.AuthorizationTable{}, nil
 		}
 		return nil, err
@@ -103,7 +103,7 @@ func (d *DataStore) AuthorizationByID(
 	var table tables.AuthorizationTable
 	err := d.getStatement(ctx, &table, q, nil)
 	if err != nil {
-		if errors.Is(sql.ErrNoRows, err) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
 		return nil, err
@@ -136,7 +136,7 @@ func (d *DataStore) ActiveAuthorizationByUserAndClientID(
 	var table tables.AuthorizationTable
 	err := d.getStatement(ctx, &table, q, nil)
 	if err != nil {
-		if errors.Is(sql.ErrNoRows, err) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
 		return nil, err
@@ -173,7 +173,7 @@ func (d *DataStore) ActiveAuthorizationByCommonToken(
 	var table tables.AuthorizationTable
 	err := d.getStatement(ctx, &table, q, nil)
 	if err != nil {
-		if errors.Is(sql.ErrNoRows, err) {
+		if errors.Is(err, sql.ErrNoRows) {
 			return nil, ErrNotFound
 		}
 		return nil, err

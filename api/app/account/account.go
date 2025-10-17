@@ -133,10 +133,10 @@ func (a *AccountRessource) getTranslatorFor(ctx context.Context, page string) *i
 	res := fmt.Sprintf("page.%s", page)
 	t, err := a.registry.TranslatorFor(locale, res)
 	if err != nil {
-		if errors.Is(i18n.ErrLanguageDoesntExist, err) {
+		if errors.Is(err, i18n.ErrLanguageDoesntExist) {
 			a.log.Error("[i18n] languages doesnt exist", "iso", locale)
 		}
-		if errors.Is(i18n.ErrRessourceDoesNotExist, err) {
+		if errors.Is(err, i18n.ErrRessourceDoesNotExist) {
 			a.log.Error("[i18n] ressource doesnt exist", "ressource", res)
 		}
 		return a.registry.CreateVoidTranslator(locale, res)
@@ -147,7 +147,7 @@ func (a *AccountRessource) getTranslatorFor(ctx context.Context, page string) *i
 func (a *AccountRessource) signedInUser(w http.ResponseWriter, r *http.Request) (bool, jwt.Token) {
 	tokenCookie, err := r.Cookie(jwtCookie)
 	if err != nil {
-		if errors.Is(http.ErrNoCookie, err) {
+		if errors.Is(err, http.ErrNoCookie) {
 			a.log.Debug("account ressource: no jwt cookie", "err", err)
 			rememberMe, err := r.Cookie(rememberMeCookie)
 			if err != nil {
@@ -416,7 +416,7 @@ func (a *AccountRessource) signout(w http.ResponseWriter, r *http.Request) {
 	}
 	err = a.rotator.RevokeCommonToken(r.Context(), tokens.RememberMeTokenType, remember.Value, id)
 	if err != nil {
-		if errors.Is(tokens.ErrTokenNotFound, err) {
+		if errors.Is(err, tokens.ErrTokenNotFound) {
 			a.log.Warn("could not find remember me token to revoke")
 		} else {
 			a.log.Error("could not revoke remember me token on sign out", "err", err)

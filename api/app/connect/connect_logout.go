@@ -68,7 +68,7 @@ func (c *ConnnectRessource) logout(w http.ResponseWriter, r *http.Request) {
 	}
 	app, err := c.appService.ApplicationByClientID(r.Context(), clientID)
 	if err != nil {
-		if errors.Is(application.ErrNotFound, err) {
+		if errors.Is(err, application.ErrNotFound) {
 			render.Respond(
 				w,
 				r,
