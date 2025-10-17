@@ -61,9 +61,12 @@ Replace the following environment variables in the docker-compose file below:
 - YOUR_GITHUB_ACCESS_TOKEN with your GitHub access token
 - USER/REPO with your repository (Your repository is the url path marked bold github.com/**USERNAME/REPOSITORY**)
 - YOUR_SMTP_USER, YOUR_SMTP_PASSWORD, smtp.example.com with your SMTP settings
+<<<<<<< HEAD
 - YOUR_CSRF_TOKEN with a random string, this is used to securely generate cross-site request forgery tokens 
   - random.org for generation: [random.org](https://www.random.org/passwords/?num=1&len=24&format=html&rnd=new)
   - Generate by reading from urandom: ```</dev/urandom tr -dc 'A-Za-z0-9!"#$%&\(\)*+,.: ;<=>?@\[\]^_`{|}~-' | head -c 21  ; echo```
+=======
+>>>>>>> feat/template-rework
 - /certs/private.key and /certs/public.key with the location of your key and pub file. 
 
 
@@ -118,7 +121,10 @@ services:
       PORT: 3000
       ADDRESS: ""
       TRXX_AUTO_SEED_INVITE: "INVITE_SEED"
+<<<<<<< HEAD
       TRXX_SERVER_CSRF_TOKEN: YOUR_CSRF_TOKEN
+=======
+>>>>>>> feat/template-rework
       TRXX_SMTP_ENABLE: "true"
       TRXX_SMTP_HOST: smtp.example.com
       TRXX_SMTP_PORT: 465

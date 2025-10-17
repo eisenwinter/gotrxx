@@ -14,7 +14,6 @@
     {{template "alert-error" .}}
     {{else}}
     <form action="set-mfa" method="POST">
-        {{ .csrfField }}
         <fieldset>
             <legend>{{ .i18n.T "title"}}</legend>
             {{ if .qr }}

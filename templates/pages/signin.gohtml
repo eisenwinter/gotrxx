@@ -4,7 +4,10 @@
     {{template "alert-error" .}}
     {{end}}
     <form method="post" action="signin">
+<<<<<<< HEAD
         {{ .csrfField }}
+=======
+>>>>>>> feat/template-rework
         <input type="hidden" value="{{.returnUrl}}" name="return_url" />
         <fieldset>
             <legend> {{ .i18n.T "title"}}</legend>

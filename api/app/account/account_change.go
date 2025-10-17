@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"regexp"
 
-	csrf "filippo.io/csrf/gorilla"
 	"github.com/eisenwinter/gotrxx/tokens"
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/google/uuid"
@@ -25,8 +24,7 @@ func (a *AccountRessource) changeEmail(w http.ResponseWriter, r *http.Request) {
 	email, _ := token.Get(tokens.ClaimEmail)
 
 	a.view(r.Context(), a.changeEmailTemplate, &changeEmailViewModel{
-		CsrfToken: csrf.Token(r),
-		Email:     email.(string),
+		Email: email.(string),
 	}, w)
 }
 
@@ -40,9 +38,9 @@ func (a *AccountRessource) updateEmail(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	if email == "" || !emailRegex.MatchString(email) {
 		a.view(r.Context(), a.changeEmailTemplate, &changeEmailViewModel{
-			CsrfToken: csrf.Token(r),
-			Email:     email,
-			Error:     "invalid_email",
+
+			Email: email,
+			Error: "invalid_email",
 		}, w)
 
 		return
@@ -50,9 +48,9 @@ func (a *AccountRessource) updateEmail(w http.ResponseWriter, r *http.Request) {
 	id, err := uuid.Parse(token.Subject())
 	if err != nil {
 		a.view(r.Context(), a.changeEmailTemplate, &changeEmailViewModel{
-			CsrfToken: csrf.Token(r),
-			Email:     email,
-			Error:     "unknown",
+
+			Email: email,
+			Error: "unknown",
 		}, w)
 		return
 	}
@@ -61,9 +59,9 @@ func (a *AccountRessource) updateEmail(w http.ResponseWriter, r *http.Request) {
 	err = a.userSignIn.Validate(r.Context(), id, password)
 	if err != nil {
 		a.view(r.Context(), a.changeEmailTemplate, &changePasswordViewModel{
-			CsrfToken: csrf.Token(r),
-			Email:     email,
-			Error:     "invalid_password",
+
+			Email: email,
+			Error: "invalid_password",
 		}, w)
 
 		return
@@ -73,17 +71,17 @@ func (a *AccountRessource) updateEmail(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(user.ErrEntityInvalidTransition, err) {
 			a.view(r.Context(), a.changeEmailTemplate, &changeEmailViewModel{
-				CsrfToken: csrf.Token(r),
-				Email:     email,
-				Error:     "email_already_in_use",
+
+				Email: email,
+				Error: "email_already_in_use",
 			}, w)
 
 			return
 		}
 		a.view(r.Context(), a.changeEmailTemplate, &changeEmailViewModel{
-			CsrfToken: csrf.Token(r),
-			Email:     email,
-			Error:     "unknown",
+
+			Email: email,
+			Error: "unknown",
 		}, w)
 		return
 	}
@@ -104,7 +102,6 @@ func (a *AccountRessource) updateEmail(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a.view(r.Context(), a.changeEmailTemplate, &changeEmailViewModel{
-		CsrfToken:      csrf.Token(r),
 		Email:          email,
 		SuccessMessage: "email_changed",
 		Successful:     true,
@@ -118,9 +115,7 @@ func (a *AccountRessource) changePassword(w http.ResponseWriter, r *http.Request
 		http.Redirect(w, r, "/account/signin", http.StatusFound)
 		return
 	}
-	a.view(r.Context(), a.changePasswordTemplate, &changePasswordViewModel{
-		CsrfToken: csrf.Token(r),
-	}, w)
+	a.view(r.Context(), a.changePasswordTemplate, &changePasswordViewModel{}, w)
 }
 
 func (a *AccountRessource) updatePassword(w http.ResponseWriter, r *http.Request) {
@@ -132,8 +127,7 @@ func (a *AccountRessource) updatePassword(w http.ResponseWriter, r *http.Request
 	oldPassword := r.FormValue("old_password")
 	if oldPassword == "" {
 		a.view(r.Context(), a.changePasswordTemplate, &changePasswordViewModel{
-			CsrfToken: csrf.Token(r),
-			Error:     "invalid_old_password",
+			Error: "invalid_old_password",
 		}, w)
 
 		return
@@ -149,8 +143,7 @@ func (a *AccountRessource) updatePassword(w http.ResponseWriter, r *http.Request
 	err = a.userSignIn.Validate(r.Context(), id, oldPassword)
 	if err != nil {
 		a.view(r.Context(), a.changePasswordTemplate, &changePasswordViewModel{
-			CsrfToken: csrf.Token(r),
-			Error:     "invalid_old_password",
+			Error: "invalid_old_password",
 		}, w)
 
 		return
@@ -160,16 +153,14 @@ func (a *AccountRessource) updatePassword(w http.ResponseWriter, r *http.Request
 	passwordAgain := r.FormValue("new_password_again")
 	if password != passwordAgain {
 		a.view(r.Context(), a.changePasswordTemplate, &changePasswordViewModel{
-			CsrfToken: csrf.Token(r),
-			Error:     "passwords_do_not_match",
+			Error: "passwords_do_not_match",
 		}, w)
 
 		return
 	}
 	if password == "" || len(password) < a.cfg.PasswordMinLength {
 		a.view(r.Context(), a.changePasswordTemplate, &changePasswordViewModel{
-			CsrfToken: csrf.Token(r),
-			Error:     "password_guidlines",
+			Error: "password_guidlines",
 		}, w)
 
 		return
@@ -178,14 +169,12 @@ func (a *AccountRessource) updatePassword(w http.ResponseWriter, r *http.Request
 	err = a.userService.ChangePassword(r.Context(), id, password)
 	if err != nil {
 		a.view(r.Context(), a.changePasswordTemplate, &changePasswordViewModel{
-			CsrfToken: csrf.Token(r),
-			Error:     "unknown",
+			Error: "unknown",
 		}, w)
 		return
 	}
 
 	a.view(r.Context(), a.changePasswordTemplate, &changePasswordViewModel{
-		CsrfToken:      csrf.Token(r),
 		SuccessMessage: "password_changed",
 		Successful:     true,
 	}, w)

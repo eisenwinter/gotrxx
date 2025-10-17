@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	csrf "filippo.io/csrf/gorilla"
 	"github.com/eisenwinter/gotrxx/authorization"
 	"github.com/eisenwinter/gotrxx/user"
 	"github.com/go-chi/render"
@@ -26,7 +25,6 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 		if errors.Is(user.ErrEntityOperationForbidden, err) {
 			//locked or unconfirmed
 			a.view(r.Context(), a.loginTmpl, &signinViewModel{
-				CsrfToken: csrf.Token(r),
 				ReturnURL: returnURL,
 				Error:     "locked_user",
 				Otp:       false,
@@ -41,7 +39,6 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			}
 			//mfa
 			a.view(r.Context(), a.loginTmpl, &signinViewModel{
-				CsrfToken: csrf.Token(r),
 				ReturnURL: returnURL,
 				Error:     "mfa",
 				Otp:       true,
@@ -55,7 +52,6 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 				a.log.Error("unable prepare MFA", "err", err)
 			}
 			a.view(r.Context(), a.loginTmpl, &signinViewModel{
-				CsrfToken: csrf.Token(r),
 				ReturnURL: returnURL,
 				Error:     "invalid_otp",
 				Otp:       true,
@@ -65,7 +61,6 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 		}
 		if errors.Is(user.ErrEntityDoesNotExist, err) {
 			a.view(r.Context(), a.loginTmpl, &signinViewModel{
-				CsrfToken: csrf.Token(r),
 				ReturnURL: returnURL,
 				Error:     "unknown_or_invalid",
 				Otp:       false,
@@ -75,7 +70,6 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 		}
 		if errors.Is(user.ErrInvalidCredentials, err) {
 			a.view(r.Context(), a.loginTmpl, &signinViewModel{
-				CsrfToken: csrf.Token(r),
 				ReturnURL: returnURL,
 				Error:     "unknown_or_invalid",
 				Otp:       false,
@@ -84,7 +78,6 @@ func (a *AccountRessource) signin(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		a.view(r.Context(), a.loginTmpl, &signinViewModel{
-			CsrfToken: csrf.Token(r),
 			ReturnURL: returnURL,
 			Error:     "unknown",
 			Otp:       false,
@@ -133,6 +126,5 @@ func (a *AccountRessource) signinPage(w http.ResponseWriter, r *http.Request) {
 	a.view(r.Context(), a.loginTmpl, &signinViewModel{
 		ReturnURL: returnURL,
 		Otp:       false,
-		CsrfToken: csrf.Token(r),
 	}, w)
 }
