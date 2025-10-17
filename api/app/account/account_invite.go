@@ -2,8 +2,6 @@ package account
 
 import (
 	"net/http"
-
-	csrf "filippo.io/csrf/gorilla"
 )
 
 func (a *AccountRessource) sendInvite(w http.ResponseWriter, r *http.Request) {
@@ -20,9 +18,8 @@ func (a *AccountRessource) sendInvite(w http.ResponseWriter, r *http.Request) {
 	email := r.FormValue("email")
 	if email == "" || !emailRegex.MatchString(email) {
 		a.view(r.Context(), a.inviteTmpl, &sendInviteViewModel{
-			CsrfToken: csrf.Token(r),
-			Email:     email,
-			Error:     "invalid_email",
+			Email: email,
+			Error: "invalid_email",
 		}, w)
 		return
 	}
@@ -30,8 +27,7 @@ func (a *AccountRessource) sendInvite(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.log.Error("could not invite user", "err", err)
 		a.view(r.Context(), a.inviteTmpl, &sendInviteViewModel{
-			CsrfToken: csrf.Token(r),
-			Error:     "unknown",
+			Error: "unknown",
 		}, w)
 
 		return
@@ -39,7 +35,6 @@ func (a *AccountRessource) sendInvite(w http.ResponseWriter, r *http.Request) {
 
 	//successfull
 	a.view(r.Context(), a.inviteTmpl, &sendInviteViewModel{
-		CsrfToken:      csrf.Token(r),
 		Successful:     true,
 		SuccessMessage: "invite_sent",
 	}, w)
@@ -56,7 +51,5 @@ func (a *AccountRessource) invitePage(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	a.view(r.Context(), a.inviteTmpl, &sendInviteViewModel{
-		CsrfToken: csrf.Token(r),
-	}, w)
+	a.view(r.Context(), a.inviteTmpl, &sendInviteViewModel{}, w)
 }

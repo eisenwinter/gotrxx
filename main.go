@@ -114,7 +114,6 @@ func initConfig(logger *slog.Logger) {
 	bind("TRXX_PORT", "server.port")
 	bind("TRXX_ADDRESS", "server.address")
 
-	bind("TRXX_SERVER_CSRF_TOKEN", "server.csrf-token")
 	bind("TRXX_SERVER_LOAD_TEMPLATE_FOLDER", "server.load-template-folder")
 
 	bind("TRXX_SMTP_ENABLE", "smtp.enable")

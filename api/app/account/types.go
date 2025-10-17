@@ -3,27 +3,13 @@ package account
 import (
 	"fmt"
 
-	csrf "filippo.io/csrf/gorilla"
 	"github.com/google/safehtml"
 	"github.com/google/safehtml/template"
 )
 
-var csrfTokenField = template.Must(
-	template.New("csrfToken").
-		Parse(`<input type="hidden" name="gorilla.csrf.Token" value="{{.}}">`),
-)
-
 var qrCodeField = template.Must(
-	template.New("csrfToken").Parse(`<img  width="256" height="256" src="{{.}}" />`),
+	template.New("qrCode").Parse(`<img  width="256" height="256" src="{{.}}" />`),
 )
-
-func csfrTokenTag(token string) safehtml.HTML {
-	field, err := csrfTokenField.ExecuteToHTML(token)
-	if err != nil {
-		return template.MustParseAndExecuteToHTML(``)
-	}
-	return field
-}
 
 func qrCodeTag(qr string) safehtml.HTML {
 	if qr == "" {
@@ -45,18 +31,16 @@ type signinViewModel struct {
 	Error     string
 	Otp       bool
 	Email     string
-	CsrfToken string
 	Password  string
 }
 
 func (s *signinViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		"returnUrl":      s.ReturnURL,
-		"otp":            s.Otp,
-		"error":          s.Error,
-		"email":          s.Email,
-		"password":       s.Password,
-		csrf.TemplateTag: csfrTokenTag(s.CsrfToken),
+		"returnUrl": s.ReturnURL,
+		"otp":       s.Otp,
+		"error":     s.Error,
+		"email":     s.Email,
+		"password":  s.Password,
 	}
 }
 
@@ -66,14 +50,12 @@ type signupViewModel struct {
 	SuccessMessage string
 	Email          string
 	Password       string
-	CsrfToken      string
 	ShowInviteCode bool
 	InviteCode     string
 }
 
 func (s *signupViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		csrf.TemplateTag:   csfrTokenTag(s.CsrfToken),
 		"successful":       s.Successful,
 		"success_message":  s.SuccessMessage,
 		"error":            s.Error,
@@ -85,7 +67,6 @@ func (s *signupViewModel) ViewData() map[string]interface{} {
 }
 
 type triggerPasswordRecoveryViewModel struct {
-	CsrfToken      string
 	Error          string
 	Email          string
 	Successful     bool
@@ -94,7 +75,6 @@ type triggerPasswordRecoveryViewModel struct {
 
 func (t *triggerPasswordRecoveryViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		csrf.TemplateTag:  csfrTokenTag(t.CsrfToken),
 		"successful":      t.Successful,
 		"success_message": t.SuccessMessage,
 		"error":           t.Error,
@@ -103,7 +83,6 @@ func (t *triggerPasswordRecoveryViewModel) ViewData() map[string]interface{} {
 }
 
 type recoverPasswordViewModel struct {
-	CsrfToken      string
 	RecoveryToken  string
 	Error          string
 	Email          string
@@ -113,7 +92,6 @@ type recoverPasswordViewModel struct {
 
 func (r *recoverPasswordViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		csrf.TemplateTag:  csfrTokenTag(r.CsrfToken),
 		"successful":      r.Successful,
 		"success_message": r.SuccessMessage,
 		"error":           r.Error,
@@ -123,7 +101,6 @@ func (r *recoverPasswordViewModel) ViewData() map[string]interface{} {
 }
 
 type changeMFAViewModel struct {
-	CsrfToken      string
 	MFAEnabled     bool
 	Error          string
 	Successful     bool
@@ -132,7 +109,6 @@ type changeMFAViewModel struct {
 
 func (c *changeMFAViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		csrf.TemplateTag:  csfrTokenTag(c.CsrfToken),
 		"successful":      c.Successful,
 		"success_message": c.SuccessMessage,
 		"error":           c.Error,
@@ -141,7 +117,6 @@ func (c *changeMFAViewModel) ViewData() map[string]interface{} {
 }
 
 type setupMFAViewModel struct {
-	CsrfToken      string
 	Error          string
 	Secret         string
 	Successful     bool
@@ -152,7 +127,6 @@ type setupMFAViewModel struct {
 
 func (s *setupMFAViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		csrf.TemplateTag:  csfrTokenTag(s.CsrfToken),
 		"successful":      s.Successful,
 		"success_message": s.SuccessMessage,
 		"error":           s.Error,
@@ -164,7 +138,6 @@ func (s *setupMFAViewModel) ViewData() map[string]interface{} {
 }
 
 type sendInviteViewModel struct {
-	CsrfToken      string
 	Email          string
 	Error          string
 	Successful     bool
@@ -173,7 +146,6 @@ type sendInviteViewModel struct {
 
 func (s *sendInviteViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		csrf.TemplateTag:  csfrTokenTag(s.CsrfToken),
 		"successful":      s.Successful,
 		"success_message": s.SuccessMessage,
 		"error":           s.Error,
@@ -192,7 +164,6 @@ func (c *confirmViewModel) ViewData() map[string]interface{} {
 }
 
 type changeEmailViewModel struct {
-	CsrfToken      string
 	Email          string
 	Error          string
 	Successful     bool
@@ -201,7 +172,6 @@ type changeEmailViewModel struct {
 
 func (c *changeEmailViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		csrf.TemplateTag:  csfrTokenTag(c.CsrfToken),
 		"successful":      c.Successful,
 		"success_message": c.SuccessMessage,
 		"error":           c.Error,
@@ -210,7 +180,6 @@ func (c *changeEmailViewModel) ViewData() map[string]interface{} {
 }
 
 type changePasswordViewModel struct {
-	CsrfToken      string
 	Email          string
 	Error          string
 	Successful     bool
@@ -219,7 +188,6 @@ type changePasswordViewModel struct {
 
 func (c *changePasswordViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		csrf.TemplateTag:  csfrTokenTag(c.CsrfToken),
 		"successful":      c.Successful,
 		"success_message": c.SuccessMessage,
 		"error":           c.Error,
@@ -228,16 +196,14 @@ func (c *changePasswordViewModel) ViewData() map[string]interface{} {
 }
 
 type userPageViewModel struct {
-	CsrfToken string
 	Email     string
 	CanInvite bool
 }
 
 func (u *userPageViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		csrf.TemplateTag: csfrTokenTag(u.CsrfToken),
-		"email":          u.Email,
-		"can_invite":     u.CanInvite,
+		"email":      u.Email,
+		"can_invite": u.CanInvite,
 	}
 }
 
@@ -249,13 +215,11 @@ func (*fourOFourViewModel) ViewData() map[string]interface{} {
 }
 
 type forgottenPasswordViewModel struct {
-	CsrfToken string
-	Email     string
+	Email string
 }
 
 func (f *forgottenPasswordViewModel) ViewData() map[string]interface{} {
 	return map[string]interface{}{
-		csrf.TemplateTag: csfrTokenTag(f.CsrfToken),
-		"email":          f.Email,
+		"email": f.Email,
 	}
 }

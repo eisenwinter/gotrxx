@@ -5,7 +5,6 @@ import (
 	"net/http"
 	"net/url"
 
-	csrf "filippo.io/csrf/gorilla"
 	"github.com/google/uuid"
 	qrcode "github.com/skip2/go-qrcode"
 )
@@ -25,7 +24,6 @@ func (a *AccountRessource) mfa(w http.ResponseWriter, r *http.Request) {
 	mfa := a.userService.IsMFAEnabled(r.Context(), id)
 
 	a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
-		CsrfToken:  csrf.Token(r),
 		MFAEnabled: mfa,
 	}, w)
 }
@@ -44,8 +42,7 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 	err = a.userSignIn.Validate(r.Context(), id, password)
 	if err != nil {
 		a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
-			CsrfToken: csrf.Token(r),
-			Error:     "invalid_password",
+			Error: "invalid_password",
 		}, w)
 
 		return
@@ -55,8 +52,7 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		a.log.Error("could not provision mfa", "err", err)
 		a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
-			CsrfToken: csrf.Token(r),
-			Error:     "unknown",
+			Error: "unknown",
 		}, w)
 		return
 	}
@@ -69,17 +65,15 @@ func (a *AccountRessource) provisionMFA(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		a.log.Error("could not generate qr code", "err", err)
 		a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
-			CsrfToken: csrf.Token(r),
-			Secret:    secret,
+			Secret: secret,
 		}, w)
 		return
 	}
 	qrb64 := base64.StdEncoding.EncodeToString(png)
 
 	a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
-		CsrfToken: csrf.Token(r),
-		QR:        qrb64,
-		Secret:    secret,
+		QR:     qrb64,
+		Secret: secret,
 	}, w)
 
 }
@@ -108,15 +102,13 @@ func (a *AccountRessource) setMFA(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.log.Error("could not enable MFA", "err", err)
 		a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
-			CsrfToken: csrf.Token(r),
-			Error:     "unknown",
-			Secret:    secret,
+			Error:  "unknown",
+			Secret: secret,
 		}, w)
 		return
 	}
 
 	a.view(r.Context(), a.mfaSetupTmpl, &setupMFAViewModel{
-		CsrfToken:      csrf.Token(r),
 		Successful:     true,
 		SuccessMessage: "activated",
 		RecoveryKey:    recoveryKey,
@@ -146,7 +138,6 @@ func (a *AccountRessource) disableMFA(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		a.log.Debug("user failed to authenticate", "err", err)
 		a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
-			CsrfToken:  csrf.Token(r),
 			MFAEnabled: true,
 			Error:      "invalid_password",
 		}, w)
@@ -155,7 +146,6 @@ func (a *AccountRessource) disableMFA(w http.ResponseWriter, r *http.Request) {
 	err = a.userService.DisableMFA(r.Context(), id)
 	if err != nil {
 		a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
-			CsrfToken:  csrf.Token(r),
 			MFAEnabled: true,
 			Error:      "unknown",
 		}, w)
@@ -163,7 +153,6 @@ func (a *AccountRessource) disableMFA(w http.ResponseWriter, r *http.Request) {
 	}
 	mfa := a.userService.IsMFAEnabled(r.Context(), id)
 	a.view(r.Context(), a.chageMfaTmpl, &changeMFAViewModel{
-		CsrfToken:      csrf.Token(r),
 		MFAEnabled:     mfa,
 		Successful:     true,
 		SuccessMessage: "mfa_disabled",

@@ -20,7 +20,6 @@ database:
 server:
   port: 5000 # server to listen on
   address: localhost # address to listen on
-  csrf-token: c3fS7yXw87Pth659QwtnA2bD # cross site request forgery token
 behaviour:
   name: Example Instance # display name of the instance
   site: https://github.com/eisenwinter/gotrxx  # the main site of your project, corporation, etc
@@ -41,7 +40,6 @@ or as environment variables:
 ```
 PORT=5000
 ADDRESS=localhost
-TRXX_SERVER_CSRF_TOKEN=c3fS7yXw87Pth659QwtnA2bD
 TRXX_DATABASE_TYPE=sqlite
 TRXX_DATABASE_DSN=gotrxx?cache=shared
 TRXX_BEHAVIOUR_NAME=Example Instance
@@ -68,7 +66,6 @@ The server section contains the basic host configuration:
 server:
   port: 5000 # integer, port to be listen on
   address: localhost # string, address to listen on
-  csrf-token: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA # cross site request forgery token, change this
   load-template-folder: false # bool, indicates that the templates folder will be used instead of the embedded ressources
 ```
 
@@ -87,8 +84,6 @@ load-template-folder: false, when personalized HTML templates should be used set
 PORT or TRXX_PORT -> server.port
 
 ADDRESS OR TRXX_ADDRESS -> server.address
-
-TRXX_SERVER_CSRF_TOKEN -> server.csrf-token
 
 TRXX_SERVER_LOAD_TEMPLATE_FOLDER -> server.load-template-folder
 ```
@@ -373,7 +368,6 @@ The example below lists all possible configuration values
 server:
   port: 5000
   address: localhost
-  csrf-token: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA # you need to replace this
   load-template-folder: false # indicates that the templates folder will be used instead of the embedded ressources
 smtp:
   enable: true

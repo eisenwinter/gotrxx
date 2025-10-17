@@ -7,7 +7,6 @@
   {{template "alert-error" .}}
   {{end}}
   <form action="change-email" method="POST">
-    {{ .csrfField }}
     <fieldset>
       <legend>{{ .i18n.T "title"}}</legend>
       <div class="field">

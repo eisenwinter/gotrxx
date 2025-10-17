@@ -11,7 +11,6 @@
     {{if .mfa_enabled}}
 
     <form action="disable-mfa" method="POST">
-        {{ .csrfField }}
         <fieldset>
             <legend>{{ .i18n.T "title"}}</legend>
             <div class="field">
@@ -28,7 +27,6 @@
     {{ else }}
 
     <form action="provision-mfa" method="POST">
-        {{ .csrfField }}
         <fieldset>
             <legend>{{ .i18n.T "title"}}</legend>
             <div class="field">

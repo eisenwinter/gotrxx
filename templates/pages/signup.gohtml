@@ -7,7 +7,6 @@
     {{template "alert-error" .}}
     {{end}}
     <form action="signup" method="POST">
-        {{ .csrfField }}
         <fieldset>
             <legend>{{ .i18n.T "title" }}</legend>
             {{if .show_invite_code}}

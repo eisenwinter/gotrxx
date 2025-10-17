@@ -36,9 +36,8 @@ To customize the templates for your needs:
 
 1. Copy the entire `templates` folder to your project
 2. Modify the `.gohtml` files to match your design requirements
-3. Make sure to preserve all `{{ .csrfField }}` fields as they are essential for CSRF protection
-4. You can modify existing components or add new ones in the `components` folder
-5. The `layout.gohtml` file serves as the base template for all pages
+3. You can modify existing components or add new ones in the `components` folder
+4. The `layout.gohtml` file serves as the base template for all pages
 
 The template system now uses `.gohtml` extension and supports layouts and components for better organization and reusability.
 

@@ -1,7 +1,6 @@
 server:
   port: 5000
   address: localhost
-  csrf-token: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA # you need to replace this
   load-template-folder: false # indicates that the templates folder will be used instead of the embedded ressources
 smtp:
   enable: true

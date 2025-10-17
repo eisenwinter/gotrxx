@@ -11,7 +11,6 @@ import (
 	"strings"
 	"time"
 
-	csrf "filippo.io/csrf/gorilla"
 	"github.com/eisenwinter/gotrxx/authorization"
 	"github.com/eisenwinter/gotrxx/config"
 	"github.com/eisenwinter/gotrxx/i18n"
@@ -63,8 +62,8 @@ type AccountRessource struct {
 func (a *AccountRessource) Router() *chi.Mux {
 	r := chi.NewRouter()
 
-	antiForgery := csrf.Protect([]byte(a.serverCfg.CSRFToken))
-	r.Use(antiForgery)
+	protector := &http.CrossOriginProtection{}
+	r.Use(protector.Handler)
 
 	r.Get("/", a.userPage)
 
@@ -305,7 +304,6 @@ func (a *AccountRessource) userPage(w http.ResponseWriter, r *http.Request) {
 	a.view(r.Context(), a.userPageTmpl, &userPageViewModel{
 		Email:     email.(string),
 		CanInvite: a.canUserInvite(r.Context(), token),
-		CsrfToken: csrf.Token(r),
 	}, w)
 }
 

@@ -3,7 +3,6 @@ module github.com/eisenwinter/gotrxx
 go 1.25
 
 require (
-	filippo.io/csrf v0.2.1
 	github.com/Masterminds/squirrel v1.5.4
 	github.com/adlio/schema v1.3.9
 	github.com/eisenwinter/fiql-sql-adapter v0.0.5

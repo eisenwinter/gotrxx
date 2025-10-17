@@ -4,7 +4,6 @@ import (
 	"errors"
 	"net/http"
 
-	csrf "filippo.io/csrf/gorilla"
 	"github.com/eisenwinter/gotrxx/user"
 )
 
@@ -20,7 +19,6 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	if email == "" || !emailRegex.MatchString(email) {
 
 		a.view(r.Context(), a.signUpTmpl, &signupViewModel{
-			CsrfToken:      csrf.Token(r),
 			Error:          "invalid_email",
 			ShowInviteCode: true,
 			InviteCode:     invite,
@@ -32,7 +30,6 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 
 	if invite == "" && a.cfg.InviteOnly {
 		a.view(r.Context(), a.signUpTmpl, &signupViewModel{
-			CsrfToken:      csrf.Token(r),
 			Error:          "invite_code_required",
 			ShowInviteCode: true,
 			InviteCode:     invite,
@@ -50,7 +47,6 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 		_, err = a.userService.RegisterFromInvite(r.Context(), email, password, phoneNr, invite)
 		if errors.Is(user.ErrEntityDoesNotExist, err) {
 			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
-				CsrfToken:      csrf.Token(r),
 				Error:          "invalid_invite_code",
 				ShowInviteCode: true,
 				InviteCode:     invite,
@@ -61,7 +57,6 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 		}
 		if errors.Is(user.ErrTokenExpired, err) {
 			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
-				CsrfToken:      csrf.Token(r),
 				Error:          "invite_code_expired",
 				ShowInviteCode: true,
 				InviteCode:     invite,
@@ -77,7 +72,6 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		if errors.Is(user.ErrPasswordGuidelines, err) {
 			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
-				CsrfToken:      csrf.Token(r),
 				Error:          "password_guidlines",
 				ShowInviteCode: true,
 				InviteCode:     invite,
@@ -88,7 +82,6 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 		}
 		if errors.Is(user.ErrEntityAlreadyExists, err) {
 			a.view(r.Context(), a.signUpTmpl, &signupViewModel{
-				CsrfToken:      csrf.Token(r),
 				Error:          "email_already_used",
 				ShowInviteCode: true,
 				InviteCode:     invite,
@@ -105,7 +98,6 @@ func (a *AccountRessource) signup(w http.ResponseWriter, r *http.Request) {
 	}
 
 	a.view(r.Context(), a.signUpTmpl, &signupViewModel{
-		CsrfToken:      csrf.Token(r),
 		Successful:     true,
 		SuccessMessage: successMessage,
 	}, w)
@@ -121,7 +113,6 @@ func (a *AccountRessource) signupPage(w http.ResponseWriter, r *http.Request) {
 	showInviteCode := a.cfg.InviteOnly || inviteCode != ""
 
 	a.view(r.Context(), a.signUpTmpl, &signupViewModel{
-		CsrfToken:      csrf.Token(r),
 		ShowInviteCode: showInviteCode,
 		InviteCode:     inviteCode,
 	}, w)
