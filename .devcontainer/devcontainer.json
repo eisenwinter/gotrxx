@@ -1,12 +1,8 @@
 {
 	"name": "Go",
 	"image": "mcr.microsoft.com/devcontainers/go:1.25-bookworm",
-	"features": {
-		"ghcr.io/eitsupi/devcontainer-features/go-task:1": {
-			"version": "latest"
-		}
-	},
+	"features": {},
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
-	"postCreateCommand": "task dev:provision:all"
+	"postCreateCommand": "go install github.com/go-task/task/v3/cmd/task@latest && task dev:provision:all"
 }
